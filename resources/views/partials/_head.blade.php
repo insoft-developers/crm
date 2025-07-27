@@ -20,10 +20,16 @@
 
 
 <style>
-    .control-label{
-        font-size: 14px !important;
-        font-weight:500;
+    .bintang::after {
+        content: " *";
+        color: red;
     }
+
+    .control-label {
+        font-size: 14px !important;
+        font-weight: 500;
+    }
+
     .modal-xl {
         max-width: 90%;
     }

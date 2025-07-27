@@ -6,12 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Customer extends Model
+class Supplier extends Model
 {
     use HasFactory;
 
     protected $guarded = ['id'];
-
 
     public function province():BelongsTo
     {

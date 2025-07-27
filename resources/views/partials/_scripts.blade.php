@@ -1,6 +1,6 @@
 <!-- Backend Bundle JavaScript -->
 <script src="{{ asset('js/backend-bundle.min.js') }}"></script>
-  
+
 <!-- Table Treeview JavaScript -->
 <script src="{{ asset('js/table-treeview.js') }}"></script>
 
@@ -39,7 +39,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
-
-
-
-
+<script>
+    function formatRibuan(angka) {
+        return angka.replace(/\D/g, '') // Hapus semua selain digit
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Tambah titik
+    }
+</script>

@@ -3,26 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
-use App\Models\Customer;
-use App\Models\Kecamatan;
-use App\Models\Kota;
 use App\Models\Province;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Str;
 
-
-class CustomerController extends Controller
+class SupplierController extends Controller
 {
-    
-    
-    
-    public function customerTable()
+    public function supplierTable()
     {
         $userid = Auth::user()->id ?? 1;
-        $data = Customer::where('userid', $userid);
+        $data = Supplier::where('userid', $userid);
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('alamat', function($data){
@@ -61,11 +54,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $view = 'customer';
+        $view = 'supplier';
         $userid = Auth::user()->id ?? 1;
         $branches = Branch::where('userid', $userid)->get();
         $provinces = Province::all();
-        return view('frontend.settingan.customer', compact('view','branches','provinces'));
+        return view('frontend.settingan.supplier', compact('view','branches','provinces'));
     }
 
     /**
@@ -119,18 +112,10 @@ class CustomerController extends Controller
 
         try {
 
-            // upload profile foto
-            $input['foto'] = null;
-            $unik = uniqid();
-            if ($request->hasFile('foto')) {
-                $input['foto'] = Str::slug($unik, '-') . '.' . $request->foto->getClientOriginalExtension();
-                $request->foto->move(public_path('/storage/customers'), $input['foto']);
-            }
-
             $input['userid'] = Auth::user()->id ?? 1;
             $input['limit_hutang'] = str_replace('.', '', $input['limit_hutang'] ?? 0);
 
-            Customer::create($input);
+            Supplier::create($input);
 
             return response()->json([
                 'success' => true,
@@ -163,7 +148,7 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $data = Customer::find($id);
+        $data = Supplier::find($id);
         return $data;
     }
 
@@ -209,14 +194,8 @@ class CustomerController extends Controller
 
         try {
 
-            $data = Customer::find($id);
-            // upload profile foto
-            $input['foto'] = $data->foto;
-            $unik = uniqid();
-            if ($request->hasFile('foto')) {
-                $input['foto'] = Str::slug($unik, '-') . '.' . $request->foto->getClientOriginalExtension();
-                $request->foto->move(public_path('/storage/customers'), $input['foto']);
-            }
+            $data = Supplier::find($id);
+            
 
             $input['userid'] = Auth::user()->id ?? 1;
             $input['limit_hutang'] = str_replace('.', '', $input['limit_hutang'] ?? 0);
@@ -242,22 +221,7 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $data = Customer::destroy($id);
-        return $data;
-    }
-
-    public function kotaGet(Request $request) {
-        $input = $request->all();
-
-        $data = Kota::where('province_id', $input['province_id'])->get();
-        return $data;
-    }
-
-
-    public function kecamatanGet(Request $request) {
-        $input = $request->all();
-
-        $data = Kecamatan::where('city_id', $input['city_id'])->get();
+        $data = Supplier::destroy($id);
         return $data;
     }
 }

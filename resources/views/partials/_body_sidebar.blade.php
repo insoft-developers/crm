@@ -295,7 +295,7 @@
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="#">
+                            <a href="{{ url('supplier') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Supplier</span>
                             </a>
                         </li>

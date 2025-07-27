@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -63,6 +64,12 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
 
   Route::resource('customer', CustomerController::class);
   Route::get('customer_table', [CustomerController::class, 'customerTable'])->name('customer.table');
+  Route::post('kota_get', [CustomerController::class, 'kotaGet'])->name('kota.get');
+  Route::post('kecamtan_get', [CustomerController::class, 'kecamatanGet'])->name('kecamatan.get');
+
+
+  Route::resource('supplier', SupplierController::class);
+  Route::get('supplier_table', [SupplierController::class, 'supplierTable'])->name('supplier.table');
 
 
 

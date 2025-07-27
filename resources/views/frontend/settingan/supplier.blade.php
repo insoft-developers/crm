@@ -6,12 +6,12 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title">Customer Data</h4>
+                            <h4 class="card-title">Supplier Data</h4>
 
                         </div>
                         <button onclick="addData()" style="float: right;" type="button"
                             class="btn btn-sm btn-success rounded-pill mt-2">+ Tambah
-                            Customer</button>
+                            Supplier</button>
 
                     </div>
                     <div class="card-body">
@@ -21,8 +21,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col">Nama Customer</th>
-                                        <th scope="col">Tipe Custumer</th>
+                                        <th scope="col">Nama Supplier</th>
                                         <th scope="col">No Telp</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Alamat</th>
@@ -75,30 +74,28 @@
 
                                 <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center bintang"
-                                        for="nama_lengkap">Nama
-                                        Lengkap</label>
+                                        for="nama_perusahaan">Nama
+                                        Supplier/Perusahaan</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap"
-                                            placeholder="masukkan nama lengkap customer">
+                                        <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
+                                            placeholder="masukkan nama supplier/perusahaan">
 
                                     </div>
                                 </div>
+
 
                                 <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center bintang"
-                                        for="customer_type">Tipe
-                                        Customer</label>
+                                        for="nama_lengkap">Nama
+                                        Penanggung Jawab</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control" id="customer_type" name="customer_type">
-                                            <option value="" disabled selected>Pilih type</option>
-                                            <option value="distributor">Distributor</option>
-                                            <option value="retail">Retail</option>
-                                            <option value="end_user">End User</option>
-                                            <option value="distributor">Reseller</option>
-                                            <option value="lainnya">Lainnya</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
+                                            placeholder="masukkan nama supplier/perusahaan">
+
                                     </div>
                                 </div>
+
+                                
 
                                 <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center bintang"
@@ -677,7 +674,7 @@
         ],
         processing: true,
         serverSide: true,
-        ajax: '{{ route('customer.table') }}',
+        ajax: '{{ route('supplier.table') }}',
         order: [
             [0, "desc"]
         ],
@@ -688,14 +685,8 @@
                 searchable: false,
             },
             {
-                data: 'nama_lengkap',
-                name: 'nama_lengkap'
-            },
-            {
-                data: 'customer_type',
-                name: 'customer_type',
-
-
+                data: 'nama_perusahaan',
+                name: 'nama_perusahaan'
             },
             {
                 data: 'phone',
