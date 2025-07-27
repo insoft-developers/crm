@@ -13,8 +13,32 @@
 {{-- <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"> --}}
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+
 
 <style>
+    .control-label{
+        font-size: 14px !important;
+        font-weight:500;
+    }
+    .modal-xl {
+        max-width: 90%;
+    }
+
+    .modal-body {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    #map {
+        height: 300px;
+        /* atau ubah sesuai kebutuhan */
+        width: 100%;
+    }
+
     .side-menu-title {
         font-size: 14px;
     }
@@ -29,11 +53,11 @@
     #table-list-jenis,
     #table-list-type,
     #table-list-location,
-    #table-list-ownership
-     {
+    #table-list-ownership {
         font-size: 14px;
         /* atau ukuran lain seperti 1rem, 12px, dll */
     }
+
     #table-list-jenis thead th,
     #table-list-type thead th,
     #table-list-location thead th,
@@ -42,6 +66,7 @@
         font-size: 14px;
         font-weight: bold;
     }
+
     #table-list-jenis tbody td,
     #table-list-type tbody td,
     #table-list-location tbody td,

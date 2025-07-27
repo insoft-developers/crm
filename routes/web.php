@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +56,15 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
 
   Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
   Route::get('/home', [DashboardController::class, 'index']);
+
+  Route::resource('branch', BranchController::class);
+  Route::get('branch_table', [BranchController::class, 'branchTable'])->name('branch.table');
+
+
+  Route::resource('customer', CustomerController::class);
+  Route::get('customer_table', [CustomerController::class, 'customerTable'])->name('customer.table');
+
+
 
   
 

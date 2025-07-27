@@ -121,7 +121,7 @@
                     </a>
                     <ul id="stock-report" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Stok + Harga Beli</span>
                             </a>
                         </li>
@@ -156,12 +156,12 @@
                     </a>
                     <ul id="purchase-reminder" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Reminder Jatuh <br>Tempo Pembelian</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Reminder Jatuh <br>Tempo Penjualan</span>
                             </a>
                         </li>
@@ -178,17 +178,17 @@
                     </a>
                     <ul id="stock-management" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Penerimaan Barang<br>Material Masuk</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Penyimpanan Stok<br>Barang</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Palet</span>
                             </a>
                         </li>
@@ -207,22 +207,22 @@
                     </a>
                     <ul id="production" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Job Order</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Surat Perintah Kerja</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Hasil Potongan</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Update Stok Potongan<br>Jasa Keluar</span>
                             </a>
                         </li>
@@ -239,7 +239,7 @@
                     </a>
                     <ul id="surat-jalan-penjualan" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Surat Jalan <br>Penjualan</span>
                             </a>
                         </li>
@@ -257,22 +257,22 @@
                     </a>
                     <ul id="transaksi-penjualan" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Sales Order</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Booking Order</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Invoice Penjualan</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Bukti Kas Masuk</span>
                             </a>
                         </li>
@@ -290,23 +290,29 @@
                     </a>
                     <ul id="settingan" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Karyawan</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Supplier</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="{{ url('customer') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Customer</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Role<br>Hak Akses</span>
+                            </a>
+                        </li>
+
+                        <li class="list-subtitle">
+                            <a href="{{ url('branch') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Branch Data</span>
                             </a>
                         </li>
                         
@@ -324,17 +330,17 @@
                     </a>
                     <ul id="customer-management" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Customer Per<br>Marketing</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Customer By<br>Grade</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Map Lokasi<br>Customer</span>
                             </a>
                         </li>
@@ -353,22 +359,22 @@
                     </a>
                     <ul id="marketing-activity" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">To Do List /<br>Deal</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Task / Tugas Marketing</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">History Aktivitas<br>Marketing</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Bidding Customer<br>(Customer yang sedang<br> dikejar)</span>
                             </a>
                         </li>
@@ -387,12 +393,12 @@
                     </a>
                     <ul id="communication" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Broadcast Email</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('vehicle') }}">
+                            <a href="#">
                                 <i class="las la-minus"></i><span class="subtitle">Broadcast Whatsapp</span>
                             </a>
                         </li>
