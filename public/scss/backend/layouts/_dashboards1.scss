@@ -1,0 +1,58 @@
+
+
+.iq-icon-box1
+{
+     width: 70px;
+     height: 70px;
+     line-height: 70px;
+     text-align: center;
+     background: #ffffff4d;
+     border: 1px solid $border-color;
+     box-shadow:  $box-shadow;
+}
+
+
+.bottom-img 
+{
+     position: absolute;
+     top: -71px;
+     right: -17px;
+}
+
+.summary-chart-01
+{
+      min-height: 240px !important;
+}
+.customer-chart-02
+{
+    min-height: 240px !important;
+}
+.user-chart-03 
+{
+     min-height: 298px !important;
+}
+@media(max-width:765px)
+{
+    .bottom-img 
+    {
+         top: -199px;
+    }
+}
+
+@media(max-width:425px)
+{
+     .bottom-img 
+     {
+          display: none;
+     }
+
+}
+
+
+@media(max-width:320px)
+{
+     .bottom-img 
+     {
+          display: none;
+     }
+}

@@ -1,0 +1,84 @@
+.back-img {
+	overflow: hidden;
+
+	&:after {
+
+
+		content: "";
+		position: absolute;
+
+
+		left: auto;
+		right: -18px;
+		top: 71px;
+		width: 140px;
+		height: 140px;
+		
+		border-radius: 5px;
+		background: rgba( 255, 255, 255, 0.30 );
+
+        backdrop-filter: blur( 6.0px );
+       -webkit-backdrop-filter: blur( 6.0px );
+
+
+		transform: rotate(35deg);
+	}
+
+	&:before {
+		content: "";
+		position: absolute;
+
+
+		left: auto;
+		right: -10px;
+		top: -24px;
+		width: 140px;
+		height: 155px;
+		
+		border-radius: 5px;
+        background: rgba( 255, 255, 255, 0.30 );
+
+        backdrop-filter: blur( 6.0px );
+        -webkit-backdrop-filter: blur( 6.0px );
+
+		transform: rotate(45deg);
+	}
+
+
+
+}
+
+.vector-img
+{
+	img {
+         
+		position: relative;
+		z-index: 9;
+	}
+}
+
+
+.order-chart-02
+{
+    min-height: 250px  !important;
+}
+
+.sales-chart-01
+{
+    min-height: 250px !important;
+}
+
+.yearly-chart-03
+{
+    min-height: 250px !important;
+}
+
+.visited-chart-05
+{
+    min-height: 250px !important;
+}
+
+.revenue-chart-06
+{
+    min-height: 250px  !important;
+}
