@@ -356,36 +356,65 @@
                                     </div>
                                     <div class="card-body">
                                         <div id="document-container">
-                                            {{-- <div class="row mb-2" id="row_1">
-                                                <div class="col-3">
-                                                    <img onclick="document_click(1)" id="document_preview_1"
-                                                        class="doc-image-upload"
-                                                        src="{{ asset('storage/doc_icon.png') }}">
-                                                    <input onchange="image_onchange(this, 1)" style="display: none;"
-                                                        type="file" id="document_image_1" name="document_image[]"
-                                                        placeholder="foto dokumen" accept=".jpg, .jpeg, .png">
-                                                </div>
-                                                <div class="col-4">
-                                                    <input type="text" class="form-control" id="document_name_1"
-                                                        name="document_name[]" placeholder="nama dokumen">
-                                                </div>
 
-
-                                                <div class="col-4">
-                                                    <input type="text" class="form-control" id="document_number_1"
-                                                        name="document_number[]" placeholder="nomor dokumen">
-                                                </div>
-                                                <div class="col-1">
-                                                    <a title="Delete Data" href="javascript:void(0);"><i
-                                                            class="fa fa-trash fa-tombol-delete"></i></a>
-                                                </div>
-                                            </div> --}}
                                         </div>
 
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-5"></div>
+                            <div class="col-5">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span class="card-title">Bank Account Detail</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">Pemegang Kartu</label>
+                                                    <input type="text" class="form-control" id="account_owner"
+                                                        name="account_owner">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">Nama Bank</label>
+                                                    <select class="form-control" id="bank_name" name="bank_name">
+                                                        <option value="" selected disabled>Pilih bank</option>
+                                                        <option value="bri">Bank BRI</option>
+                                                        <option value="bca">Bank BCA</option>
+                                                        <option value="cimb">Bank CIMB NIAGA</option>
+                                                        <option value="mandiri">Bank Mandiri</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">Lokasi Bank</label>
+                                                    <input type="text" class="form-control" id="branch_account"
+                                                        name="branch_account">
+                                                </div>
+
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">Nomor Rekening</label>
+                                                    <input type="text" class="form-control"
+                                                        id="bank_account_number" name="bank_account_number">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">Nomor Kode Bank</label>
+                                                    <input type="text" class="form-control" id="bank_code"
+                                                        name="bank_code">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="label-insoft bintang">NPWP</label>
+                                                    <input type="text" class="form-control" id="npwp"
+                                                        name="npwp">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
 
                     </div>
@@ -403,6 +432,7 @@
     @include('frontend.settingan.modals.modal_jabatan')
 
     @include('frontend.settingan.modals.modal_department')
+    @include('frontend.settingan.karyawan.modal_detail')
 
 
 
@@ -412,6 +442,48 @@
 
 <!-- JAVASCRIPT -->
 
+<script>
+    function detailData(id) {
+        $.ajax({
+            url: "{{ url('karyawan') }}" + "/" + id,
+            type: "GET",
+            success: function(data) {
+                console.log(data);
+                $("#karyawan-detail-container").html(data.html);
+                $(".modal-title").text('Detail Data Karyawan');
+                $("#modal-detail").modal('show');
+
+
+                setTimeout(function() {
+                    var mapDetail = null;
+                    var markerDetail = null;
+
+                    if (!mapDetail) {
+                        mapDetail = L.map('map-detail').setView([data.emp.latitude, data.emp
+                                .longitude
+                            ],
+                            15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 12
+                        }).addTo(mapDetail);
+                        L.marker([data.emp.latitude, data.emp.longitude]).addTo(mapDetail)
+                            .bindPopup("Lokasi Karyawan")
+                            .openPopup();
+                    } else {
+                        mapDetail.setView([data.emp.latitude, data.emp.longitude], 15);
+                        L.marker([data.emp.latitude, data.emp.longitude]).addTo(mapDetail)
+                            .bindPopup("Lokasi Karyawan")
+                            .openPopup();
+                    }
+                }, 300);
+
+            }
+        })
+
+
+
+    }
+</script>
 
 <script>
     let rowCount = 1;
@@ -850,6 +922,7 @@
                 $("#account_owner").val(data.karyawan.account_owner);
                 $("#bank_name").val(data.karyawan.bank_name);
                 $("#branch_account").val(data.karyawan.branch_account);
+                $("#bank_code").val(data.karyawan.bank_code);
                 $("#status_karyawan").val(data.karyawan.status_karyawan);
                 $("#role").val(data.karyawan.role);
                 $("#tanggal_keluar").val(data.karyawan.tanggal_keluar);
@@ -875,13 +948,21 @@
                     $("#document-container").empty(); // clear container
                     rowCount = 1; // reset counter
                     for (var i = 0; i < data_documents.length; i++) {
+                        var src_gambar = '';
+                        if (data_documents[i].document_image == null) {
+                            src_gambar = "{{ asset('storage/doc_icon.png') }}";
+                        } else {
+                            src_gambar = "{{ asset('storage/documents') }}" + "/" + data_documents[i]
+                                .document_image;
+                        }
                         rowCount++;
                         let newRow = `
         <div class="row mb-2" id="row_${rowCount}">
             <div class="col-3">
+                <input type="hidden" name="document_id[]" value="${data_documents[i].id}">
                 <img onclick="document_click(${rowCount})" id="document_preview_${rowCount}"
                     class="doc-image-upload"
-                    src="{{ asset('storage/doc_icon.png') }}">
+                    src="${src_gambar}">
                 <input onchange="image_onchange(this, ${rowCount})" style="display: none;"
                     type="file" id="document_image_${rowCount}" name="document_image[]"
                     placeholder="foto dokumen" accept=".jpg, .jpeg, .png">
@@ -984,7 +1065,11 @@
         $("#password").val("");
         $("#tanggal_keluar").val("");
         $("#foto").val(null);
-
+        $("#bank_code").val("");
+        $("#latitude").val(-6.2);
+        $("#longitude").val(106.8167);
+        updateMap(-6.2, 106.8167);
+       
         var avatarURL = "{{ asset('images/avatar_foto.webp') }}";
         $('#profile-preview').attr('src', avatarURL);
     }

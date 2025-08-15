@@ -202,4 +202,32 @@
         padding: 10px;
         object-fit: contain;
     }
+
+
+    .table-compact {
+        font-size: 12px;
+        /* ukuran font kecil */
+        border-collapse: collapse;
+        /* rapatkan border */
+        width: 100%;
+
+    }
+
+    .table-compact th,
+    .table-compact td {
+        padding: 4px 4px;
+        /* padding kecil */
+        /* border: 1px solid #ddd; */
+        /* garis tipis */
+        vertical-align: middle;
+        /* white-space: nowrap; */
+        overflow:hidden;
+        /* tengah vertikal */
+    }
+
+    .table-compact th {
+        /* background-color: #f8f9fa; */
+        /* warna header */
+        font-weight: bold;
+    }
 </style>

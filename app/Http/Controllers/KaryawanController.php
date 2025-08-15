@@ -24,7 +24,7 @@ class KaryawanController extends Controller
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('nik', function ($data) {
-                return '<a href="#"><div class="karyawan-id">' . $data->nik . '</div></a>';
+                return '<a onclick="detailData('.$data->id.')" href="javascript:void(0);"><div class="karyawan-id">' . $data->nik . '</div></a>';
             })
             ->addColumn('alamat', function ($data) {
                 $html = '';
@@ -116,7 +116,13 @@ class KaryawanController extends Controller
             'username' => 'nullable|unique:karyawans,username',
             'password' => 'nullable|required_with:username|min:6',
             'document_name.*' =>  'required',
-            'document_number.*' => 'required'
+            'document_number.*' => 'required',
+            'account_owner' => 'required',
+            'bank_account_number' => 'required',
+            'bank_name' => 'required',
+            'bank_code' => 'required',
+            'branch_account' => 'required',
+            
         ];
 
         $validator = Validator::make($input, $rules);
@@ -194,7 +200,136 @@ class KaryawanController extends Controller
      */
     public function show($id)
     {
-        //
+        $emp = Karyawan::find($id);
+        $doc = KaryawanDocument::where('karyawan_id', $id)->get();
+        
+        $html = '';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-2">';
+        if($emp->foto == null) {
+            $html .= '<img id="profile-image" class="profile-image-upload"
+                                        src="'.asset('images/avatar_foto.webp').'">';
+        } else {
+            $html .= '<img id="profile-image" class="profile-image-upload"
+                                        src="'.asset('storage/karyawan/'.$emp->foto).'">';
+        }
+        
+        $html .= '</div>';
+
+        $html .= '<div class="col-5">';
+        $html .= '<div class="row">';
+
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table-compact">';
+        
+        $html .= '<tr>';
+        $html .= '<td width="10%">Nama</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="38%">'.$emp->nama_lengkap.'</td>';
+
+        $html .= '<td width="10%">Gender</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="38%">'.$emp->jenis_kelamin.'</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Tempat/Tgl Lahir</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->tempat_lahir.'/'.date('d-m-Y', strtotime($emp->tanggal_lahir)).'</td>';
+
+        $html .= '<td>Agama</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->agama.'</td>';
+
+        $html .= '</tr>';
+
+
+        $html .= '<tr>';
+        $html .= '<td>Email</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->email.'</td>';
+
+        $html .= '<td>Telepon</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->phone.'</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Alamat</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->alamat.'</td>';
+
+        $html .= '<td>Kecamatan</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->district->subdistrict_name ?? ''.'</td>';
+
+        $html .= '</tr>';
+
+       
+
+        $html .= '<tr>';
+        $html .= '<td>Kabupaten/Kota</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->city->city_name ?? ''.'</td>';
+
+        $html .= '<td>Provinsi</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->province->province_name.'</td>';
+
+        $html .= '</tr>';
+
+        
+
+        $html .= '<tr>';
+        $html .= '<td>Kode Pos</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->postal_code.'</td>';
+
+        $html .= '<td></td>';
+        $html .= '<td></td>';
+        $html .= '<td></td>';
+
+
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Latitude</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->latitude.'</td>';
+
+        $html .= '<td>Longitude</td>';
+        $html .= '<td>:</td>';
+        $html .= '<td>'.$emp->longitude.'</td>';
+
+
+        $html .= '</tr>';
+
+
+        $html .= '<tr>';
+        $html .= '<td colspan="6"> <div id="map-detail" style="height: 200px;"></div></td>';
+        
+        $html .= '</tr>';
+
+
+       
+
+
+        $html .= '</table>';
+        $html .= '</div>'; 
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="col-5">';
+        $html .= '</div>';
+
+        $html .= '</div>';
+
+
+        $data['html'] = $html;
+        $data['emp'] = $emp;
+        return $data;
+
     }
 
     /**
@@ -232,15 +367,20 @@ class KaryawanController extends Controller
             'provinsi' => 'required',
             'kota' => 'required',
             'kecamatan' => 'required',
-            'phone' => 'required|'.Rule::unique('karyawans', 'phone')->ignore($id),
-            'email' => 'email|required|'.Rule::unique('karyawans', 'email')->ignore($id),
+            'phone' => 'required|' . Rule::unique('karyawans', 'phone')->ignore($id),
+            'email' => 'email|required|' . Rule::unique('karyawans', 'email')->ignore($id),
             'latitude' => 'required',
             'longitude' => 'required',
             'tanggal_masuk' => 'required',
             'username' => 'nullable|' . Rule::unique('karyawans', 'username')->ignore($id),
             'password' => 'nullable|required_with:username|min:6',
             'document_name.*' =>  'required',
-            'document_number.*' => 'required'
+            'document_number.*' => 'required',
+            'account_owner' => 'required',
+            'bank_account_number' => 'required',
+            'bank_name' => 'required',
+            'bank_code' => 'required',
+            'branch_account' => 'required',
 
         ];
 
@@ -277,6 +417,12 @@ class KaryawanController extends Controller
 
 
             if (!empty($input['document_name'])) {
+                // Ambil semua ID dokumen lama untuk karyawan ini
+                $oldDocs = KaryawanDocument::where('karyawan_id', $id)->get();
+
+                // Simpan semua ID dokumen yang masih ada di request
+                $keptIds = [];
+
                 foreach ($input['document_name'] as $index => $dn) {
 
                     // Skip kalau document_name kosong
@@ -284,44 +430,53 @@ class KaryawanController extends Controller
                         continue;
                     }
 
-                    // Cari dokumen lama kalau ada (misal kita pakai ID hidden input)
                     $documentId = $input['document_id'][$index] ?? null;
                     $existingDoc = $documentId ? KaryawanDocument::find($documentId) : null;
 
-                    $filename = $existingDoc->document_image ?? null; // default pakai gambar lama
+                    $filename = $existingDoc->document_image ?? null;
 
-                    // Kalau ada file baru di index ini
                     if ($request->hasFile("document_image.$index")) {
                         $unik = uniqid();
                         $file = $request->file("document_image.$index");
                         $filename = Str::slug($unik, '-') . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('/storage/documents'), $filename);
 
-                        // Hapus file lama kalau ada
                         if ($existingDoc && $existingDoc->document_image && file_exists(public_path('/storage/documents/' . $existingDoc->document_image))) {
                             unlink(public_path('/storage/documents/' . $existingDoc->document_image));
                         }
                     }
 
                     if ($existingDoc) {
-                        // Update dokumen lama
                         $existingDoc->update([
                             "document_name"   => $dn,
                             "document_number" => $input['document_number'][$index] ?? null,
                             "document_image"  => $filename,
                         ]);
+                        $keptIds[] = $existingDoc->id;
                     } else {
-                        // Insert dokumen baru
-                        KaryawanDocument::create([
+                        $newDoc = KaryawanDocument::create([
                             "document_name"   => $dn,
                             "document_number" => $input['document_number'][$index] ?? null,
                             "document_image"  => $filename,
                             "karyawan_id"     => $id,
                             "userid"          => $userid
                         ]);
+                        $keptIds[] = $newDoc->id;
+                    }
+                }
+
+                // Hapus dokumen lama yang tidak ada di keptIds
+                foreach ($oldDocs as $doc) {
+                    if (!in_array($doc->id, $keptIds)) {
+                        // Hapus file fisik kalau ada
+                        if ($doc->document_image && file_exists(public_path('/storage/documents/' . $doc->document_image))) {
+                            unlink(public_path('/storage/documents/' . $doc->document_image));
+                        }
+                        $doc->delete();
                     }
                 }
             }
+
 
 
             return response()->json([
