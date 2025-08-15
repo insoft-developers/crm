@@ -218,4 +218,3 @@
         $("#branch_name").val("");
     }
 </script>
-</script>

@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -70,6 +71,12 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
 
   Route::resource('supplier', SupplierController::class);
   Route::get('supplier_table', [SupplierController::class, 'supplierTable'])->name('supplier.table');
+
+  Route::resource('karyawan', KaryawanController::class);
+  Route::get('karyawan_table', [KaryawanController::class, 'karyawanTable'])->name('karyawan.table');
+  Route::post('form-add-cabang', [KaryawanController::class, 'formAddKaryawan']);
+  Route::post('form-add-jabatan', [KaryawanController::class, 'formAddJabatan']);
+  Route::post('form-add-department', [KaryawanController::class, 'formAddDepartment']);
 
 
 

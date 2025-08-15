@@ -83,8 +83,8 @@ class SupplierController extends Controller
 
         $rules = [
             'branch_id' => 'required',
-            'nama_lengkap' => 'required',
-            'customer_type' => 'required',
+            'nama_perusahaan' => 'required',
+            'nama_penanggung_jawab' => 'required',
             'alamat' => 'required',
             'provinsi' => 'required',
             'kota' => 'required',
@@ -165,8 +165,8 @@ class SupplierController extends Controller
 
         $rules = [
             'branch_id' => 'required',
-            'nama_lengkap' => 'required',
-            'customer_type' => 'required',
+            'nama_perusahaan' => 'required',
+            'nama_penanggung_jawab' => 'required',
             'alamat' => 'required',
             'provinsi' => 'required',
             'kota' => 'required',

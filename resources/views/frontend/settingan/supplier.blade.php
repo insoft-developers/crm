@@ -86,11 +86,11 @@
 
                                 <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center bintang"
-                                        for="nama_lengkap">Nama
+                                        for="nama_penanggung_jawab">Nama
                                         Penanggung Jawab</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
-                                            placeholder="masukkan nama supplier/perusahaan">
+                                        <input type="text" class="form-control" id="nama_penanggung_jawab" name="nama_penanggung_jawab"
+                                            placeholder="masukkan nama penanggung jawab">
 
                                     </div>
                                 </div>
@@ -102,7 +102,7 @@
                                         for="alamat">Alamat
                                         Lengkap</label>
                                     <div class="col-sm-8">
-                                        <textarea class="form-control" id="alamat" name="alamat" placeholder="masukkan alamat lengkap customer"></textarea>
+                                        <textarea class="form-control" id="alamat" name="alamat" placeholder="masukkan alamat lengkap supplier"></textarea>
 
                                     </div>
                                 </div>
@@ -232,23 +232,6 @@
 
 
                                 <div class="form-group row">
-                                    <label class="control-label col-sm-4 align-self-center"
-                                        for="contact_person_phone">No Telepon/Whatsapp Contact Person</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="contact_person_phone"
-                                            name="contact_person_phone" placeholder="ex: 082199005656">
-
-                                    </div>
-
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="contact_person_phone2"
-                                            name="contact_person_phone2" placeholder="ex: 082199005656">
-
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center" for="status">Status
                                         Customer</label>
                                     <div class="col-sm-4">
@@ -278,33 +261,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
-                                    <label class="control-label col-sm-4 align-self-center" for="akun_piutang">Akun
-                                        Piutang</label>
-                                    <div class="col-sm-8">
-                                        <select class="form-control" id="akun_piutang" name="akun_piutang">
-                                            <option value="" disabled selected>pilih akun piutang</option>
-                                            <option value="1">Akun Piutang Contoh 1</option>
-                                            <option value="2">Akun Piutang Contoh 2</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group row">
-                                    <label class="control-label col-sm-4 align-self-center"
-                                        for="akun_piutang_sementara">Akun Piutang Sementara</label>
-                                    <div class="col-sm-8">
-                                        <select class="form-control" id="akun_piutang_sementara"
-                                            name="akun_piutang_sementara">
-                                            <option value="" disabled selected>pilih akun piutang sementara
-                                            </option>
-                                            <option value="1">Akun Piutang Sementara Contoh 1</option>
-                                            <option value="2">Akun Piutang Sementara Contoh 2</option>
-                                        </select>
-                                    </div>
-                                </div>
-
+                                
 
                                 <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center" for="limit_hutang">Limit
@@ -329,17 +286,6 @@
 
 
                                 <div class="form-group row">
-                                    <label class="control-label col-sm-4 align-self-center" for="npwp_induk">No NPWP
-                                        Induk</label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="npwp_induk" name="npwp_induk"
-                                            placeholder="masukkan no NPWP Induk">
-
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group row">
                                     <label class="control-label col-sm-4 align-self-center" for="npwp">No
                                         NPWP</label>
                                     <div class="col-sm-8">
@@ -354,7 +300,7 @@
                                     <label class="control-label col-sm-4 align-self-center"
                                         for="description">Deskripsi</label>
                                     <div class="col-sm-8">
-                                        <textarea class="form-control" id="description" name="description" placeholder="masukkan Deskripsi pelanggan...">
+                                        <textarea class="form-control" id="description" name="description" placeholder="masukkan deskripsi supplier...">
                                         </textarea>
 
                                     </div>
@@ -367,7 +313,7 @@
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control" id="bank_account_number"
                                             name="bank_account_number"
-                                            placeholder="masukkan no rekening pelanggan...">
+                                            placeholder="masukkan no rekening supplier...">
 
                                     </div>
                                 </div>
@@ -406,30 +352,11 @@
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control" id="branch_account"
                                             name="branch_account"
-                                            placeholder="masukkan bank cabang mana rekening pelanggan terdaftar...">
+                                            placeholder="masukkan bank cabang mana rekening supplier terdaftar...">
 
 
                                     </div>
                                 </div>
-
-
-                                <div class="form-group row">
-                                    <label class="control-label col-sm-4 align-self-center" for="foto">Foto
-                                        Pelanggan</label>
-                                    <div class="col-sm-8">
-                                        <img id="profile-preview" class="profile-image-upload"
-                                            src="{{ asset('images/avatar_foto.webp') }}">
-                                        <input type="file" class="form-control" id="foto" name="foto"
-                                            placeholder="Profile Image Here.." accept=".jpg, .png, .jpeg"
-                                            style="display: none;">
-
-
-                                    </div>
-                                </div>
-
-
-
-
 
                             </div>
                         </div>
@@ -554,16 +481,6 @@
             $('#longitude').val(lng);
         }
     }
-
-    $('#profile-preview').click(function() {
-        $('#foto').trigger('click');
-    });
-
-    $("#foto").change(function() {
-        document.getElementById('profile-preview').src = window.URL.createObjectURL(this.files[0]);
-
-    });
-
 
     function loading() {
         $("#btn-save-data").text("Processing....");
@@ -721,7 +638,7 @@
         resetForm();
         save_method = "add";
         $('input[name=_method]').val('POST');
-        $(".modal-title").text("Tambah Customer Data");
+        $(".modal-title").text("Tambah Supplier Data");
         $("#modal-add").modal("show");
         unloading();
     }
@@ -730,8 +647,8 @@
         loading();
         e.preventDefault();
         var id = $('#id').val();
-        if (save_method == "add") url = "{{ url('/customer') }}";
-        else url = "{{ url('/customer') . '/' }}" + id;
+        if (save_method == "add") url = "{{ url('/supplier') }}";
+        else url = "{{ url('/supplier') . '/' }}" + id;
         $.ajax({
             url: url,
             type: "POST",
@@ -761,16 +678,16 @@
         save_method = "edit";
         $('input[name=_method]').val('PATCH');
         $.ajax({
-            url: "{{ url('/customer') }}" + "/" + id + "/edit",
+            url: "{{ url('/supplier') }}" + "/" + id + "/edit",
             type: "GET",
             dataType: "JSON",
             success: function(data) {
                 $('#modal-add').modal("show");
-                $('.modal-title').text("Edit Customer Data");
+                $('.modal-title').text("Edit Supplier Data");
                 $('#id').val(data.id);
                 $("#branch_id").val(data.branch_id);
-                $("#nama_lengkap").val(data.nama_lengkap);
-                $("#customer_type").val(data.customer_type);
+                $("#nama_perusahaan").val(data.nama_perusahaan);
+                $("#nama_penanggung_jawab").val(data.nama_penanggung_jawab);
                 $("#alamat").val(data.alamat);
                 $("#provinsi").val(data.provinsi);
                 provinsiChange(data.provinsi, data.kota);
@@ -781,33 +698,19 @@
                 $("#email").val(data.email);
                 $("#contact_person").val(data.contact_person);
                 $("#email_contact_person").val(data.email_contact_person);
-                $("#contact_person_phone").val(data.contact_person_phone);
-                $("#contact_person_phone2").val(data.contact_person_phone2);
                 $("#status").val(data.status);
                 $("#akun_hutang").val(data.akun_hutang);
-                $("#akun_piutang").val(data.akun_piutang);
-                $("#akun_piutang_sementara").val(data.akun_piutang_sementara);
                 var limitHutang = data.limit_hutang;
                 limitHutang = limitHutang.toString();
                 var limit = formatRibuan(limitHutang);
                 $("#limit_hutang").val(limit);
                 $("#no_ktp").val(data.no_ktp);
-                $("#npwp_induk").val(data.npwp_induk);
                 $("#npwp").val(data.npwp);
                 $("#description").val(data.description);
                 $("#bank_account_number").val(data.bank_account_number);
                 $("#account_owner").val(data.account_owner);
                 $("#bank_name").val(data.bank_name);
                 $("#branch_account").val(data.branch_account);
-                $("#foto").val(null);
-
-                if (data.foto == null) {
-                    var avatarURL = "{{ asset('images/avatar_foto.webp') }}";
-                } else {
-                    var avatarURL = "{{ asset('storage/customers') }}" + "/" + data.foto;
-                }
-
-                $('#profile-preview').attr('src', avatarURL);
                 $("#latitude").val(data.latitude);
                 $("#longitude").val(data.longitude);
                 updateMap(data.latitude, data.longitude);
@@ -830,7 +733,7 @@
             if (result.isConfirmed) {
                 var csrf_token = $('meta[name="csrf-token"]').attr('content');
                 $.ajax({
-                    url: "{{ url('/customer') }}" + '/' + id,
+                    url: "{{ url('/supplier') }}" + '/' + id,
                     type: "POST",
                     data: {
                         '_method': 'DELETE',
@@ -852,8 +755,8 @@
 
     function resetForm() {
         $("#branch_id").val("");
-        $("#nama_lengkap").val("");
-        $("#customer_type").val("");
+        $("#nama_perusahaan").val("");
+        $("#nama_penanggung_jawab").val("");
         $("#alamat").val("");
         $("#provinsi").val("");
         $("#kota").html('<option value="" disabled selected>pilih provinsi dahulu</option>');
@@ -864,25 +767,16 @@
         $("#email").val("");
         $("#contact_person").val("");
         $("#email_contact_person").val("");
-        $("#contact_person_phone").val("");
-        $("#contact_person_phone2").val("");
         $("#status").val("");
         $("#akun_hutang").val("");
-        $("#akun_piutang").val("");
-        $("#akun_piutang_sementara").val("");
         $("#limit_hutang").val("");
         $("#no_ktp").val("");
-        $("#npwp_induk").val("");
         $("#npwp").val("");
         $("#description").val("");
         $("#bank_account_number").val("");
         $("#account_owner").val("");
         $("#bank_name").val("");
         $("#branch_account").val("");
-        $("#foto").val(null);
-
-        var avatarURL = "{{ asset('images/avatar_foto.webp') }}";
-        $('#profile-preview').attr('src', avatarURL);
+        
     }
-</script>
 </script>

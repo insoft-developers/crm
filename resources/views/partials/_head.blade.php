@@ -20,6 +20,19 @@
 
 
 <style>
+    .label-insoft {
+        margin-bottom: -4px !important;
+        font-size: 15px !important;
+    }
+
+    .karyawan-id {
+        background: green;
+        text-align: center;
+        color: white;
+        padding: 0px 20px;
+        border-radius: 4px;
+    }
+
     .bintang::after {
         content: " *";
         color: red;
@@ -98,7 +111,7 @@
     } */
 
     .form-control {
-        border: 1px solid whitesmoke !important;
+        border: 1px solid lightgrey !important;
         background-color: whitesmoke !important;
     }
 
@@ -162,13 +175,31 @@
     }
 
     .profile-image-upload {
-        width: 220px;
-        height: 256px;
+        width: 180px;
+        height: 224px;
         object-fit: cover;
         display: block;
         background: lightgrey;
         border: 2px solid beige;
         border-radius: 7px;
         cursor: pointer;
+        padding: 10px;
+
+    }
+
+    .modal-body {
+        background: url(http://127.0.0.1:8000/images/background.png);
+        background-attachment: fixed;
+        background-size: cover;
+    }
+
+    .doc-image-upload {
+        width: 153px;
+        border: 2px solid lightgrey;
+        height: 109px;
+        border-radius: 10px;
+        cursor: pointer;
+        padding: 10px;
+        object-fit: contain;
     }
 </style>

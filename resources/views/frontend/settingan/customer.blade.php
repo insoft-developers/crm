@@ -894,4 +894,4 @@
         $('#profile-preview').attr('src', avatarURL);
     }
 </script>
-</script>
+

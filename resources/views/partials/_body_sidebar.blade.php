@@ -290,7 +290,7 @@
                     </a>
                     <ul id="settingan" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="#">
+                            <a href="{{ url('karyawan') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Karyawan</span>
                             </a>
                         </li>
