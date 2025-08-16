@@ -240,4 +240,17 @@
         object-fit: cover;
         cursor: pointer;
     }
+
+
+    .tab-pane .card-body {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .alamat-row {
+        border-bottom: 1px solid #dee2e6;
+        /* abu tipis Bootstrap */
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+    }
 </style>

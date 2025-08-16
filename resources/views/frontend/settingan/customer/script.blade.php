@@ -1,6 +1,111 @@
 <!-- JAVASCRIPT -->
 
 <script>
+    let alamatIndex = 1;
+
+    function tambah_alamat_pengiriman() {
+        alamatIndex++;
+
+        // clone row pertama
+        let newRow = $('#row_1').clone();
+
+        // update ID di semua input/select/textarea/map
+        newRow.attr('id', 'row_' + alamatIndex);
+        newRow.find('[id]').each(function() {
+            let oldId = $(this).attr('id');
+            let newId = oldId.replace(/\d+$/, alamatIndex);
+            $(this).attr('id', newId).val(''); // reset value juga
+        });
+
+        // ganti ID map
+        let mapId = 'map_' + alamatIndex;
+        newRow.find('div[id^=map_]').attr('id', mapId);
+
+        // append ke wrapper
+        $('#alamat_pengiriman_id').append(newRow);
+
+        // Panggil initMap() untuk row baru
+        initMap(alamatIndex);
+    }
+
+    var maps = {}; // simpan semua map berdasarkan index
+    var markers = {}; // simpan semua marker berdasarkan index
+
+    // fungsi inisialisasi map
+    function initMap(index) {
+        var lat = -6.2;
+        var lng = 106.8167;
+
+        var mapId = 'map_' + index;
+        var latId = '#latitude_pengiriman_' + index;
+        var lngId = '#longitude_pengiriman_' + index;
+
+        if (!maps[index]) {
+            var map = L.map(mapId).setView([lat, lng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+            maps[index] = map;
+            markers[index] = marker;
+
+            // isi awal
+            $(latId).val(lat);
+            $(lngId).val(lng);
+
+            // drag
+            marker.on('dragend', function() {
+                var pos = marker.getLatLng();
+                $(latId).val(pos.lat.toFixed(6));
+                $(lngId).val(pos.lng.toFixed(6));
+            });
+
+            // double click
+            map.on('dblclick', function(e) {
+                var newLat = e.latlng.lat.toFixed(6);
+                var newLng = e.latlng.lng.toFixed(6);
+                marker.setLatLng([newLat, newLng]);
+                $(latId).val(newLat);
+                $(lngId).val(newLng);
+            });
+
+            // input manual
+            $(latId + ', ' + lngId).off('change.map' + index).on('change.map' + index, function() {
+                var la = parseFloat($(latId).val());
+                var lo = parseFloat($(lngId).val());
+                if (!isNaN(la) && !isNaN(lo)) {
+                    var latLng = L.latLng(la, lo);
+                    marker.setLatLng(latLng);
+                    map.setView(latLng);
+                }
+            });
+        } else {
+            setTimeout(function() {
+                maps[index].invalidateSize();
+            }, 300);
+        }
+    }
+
+    // Saat modal dibuka → init map pertama
+    $('#modal-add').on('shown.bs.modal', function() {
+        initMap(1);
+    });
+
+    // Saat tab dibuka → resize semua map
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function() {
+        Object.values(maps).forEach(function(map) {
+            setTimeout(() => map.invalidateSize(), 300);
+        });
+    });
+</script>
+
+
+
+
+<script>
     var map;
     var marker;
 
