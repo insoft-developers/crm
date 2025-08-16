@@ -221,7 +221,7 @@
         /* garis tipis */
         vertical-align: middle;
         /* white-space: nowrap; */
-        overflow:hidden;
+        overflow: hidden;
         /* tengah vertikal */
     }
 
@@ -229,5 +229,15 @@
         /* background-color: #f8f9fa; */
         /* warna header */
         font-weight: bold;
+    }
+
+    .karyawan-detail-document-image {
+        width: 100px;
+        height: auto;
+        border-radius: 5px;
+        background: orange;
+        padding: 3px;
+        object-fit: cover;
+        cursor: pointer;
     }
 </style>

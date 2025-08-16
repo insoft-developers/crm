@@ -24,7 +24,7 @@ class KaryawanController extends Controller
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('nik', function ($data) {
-                return '<a onclick="detailData('.$data->id.')" href="javascript:void(0);"><div class="karyawan-id">' . $data->nik . '</div></a>';
+                return '<a onclick="detailData(' . $data->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $data->nik . '</div></a>';
             })
             ->addColumn('alamat', function ($data) {
                 $html = '';
@@ -122,7 +122,7 @@ class KaryawanController extends Controller
             'bank_name' => 'required',
             'bank_code' => 'required',
             'branch_account' => 'required',
-            
+
         ];
 
         $validator = Validator::make($input, $rules);
@@ -201,45 +201,48 @@ class KaryawanController extends Controller
     public function show($id)
     {
         $emp = Karyawan::find($id);
-        $doc = KaryawanDocument::where('karyawan_id', $id)->get();
-        
+        $docs = KaryawanDocument::where('karyawan_id', $id)->get();
+
         $html = '';
         $html .= '<div class="row">';
         $html .= '<div class="col-2">';
-        if($emp->foto == null) {
+        if ($emp->foto == null) {
             $html .= '<img id="profile-image" class="profile-image-upload"
-                                        src="'.asset('images/avatar_foto.webp').'">';
+                                        src="' . asset('images/avatar_foto.webp') . '">';
         } else {
             $html .= '<img id="profile-image" class="profile-image-upload"
-                                        src="'.asset('storage/karyawan/'.$emp->foto).'">';
+                                        src="' . asset('storage/karyawan/' . $emp->foto) . '">';
         }
-        
+
         $html .= '</div>';
 
         $html .= '<div class="col-5">';
         $html .= '<div class="row">';
 
         $html .= '<div class="col-12">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-header"><div class="card-title">Personal</div></div>';
+        $html .= '<div class="card-body">';
         $html .= '<table class="table-compact">';
-        
+
         $html .= '<tr>';
         $html .= '<td width="10%">Nama</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="38%">'.$emp->nama_lengkap.'</td>';
+        $html .= '<td width="38%">' . $emp->nama_lengkap . '</td>';
 
         $html .= '<td width="10%">Gender</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="38%">'.$emp->jenis_kelamin.'</td>';
+        $html .= '<td width="38%">' . $emp->jenis_kelamin . '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td>Tempat/Tgl Lahir</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->tempat_lahir.'/'.date('d-m-Y', strtotime($emp->tanggal_lahir)).'</td>';
+        $html .= '<td>' . $emp->tempat_lahir . '/' . date('d-m-Y', strtotime($emp->tanggal_lahir)) . '</td>';
 
         $html .= '<td>Agama</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->agama.'</td>';
+        $html .= '<td>' . $emp->agama . '</td>';
 
         $html .= '</tr>';
 
@@ -247,43 +250,43 @@ class KaryawanController extends Controller
         $html .= '<tr>';
         $html .= '<td>Email</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->email.'</td>';
+        $html .= '<td>' . $emp->email . '</td>';
 
         $html .= '<td>Telepon</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->phone.'</td>';
+        $html .= '<td>' . $emp->phone . '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td>Alamat</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->alamat.'</td>';
+        $html .= '<td>' . $emp->alamat . '</td>';
 
         $html .= '<td>Kecamatan</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->district->subdistrict_name ?? ''.'</td>';
+        $html .= '<td>' . $emp->district->subdistrict_name ?? '' . '</td>';
 
         $html .= '</tr>';
 
-       
+
 
         $html .= '<tr>';
         $html .= '<td>Kabupaten/Kota</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->city->city_name ?? ''.'</td>';
+        $html .= '<td>' . $emp->city->city_name ?? '' . '</td>';
 
         $html .= '<td>Provinsi</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->province->province_name.'</td>';
+        $html .= '<td>' . $emp->province->province_name . '</td>';
 
         $html .= '</tr>';
 
-        
+
 
         $html .= '<tr>';
         $html .= '<td>Kode Pos</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->postal_code.'</td>';
+        $html .= '<td>' . $emp->postal_code . '</td>';
 
         $html .= '<td></td>';
         $html .= '<td></td>';
@@ -295,11 +298,11 @@ class KaryawanController extends Controller
         $html .= '<tr>';
         $html .= '<td>Latitude</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->latitude.'</td>';
+        $html .= '<td>' . $emp->latitude . '</td>';
 
         $html .= '<td>Longitude</td>';
         $html .= '<td>:</td>';
-        $html .= '<td>'.$emp->longitude.'</td>';
+        $html .= '<td>' . $emp->longitude . '</td>';
 
 
         $html .= '</tr>';
@@ -307,29 +310,187 @@ class KaryawanController extends Controller
 
         $html .= '<tr>';
         $html .= '<td colspan="6"> <div id="map-detail" style="height: 200px;"></div></td>';
-        
+
         $html .= '</tr>';
-
-
-       
-
-
         $html .= '</table>';
-        $html .= '</div>'; 
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';
 
         $html .= '<div class="col-5">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-header"><div class="card-title">Documents</div></div>';
+        $html .= '<div class="card-body">';
+
+        $html .= '<table class="table-compact">';
+        $html .= '<tr>';
+        $html .= '<th>#</th>';
+        $html .= '<th>Nama </th>';
+        $html .= '<th>Nomor </th>';
+        $html .= '<th>Foto</th>';
+        $html .= '</tr>';
+
+        foreach ($docs as $index => $doc) {
+            $html .= '<tr>';
+            $html .= '<td>'.($index + 1).'</td>';
+            $html .= '<td>'.$doc->document_name.'</td>';
+            $html .= '<td>'.$doc->document_number.'</td>';
+
+            if($doc->document_image === null) {
+                $html .= '<td><img class="karyawan-detail-document-image" src="'.asset('storage/doc_icon.png').'"></td>';
+            } else {
+                $html .= '<td><a href="'.asset('storage/documents/'.$doc->document_image).'" target="_blank"><img class="karyawan-detail-document-image" src="'.asset('storage/documents/'.$doc->document_image).'"></a></td>';
+            }
+
+            $html .= '<td><img src=""></td>';
+            $html .= '</tr>';
+        }
+
+
+
+
+        $html .= '</table>';
+
         $html .= '</div>';
+        $html .= '</div>';
+
 
         $html .= '</div>';
 
+        $html .= '</div>';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-7">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-header"><div class="card-title">Bank Account Detail</div></div>';
+        
+        $html .= '<div class="card-body">';
+        $html .= '<table class="table-compact">';
+        $html .= '<tr>';
+        $html .= '<td width="23%">Pemegang Kartu</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->account_owner.'</td>';
+
+        $html .= '<td width="23%">Nomor Rekening</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->bank_account_number.'</td>';
+
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Nama Bank</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->bank_name.'</td>';
+
+        $html .= '<td width="23%">Nomor Kode Bank</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->bank_code.'</td>';
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Lokasi Bank</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->branch_account.'</td>';
+
+        $html .= '<td width="23%">NPWP</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->npwp.'</td>';
+
+
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        $html .= '</div>'; //card-body
+        $html .= '</div>'; //card
+
+
+
+        $html .= '<div class="card">';
+        $html .= '<div class="card-header"><div class="card-title">Perusahaan Detail</div></div>';
+        
+        $html .= '<div class="card-body">';
+        $html .= '<table class="table-compact">';
+        $html .= '<tr>';
+        $html .= '<td width="23%">Nomor Induk Pegawai</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->nik.'</td>';
+
+        $html .= '<td width="23%">Departemen</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->department->department_name ?? ''.'</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Cabang</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->branch->branch_name ?? ''.'</td>';
+
+        $html .= '<td width="23%">Status Karyawan</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->status_karyawan.'</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Gabung dalam Perusahaan</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.date('d-m-Y', strtotime($emp->tanggal_masuk)).'</td>';
+
+        $html .= '<td width="23%">Keluar dari Perusahaan</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.date('d-m-Y', strtotime($emp->tanggal_keluar)).'</td>';
+        $html .= '</tr>';
+
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Role</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->role.'</td>';
+
+        if($emp->status === 1) {
+            $active = 'Aktif';
+        } else {
+            $active = 'Tidak Aktif';
+        }
+
+        $html .= '<td width="23%">User Status</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$active.'</td>';
+        $html .= '</tr>';
+
+
+        $html .= '<tr>';
+        $html .= '<td width="23%">Username</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->username.'</td>';
+
+        $html .= '<td width="23%">Password</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="25%">'.$emp->password.'</td>';
+        $html .= '</tr>';
+
+        
+
+        $html .= '</table>';
+        $html .= '</div>'; //card-body
+        $html .= '</div>'; //card
+
+
+
+        $html .= '</div class="col-5">';
+
+
+        
+
+
+        $html .= '</div>';
+
+        $html .= '</div>'. //row ke 2
 
         $data['html'] = $html;
         $data['emp'] = $emp;
         return $data;
-
     }
 
     /**

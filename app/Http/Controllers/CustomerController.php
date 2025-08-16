@@ -25,22 +25,13 @@ class CustomerController extends Controller
         $data = Customer::where('userid', $userid);
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('alamat', function($data){
-                $html = '';
-                $html .= $data->province->province_name ?? '';
-                $html .= '<br>'.$data->city->city_name ?? '';
-                $html .= '<br>'.$data->district->subdistrict_name ?? '';
-
-                return $html;
+            ->addColumn('customer_code', function ($data) {
+                return '<a onclick="detailData(' . $data->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $data->customer_code . '</div></a>';
             })
-
-            ->addColumn('status', function($data){
-                if($data->status == 1) {
-                    return '<div class="badge badge-pill border border-success text-success">Aktif</div>';
-                } else {
-                    return '<div class="badge badge-pill border border-danger text-red">Tidak Aktif</div>';
-                }
+            ->addColumn('balance', function($data){
+                return number_format($data->balance);
             })
+            
             ->addColumn('action', function ($row) {
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
@@ -50,7 +41,7 @@ class CustomerController extends Controller
                 $html .= '</center></div>';
                 return $html;
             })
-            ->rawColumns(['action','alamat','status'])
+            ->rawColumns(['action','customer_code'])
             ->make(true);
     }
 
@@ -65,7 +56,7 @@ class CustomerController extends Controller
         $userid = Auth::user()->id ?? 1;
         $branches = Branch::where('userid', $userid)->get();
         $provinces = Province::all();
-        return view('frontend.settingan.customer', compact('view','branches','provinces'));
+        return view('frontend.settingan.customer.index', compact('view','branches','provinces'));
     }
 
     /**
