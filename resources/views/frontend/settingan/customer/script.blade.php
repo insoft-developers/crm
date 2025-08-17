@@ -1,9 +1,162 @@
 <!-- JAVASCRIPT -->
 
 <script>
+    function hapus_alamat(id) {
+        if (id != 1) {
+            $("#row_" + id).remove();
+        }
+
+    }
+
+    function init_alamat_pengiriman() {
+        let newAlamat = `<div class="row alamat-row" id="row_1">
+            <div class="col-6">
+                <div class="row">
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Nama</label>
+                            <input class="form-control"
+                                type="text"
+                                id="nama_pengiriman_1"
+                                name="nama_pengiriman[]">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Kontak</label>
+                            <input class="form-control"
+                                type="text"
+                                id="kontak_pengiriman_1"
+                                name="kontak_pengiriman[]">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Alamat</label>
+                            <textarea id="alamat_pengiriman_1" name="alamat_pengiriman[]" class="form-control">
+                </textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Provinsi</label>
+                            <select onchange="province_onchange(this)" id="provinsi_pengiriman_1"
+                                name="provinsi_pengiriman[]"
+                                class="form-control">
+                                <option value="" selected
+                                    disabled>
+                                    Pilih Provinsi</option>
+                                @foreach ($provinces as $province)
+                                    <option
+                                        value="{{ $province->province_id }}">
+                                        {{ $province->province_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Kabupaten/Kota</label>
+                            <select onchange="kota_onchange(this)" id="kota_pengiriman_1"
+                                name="kota_pengiriman[]"
+                                class="form-control">
+                                <option value="" selected
+                                    disabled>
+                                    Pilih Provinsi Dahulu
+                                </option>
+
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Kecamatan</label>
+                            <select id="kecamatan_pengiriman_1"
+                                name="kecamatan_pengiriman[]"
+                                class="form-control">
+                                <option value="" selected
+                                    disabled>
+                                    Pilih Kota Dahulu</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft">Kode
+                                Pos</label>
+                            <input type="text"
+                                id="postal_code_pengiriman_1"
+                                name="postal_code_pengiriman[]"
+                                class="form-control">
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Latitude</label>
+                            <input type="text"
+                                class="form-control"
+                                id="latitude_pengiriman_1"
+                                name="latitude_pengiriman[]">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label
+                                class="label-insoft bintang">Longitude</label>
+                            <input type="text"
+                                class="form-control"
+                                id="longitude_pengiriman_1"
+                                name="longitude_pengiriman[]">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div id="map_1"
+                            style="height: 200px;">
+                        </div>
+                        <button onclick="hapus_alamat(1)" type="button" class="btn btn-hapus-alamat btn-danger btn-sm mt-2">(-) Hapus Alamat</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>`;
+
+        $("#alamat_pengiriman_id").html(newAlamat);
+    }
+
+
     let alamatIndex = 1;
 
     function tambah_alamat_pengiriman() {
+
+
         alamatIndex++;
 
         // clone row pertama
@@ -17,6 +170,9 @@
             $(this).attr('id', newId).val(''); // reset value juga
         });
 
+
+        // update tombol hapus agar memanggil index baru
+        newRow.find('.btn-hapus-alamat').attr('onclick', 'hapus_alamat(' + alamatIndex + ')');
         // ganti ID map
         let mapId = 'map_' + alamatIndex;
         newRow.find('div[id^=map_]').attr('id', mapId);
@@ -25,8 +181,231 @@
         $('#alamat_pengiriman_id').append(newRow);
 
         // Panggil initMap() untuk row baru
-        initMap(alamatIndex);
+
+        setTimeout(() => {
+            initMap(alamatIndex);
+        }, 100);
+
     }
+
+
+
+
+
+
+
+    function edit_alamat_pengiriman(listData) {
+
+        let html = "";
+
+        listData.forEach((data, index) => {
+            let rowIndex = index + 1;
+            alamatIndex++;
+
+            html += `<div class="row alamat-row" id="row_${rowIndex}">
+            <div class="col-6">
+                <div class="row">
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <input type="hidden" id="alamat_id_${rowIndex}" name="alamat_id[]" value="${data.id}">
+                            <label class="label-insoft bintang">Nama</label>
+                            <input class="form-control"
+                                type="text"
+                                id="nama_pengiriman_${rowIndex}"
+                                name="nama_pengiriman[]"
+                                value="${data.nama || ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Kontak</label>
+                            <input class="form-control"
+                                type="text"
+                                id="kontak_pengiriman_${rowIndex}"
+                                name="kontak_pengiriman[]"
+                                value="${data.kontak || ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Alamat</label>
+                            <textarea id="alamat_pengiriman_${rowIndex}" 
+                                name="alamat_pengiriman[]" 
+                                class="form-control">${data.alamat || ''}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Provinsi</label>
+                            <select onchange="province_onchange(this)" 
+                                id="provinsi_pengiriman_${rowIndex}"
+                                name="provinsi_pengiriman[]"
+                                class="form-control">
+                                <option value="" disabled>Pilih Provinsi</option>
+                                @foreach ($provinces as $province)
+                                    <option value="{{ $province->province_id }}"
+                                        ${data.province_id == "{{ $province->province_id }}" ? 'selected' : ''}>
+                                        {{ $province->province_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Kabupaten/Kota</label>
+                            <select onchange="kota_onchange(this)"
+                                id="kota_pengiriman_${rowIndex}"
+                                name="kota_pengiriman[]"
+                                class="form-control">
+                                
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Kecamatan</label>
+                            <select id="kecamatan_pengiriman_${rowIndex}"
+                                name="kecamatan_pengiriman[]"
+                                class="form-control">
+                                
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft">Kode Pos</label>
+                            <input type="text"
+                                id="postal_code_pengiriman_${rowIndex}"
+                                name="postal_code_pengiriman[]"
+                                class="form-control"
+                                value="${data.postal_code || ''}">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Latitude</label>
+                            <input type="text"
+                                class="form-control"
+                                id="latitude_pengiriman_${rowIndex}"
+                                name="latitude_pengiriman[]"
+                                value="${data.latitude || ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="label-insoft bintang">Longitude</label>
+                            <input type="text"
+                                class="form-control"
+                                id="longitude_pengiriman_${rowIndex}"
+                                name="longitude_pengiriman[]"
+                                value="${data.longitude || ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div id="map_${rowIndex}" style="height: 200px;"></div>
+                        <button onclick="hapus_alamat(${rowIndex})" type="button" class="btn btn-hapus-alamat btn-danger btn-sm mt-2">(-) Hapus Alamat</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        });
+
+        $("#alamat_pengiriman_id").html(html);
+
+
+        listData.forEach((data, index) => {
+            let rowIndex = index + 1;
+            let lat = data.latitude || -6.200; // fallback Jakarta
+            let lng = data.longitude || 106.816; // fallback Jakarta
+
+            setTimeout(() => {
+                updateDeliveryMap(rowIndex, lat, lng);
+            }, 200);
+        });
+    }
+
+
+    // object untuk simpan semua map dan marker pengiriman
+    let deliveryMaps = {};
+    let deliveryMarkers = {};
+
+    function updateDeliveryMap(rowIndex, lat, lng) {
+        let mapId = `map_${rowIndex}`;
+
+        // kalau map sudah ada → hapus dulu biar tidak duplicate
+        if (deliveryMaps[mapId]) {
+            deliveryMaps[mapId].remove();
+        }
+
+        // inisialisasi map baru
+        let map = L.map(mapId).setView([lat, lng], 15);
+
+        // tambahkan tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 6,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // tambahkan marker draggable
+        let marker = L.marker([lat, lng], {
+            draggable: true
+        }).addTo(map);
+
+        // simpan map & marker ke object global
+        deliveryMaps[mapId] = map;
+        deliveryMarkers[mapId] = marker;
+
+        // update input saat marker digeser
+        marker.on('dragend', function() {
+            let pos = marker.getLatLng();
+            $(`#latitude_pengiriman_${rowIndex}`).val(pos.lat.toFixed(6));
+            $(`#longitude_pengiriman_${rowIndex}`).val(pos.lng.toFixed(6));
+        });
+
+        // update marker saat user double click di peta
+        map.on('dblclick', function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+
+            marker.setLatLng([lat, lng]);
+            $(`#latitude_pengiriman_${rowIndex}`).val(lat);
+            $(`#longitude_pengiriman_${rowIndex}`).val(lng);
+        });
+
+        // update marker saat input lat/long diubah manual
+        $(`#latitude_pengiriman_${rowIndex}, #longitude_pengiriman_${rowIndex}`).off('change').on('change', function() {
+            const newLat = parseFloat($(`#latitude_pengiriman_${rowIndex}`).val());
+            const newLng = parseFloat($(`#longitude_pengiriman_${rowIndex}`).val());
+            if (!isNaN(newLat) && !isNaN(newLng)) {
+                const latLng = L.latLng(newLat, newLng);
+                marker.setLatLng(latLng);
+                map.setView(latLng);
+            }
+        });
+
+        // fix tampilan map kalau ada di tab/modal
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
+    }
+
+
 
     var maps = {}; // simpan semua map berdasarkan index
     var markers = {}; // simpan semua marker berdasarkan index
@@ -47,7 +426,9 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            var marker = L.marker([lat, lng], {
+                draggable: true
+            }).addTo(map);
 
             maps[index] = map;
             markers[index] = marker;
@@ -168,13 +549,6 @@
 
 
 <script>
-    $('#limit_hutang').on('input', function() {
-        let nilai = $(this).val();
-        let nilaiBaru = formatRibuan(nilai);
-        $(this).val(nilaiBaru);
-    });
-
-
     function updateMap(lat, lng) {
         if (!map) {
             map = L.map('map').setView([lat, lng], 13);
@@ -197,6 +571,33 @@
                 $('#latitude').val(pos.lat.toFixed(6));
                 $('#longitude').val(pos.lng.toFixed(6));
             });
+
+
+            map.on('dblclick', function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+
+                // Pindahkan marker ke lokasi klik
+                marker.setLatLng([lat, lng]);
+
+                // Perbarui input koordinat
+                $('#latitude').val(lat);
+                $('#longitude').val(lng);
+
+
+            });
+
+            $('#latitude, #longitude').on('change', function() {
+                const lat = parseFloat($('#latitude').val());
+                const lng = parseFloat($('#longitude').val());
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const latLng = L.latLng(lat, lng);
+                    marker.setLatLng(latLng);
+                    map.setView(latLng); // opsional
+
+                }
+
+            });
         } else {
             // Resize map jika misalnya ditaruh di dalam modal
             map.invalidateSize();
@@ -208,6 +609,38 @@
             // Update input juga
             $('#latitude').val(lat);
             $('#longitude').val(lng);
+
+            marker.on('dragend', function() {
+                var pos = marker.getLatLng();
+                $('#latitude').val(pos.lat.toFixed(6));
+                $('#longitude').val(pos.lng.toFixed(6));
+            });
+
+            map.on('dblclick', function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+
+                // Pindahkan marker ke lokasi klik
+                marker.setLatLng([lat, lng]);
+
+                // Perbarui input koordinat
+                $('#latitude').val(lat);
+                $('#longitude').val(lng);
+
+
+            });
+
+            $('#latitude, #longitude').on('change', function() {
+                const lat = parseFloat($('#latitude').val());
+                const lng = parseFloat($('#longitude').val());
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const latLng = L.latLng(lat, lng);
+                    marker.setLatLng(latLng);
+                    map.setView(latLng); // opsional
+
+                }
+
+            });
         }
     }
 
@@ -237,7 +670,7 @@
     });
 
 
-    function provinsiChange(provinceId, cityId) {
+    function provinsiChange(provinceId, cityId, angka) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: "{{ route('kota.get') }}",
@@ -267,9 +700,17 @@
                 }
 
 
-                $("#kota").html(html);
-                $("#kecamatan").html(
-                    '<option value="" disabled selected>pilih kota dahulu</option>');
+                if (angka == null) {
+                    $("#kota").html(html);
+                    $("#kecamatan").html(
+                        '<option value="" disabled selected>pilih kota dahulu</option>');
+
+                } else {
+                    $("#kota_pengiriman_" + angka).html(html);
+                    $("#kecamatan_pengiriman_" + angka).html(
+                        '<option value="" disabled selected>pilih kota dahulu</option>');
+                }
+
 
 
             }
@@ -286,7 +727,7 @@
     });
 
 
-    function changeCity(cityId, districtId) {
+    function changeCity(cityId, districtId, angka) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: "{{ route('kecamatan.get') }}",
@@ -297,7 +738,7 @@
                 "_token": csrf_token
             },
             success: function(data) {
-                console.log(data);
+
                 var html = '';
                 html += '<option value="" disabled selected>pilih kecamatan</option>';
 
@@ -315,10 +756,11 @@
                     }
                 }
 
-
-                $("#kecamatan").html(html);
-
-
+                if (angka == null) {
+                    $("#kecamatan").html(html);
+                } else {
+                    $("#kecamatan_pengiriman_" + angka).html(html);
+                }
             }
         });
     }
@@ -378,11 +820,13 @@
         $('input[name=_method]').val('POST');
         $(".modal-title").text("Tambah Data Customer");
         $("#modal-add").modal("show");
+
+        init_alamat_pengiriman();
         unloading();
     }
 
     $("#form-add").submit(function(e) {
-        loading();
+        // loading();
         e.preventDefault();
         var id = $('#id').val();
         if (save_method == "add") url = "{{ url('/customer') }}";
@@ -422,50 +866,77 @@
             success: function(data) {
                 $('#modal-add').modal("show");
                 $('.modal-title').text("Edit Data Customer");
-                $('#id').val(data.id);
-                $("#branch_id").val(data.branch_id);
-                $("#nama_lengkap").val(data.nama_lengkap);
-                $("#customer_type").val(data.customer_type);
-                $("#alamat").val(data.alamat);
-                $("#provinsi").val(data.provinsi);
-                provinsiChange(data.provinsi, data.kota);
-                changeCity(data.kota, data.kecamatan);
-                $("#postal_code").val(data.postal_code);
-                $("#phone").val(data.phone);
-                $("#phone2").val(data.phone2);
-                $("#email").val(data.email);
-                $("#contact_person").val(data.contact_person);
-                $("#email_contact_person").val(data.email_contact_person);
-                $("#contact_person_phone").val(data.contact_person_phone);
-                $("#contact_person_phone2").val(data.contact_person_phone2);
-                $("#status").val(data.status);
-                $("#akun_hutang").val(data.akun_hutang);
-                $("#akun_piutang").val(data.akun_piutang);
-                $("#akun_piutang_sementara").val(data.akun_piutang_sementara);
-                var limitHutang = data.limit_hutang;
-                limitHutang = limitHutang.toString();
-                var limit = formatRibuan(limitHutang);
-                $("#limit_hutang").val(limit);
-                $("#no_ktp").val(data.no_ktp);
-                $("#npwp_induk").val(data.npwp_induk);
-                $("#npwp").val(data.npwp);
-                $("#description").val(data.description);
-                $("#bank_account_number").val(data.bank_account_number);
-                $("#account_owner").val(data.account_owner);
-                $("#bank_name").val(data.bank_name);
-                $("#branch_account").val(data.branch_account);
+                $('#id').val(data.customer.id);
+
+                $("#nama_lengkap").val(data.customer.nama_lengkap);
+                $("#tempat_lahir").val(data.customer.tempat_lahir);
+                $("#tanggal_lahir").val(data.customer.tanggal_lahir);
+                $("#tanggal_aktif").val(data.customer.tanggal_aktif);
+                $("#customer_type").val(data.customer.customer_type);
+                $("#alamat").val(data.customer.alamat);
+
+                $("#phone").val(data.customer.phone);
+                $("#email").val(data.customer.email);
+                $("#customer_code").val(data.customer.customer_code);
+                $("#nama_tagihan").val(data.customer.nama_tagihan);
+                $("#kontak_tagihan").val(data.customer.kontak_tagihan);
+                $("#alamat_tagihan").val(data.customer.alamat_tagihan);
+                $("#provinsi").val(data.customer.provinsi);
+                provinsiChange(data.customer.provinsi, data.customer.kota);
+                changeCity(data.customer.kota, data.customer.kecamatan);
+                $("#postal_code").val(data.customer.postal_code);
+
+                $("#latitude").val(data.customer.latitude);
+                $("#longitude").val(data.customer.longitude);
+
+
+
+
+                $("#npwp").val(data.customer.npwp);
+                $("#bank_account_number").val(data.customer.bank_account_number);
+                $("#account_owner").val(data.customer.account_owner);
+                $("#bank_name").val(data.customer.bank_name);
+                $("#branch_account").val(data.customer.branch_account);
+                $("#bank_code").val(data.customer.bank_code);
+
+                $("#nama_penanggung_jawab").val(data.customer.nama_penanggung_jawab);
+                $("#kontak_penanggung_jawab").val(data.customer.kontak_penanggung_jawab);
+                $("#jabatan_penanggung_jawab").val(data.customer.jabatan_penanggung_jawab);
+                $("#email_penanggung_jawab").val(data.customer.email_penanggung_jawab);
+
                 $("#foto").val(null);
 
-                if (data.foto == null) {
+                if (data.customer.foto == null) {
                     var avatarURL = "{{ asset('images/avatar_foto.webp') }}";
                 } else {
-                    var avatarURL = "{{ asset('storage/customers') }}" + "/" + data.foto;
+                    var avatarURL = "{{ asset('storage/customers') }}" + "/" + data.customer.foto;
                 }
 
                 $('#profile-preview').attr('src', avatarURL);
-                $("#latitude").val(data.latitude);
-                $("#longitude").val(data.longitude);
-                updateMap(data.latitude, data.longitude);
+
+                setTimeout(() => {
+                    updateMap(data.customer.latitude, data.customer.longitude);
+
+
+                }, 200);
+
+                $('#pills-profile-tab').on('shown.bs.tab', function() {
+                    edit_alamat_pengiriman(data.alamat);
+
+                    data.alamat.forEach(function(item, index) {
+                        var baris = index + 1;
+                        provinsiChange(item.province_id, item.city_id, baris);
+
+                        
+                        setTimeout(() => {
+                            changeCity(item.city_id, item.district_id, baris);
+                        }, 400);
+
+                    });
+
+
+
+                });
 
             }
         })
@@ -538,5 +1009,89 @@
 
         var avatarURL = "{{ asset('images/avatar_foto.webp') }}";
         $('#profile-preview').attr('src', avatarURL);
+    }
+
+
+    function province_onchange(el) {
+        let indeks = el.id;
+        let angka = indeks.replace(/\D/g, ""); // hasil: "1"
+        let provinceId = el.value;
+
+        provinsiChange(provinceId, 0, angka);
+    }
+
+
+
+    function kota_onchange(el) {
+        let indeks = el.id;
+        let angka = indeks.replace(/\D/g, ""); // hasil: "1"
+        let cityId = el.value;
+
+        changeCity(cityId, 0, angka);
+    }
+
+
+    let mapss = {};
+    let markerss = {};
+
+    function updateMaps(mapIndex, lat, lng) {
+        let mapId = "map_" + mapIndex;
+        let latInput = "#latitude_pengiriman_" + mapIndex;
+        let lngInput = "#longitude_pengiriman_" + mapIndex;
+
+        if (!mapss[mapId]) {
+            // Buat map baru
+            mapss[mapId] = L.map(mapId).setView([lat, lng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(mapss[mapId]);
+
+            // Tambahkan marker draggable
+            markerss[mapId] = L.marker([lat, lng], {
+                draggable: true
+            }).addTo(mapss[mapId]);
+
+            // Isi input awal
+            $(latInput).val(lat);
+            $(lngInput).val(lng);
+
+            // Event marker digeser
+            markerss[mapId].on('dragend', function() {
+                const pos = markerss[mapId].getLatLng();
+                $(latInput).val(pos.lat.toFixed(6));
+                $(lngInput).val(pos.lng.toFixed(6));
+            });
+
+            // Event double click → pindah marker
+            mapss[mapId].on('dblclick', function(e) {
+                const newLat = e.latlng.lat.toFixed(6);
+                const newLng = e.latlng.lng.toFixed(6);
+                markerss[mapId].setLatLng([newLat, newLng]);
+
+                $(latInput).val(newLat);
+                $(lngInput).val(newLng);
+            });
+
+            // Event input manual
+            $(latInput + ", " + lngInput).on('change', function() {
+                const newLat = parseFloat($(latInput).val());
+                const newLng = parseFloat($(lngInput).val());
+                if (!isNaN(newLat) && !isNaN(newLng)) {
+                    const latLng = L.latLng(newLat, newLng);
+                    markerss[mapId].setLatLng(latLng);
+                    mapss[mapId].setView(latLng);
+                }
+            });
+
+        } else {
+            // Kalau map sudah ada → update saja
+            mapss[mapId].invalidateSize();
+            mapss[mapId].setView([lat, lng], 13);
+            markerss[mapId].setLatLng([lat, lng]);
+
+            $(latInput).val(lat);
+            $(lngInput).val(lng);
+        }
     }
 </script>

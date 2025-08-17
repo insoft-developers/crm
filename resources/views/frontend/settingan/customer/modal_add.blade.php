@@ -76,7 +76,7 @@
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label class="label-insoft bintang">Tipe Customer</label>
-                                                <select class="form-control" id="tanggal_aktif" name="tanggal_aktif">
+                                                <select class="form-control" id="customer_type" name="customer_type">
                                                     <option value="" selected disabled>Pilih tipe customer
                                                     </option>
                                                     <option value="distributor">Distributor</option>
@@ -85,6 +85,13 @@
                                                     <option value="distributor">Reseller</option>
                                                     <option value="lainnya">Lainnya</option>
                                                 </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="label-insoft bintang">Customer Code</label>
+                                                <input type="text" class="form-control" id="customer_code" name="customer_code" placeholder="cth: C-10221">
                                             </div>
                                         </div>
                                     </div>
@@ -363,143 +370,7 @@
                                                             
 
                                                             <div id="alamat_pengiriman_id">
-                                                                <div class="row alamat-row" id="row_1">
-                                                                    <div class="col-6">
-                                                                        <div class="row">
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Nama</label>
-                                                                                    <input class="form-control"
-                                                                                        type="text"
-                                                                                        id="nama_pengiriman_1"
-                                                                                        name="nama_pengiriman[]">
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Kontak</label>
-                                                                                    <input class="form-control"
-                                                                                        type="text"
-                                                                                        id="kontak_pengiriman_1"
-                                                                                        name="kontak_pengiriman[]">
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-12">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Alamat</label>
-                                                                                    <textarea id="alamat_pengiriman_1" name="alamat_pengiriman[]" class="form-control">
-                                                                        </textarea>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Provinsi</label>
-                                                                                    <select id="provinsi_pengiriman_1"
-                                                                                        name="provinsi_pengiriman[]"
-                                                                                        class="form-control">
-                                                                                        <option value="" selected
-                                                                                            disabled>
-                                                                                            Pilih Provinsi</option>
-                                                                                        @foreach ($provinces as $province)
-                                                                                            <option
-                                                                                                value="{{ $province->province_id }}">
-                                                                                                {{ $province->province_name }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-
-
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Kabupaten/Kota</label>
-                                                                                    <select id="kota_pengiriman_1"
-                                                                                        name="kota_pengiriman[]"
-                                                                                        class="form-control">
-                                                                                        <option value="" selected
-                                                                                            disabled>
-                                                                                            Pilih Provinsi Dahulu
-                                                                                        </option>
-
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Kecamatan</label>
-                                                                                    <select id="kecamatan_pengiriman_1"
-                                                                                        name="kecamatan_pengiriman[]"
-                                                                                        class="form-control">
-                                                                                        <option value="" selected
-                                                                                            disabled>
-                                                                                            Pilih Kota Dahulu</option>
-
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label class="label-insoft">Kode
-                                                                                        Pos</label>
-                                                                                    <input type="text"
-                                                                                        id="postal_code_pengiriman_1"
-                                                                                        name="postal_code_pengiriman[]"
-                                                                                        class="form-control">
-
-                                                                                </div>
-                                                                            </div>
-
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-6">
-                                                                        <div class="row">
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Latitude</label>
-                                                                                    <input type="text"
-                                                                                        class="form-control"
-                                                                                        id="latitude_pengiriman_1"
-                                                                                        name="latitude_pengiriman[]">
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        class="label-insoft bintang">Longitude</label>
-                                                                                    <input type="text"
-                                                                                        class="form-control"
-                                                                                        id="longitude_pengiriman_1"
-                                                                                        name="longitude_pengiriman[]">
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-12">
-                                                                                <div id="map_1"
-                                                                                    style="height: 200px;">
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                </div>
+                                                               
 
                                                             </div>
                                                         </div>
