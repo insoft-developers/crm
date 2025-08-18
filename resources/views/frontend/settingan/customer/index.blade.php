@@ -41,6 +41,7 @@
     </div>
 
     @include('frontend.settingan.customer.modal_add')
+    @include('frontend.settingan.customer.modal_detail')
     
 
 </x-app-layout>

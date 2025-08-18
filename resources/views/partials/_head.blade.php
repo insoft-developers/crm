@@ -231,6 +231,35 @@
         font-weight: bold;
     }
 
+
+
+    .table-compact-border {
+        font-size: 12px;
+        /* ukuran font kecil */
+        border-collapse: collapse;
+        /* rapatkan border */
+        width: 100%;
+
+    }
+
+    .table-compact-border th,
+    .table-compact-border td {
+        padding: 4px 4px;
+        /* padding kecil */
+        border: 1px solid #ddd;
+        /* garis tipis */
+        vertical-align: middle;
+        /* white-space: nowrap; */
+        overflow: hidden;
+        /* tengah vertikal */
+    }
+
+    .table-compact-border th {
+        /* background-color: #f8f9fa; */
+        /* warna header */
+        font-weight: bold;
+    }
+
     .karyawan-detail-document-image {
         width: 100px;
         height: auto;
@@ -243,8 +272,8 @@
 
 
     .tab-pane .card-body {
-        padding-left: 0;
-        padding-right: 0;
+        /* padding-left: 0; */
+        /* padding-right: 0; */
     }
 
     .alamat-row {

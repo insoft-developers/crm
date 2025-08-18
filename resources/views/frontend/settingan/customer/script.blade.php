@@ -1,6 +1,110 @@
 <!-- JAVASCRIPT -->
 
 <script>
+    function detailData(id) {
+
+        $.ajax({
+            url: "{{ url('customer') }}" + "/" + id,
+            type: "GET",
+            success: function(data) {
+                console.log(data);
+                $("#customer-detail-container").html(data['html']);
+                $("#alamat_tagihan_content").html(data['alamat_tagihan']);
+                $("#alamat_pengiriman_content").html(data['alamat_pengiriman']);
+                $("#account_detail_content").html(data['account_detail']);
+                $("#tanggung_jawab_content").html(data['tanggung_jawab']);
+                $(".modal-title").text("Detail Data Customer");
+                $("#modal-detail").modal("show");
+
+                setTimeout(() => {
+                    updateMapDetail(data.cust.latitude, data.cust.longitude);
+                }, 200);
+
+                $('#profile-tab').on('shown.bs.tab', function() {
+                    data.alamat.forEach(function(item, index) {
+                        var baris = index + 1;
+
+                        setTimeout(() => {
+                            updateDeliveryMap(baris, item.latitude, item.longitude);
+                        }, 200);
+                    });
+
+                });
+
+
+                $('#home-tab').on('shown.bs.tab', function() {
+                    updateMapDetail(data.cust.latitude, data.cust.longitude);
+
+                });
+
+
+
+            }
+        })
+
+
+    }
+</script>
+
+
+<script>
+    function updateMapDetail(lat, lng) {
+        if (!window.mapDetail) { // variabel khusus modal detail
+            window.mapDetail = L.map('map-detail').setView([lat, lng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(window.mapDetail);
+
+            window.markerDetail = L.marker([lat, lng]).addTo(window.mapDetail);
+
+        } else {
+            // Supaya map tampil sempurna setelah modal dibuka
+            window.mapDetail.invalidateSize();
+
+            // Update posisi marker
+            window.mapDetail.setView([lat, lng], 13);
+            window.markerDetail.setLatLng([lat, lng]);
+        }
+    }
+
+    // Event ketika modal detail ditampilkan
+    // $('#modal-detail').on('shown.bs.modal', function(e) {
+    //     var button = $(e.relatedTarget);
+    //     var lat = button.data('lat') || -6.2;
+    //     var lng = button.data('lng') || 106.8167;
+
+    //     updateMapDetail(lat, lng);
+
+    //     // Ini penting supaya map redraw setelah modal muncul
+    //     setTimeout(function() {
+    //         if (window.mapDetail) {
+    //             window.mapDetail.invalidateSize();
+    //         }
+    //     }, 200);
+    // });
+
+
+    $('#modal-detail').on('hidden.bs.modal', function() {
+        if (window.mapDetail) {
+            window.mapDetail.remove(); // hapus map dari DOM
+            window.mapDetail = null; // reset variable
+            window.markerDetail = null;
+        }
+
+        // Hapus semua map pengiriman
+        for (let mapId in deliveryMaps) {
+            if (deliveryMaps[mapId]) {
+                deliveryMaps[mapId].remove();
+            }
+        }
+        deliveryMaps = {};
+        deliveryMarkers = {};
+    });
+</script>
+
+
+<script>
     function hapus_alamat(id) {
         if (id != 1) {
             $("#row_" + id).remove();
@@ -149,6 +253,7 @@
         </div>`;
 
         $("#alamat_pengiriman_id").html(newAlamat);
+
     }
 
 
@@ -195,14 +300,14 @@
 
 
     function edit_alamat_pengiriman(listData) {
+        if (listData.length > 0) {
+            let html = "";
 
-        let html = "";
+            listData.forEach((data, index) => {
+                let rowIndex = index + 1;
+                alamatIndex++;
 
-        listData.forEach((data, index) => {
-            let rowIndex = index + 1;
-            alamatIndex++;
-
-            html += `<div class="row alamat-row" id="row_${rowIndex}">
+                html += `<div class="row alamat-row" id="row_${rowIndex}">
             <div class="col-6">
                 <div class="row">
 
@@ -324,20 +429,31 @@
                 </div>
             </div>
         </div>`;
-        });
+            });
 
-        $("#alamat_pengiriman_id").html(html);
+            $("#alamat_pengiriman_id").html(html);
 
 
-        listData.forEach((data, index) => {
-            let rowIndex = index + 1;
-            let lat = data.latitude || -6.200; // fallback Jakarta
-            let lng = data.longitude || 106.816; // fallback Jakarta
+            listData.forEach((data, index) => {
+                let rowIndex = index + 1;
+                let lat = data.latitude || -6.200; // fallback Jakarta
+                let lng = data.longitude || 106.816; // fallback Jakarta
+
+                setTimeout(() => {
+                    updateDeliveryMap(rowIndex, lat, lng);
+                }, 200);
+            });
+        } else {
+            init_alamat_pengiriman();
 
             setTimeout(() => {
-                updateDeliveryMap(rowIndex, lat, lng);
+                $("#latitude_pengiriman_1").val(-6.200);
+                $("#longitude_pengiriman_1").val(106.816);
+                updateDeliveryMap(1, -6.200, 106.816);
             }, 200);
-        });
+        }
+
+
     }
 
 
@@ -546,7 +662,6 @@
 
     });
 </script>
-
 
 <script>
     function updateMap(lat, lng) {
@@ -889,7 +1004,8 @@
                 $("#latitude").val(data.customer.latitude);
                 $("#longitude").val(data.customer.longitude);
 
-
+                $("#status").val(data.customer.status);
+                $("#customer_grade").val(data.customer.customer_grade);
 
 
                 $("#npwp").val(data.customer.npwp);
@@ -920,23 +1036,36 @@
 
                 }, 200);
 
+                // ==============================
+                // Tab 2 (alamat pengiriman)
+                // ==============================
+                // if (data.alamat && data.alamat.length > 0) {
+                // Render alamat langsung
+                edit_alamat_pengiriman(data.alamat);
+
+                data.alamat.forEach(function(item, index) {
+                    var baris = index + 1;
+                    provinsiChange(item.province_id, item.city_id, baris);
+                    changeCity(item.city_id, item.district_id, baris);
+
+                });
+                // }
+
                 $('#pills-profile-tab').on('shown.bs.tab', function() {
-                    edit_alamat_pengiriman(data.alamat);
+
 
                     data.alamat.forEach(function(item, index) {
                         var baris = index + 1;
-                        provinsiChange(item.province_id, item.city_id, baris);
-
-                        
                         setTimeout(() => {
-                            changeCity(item.city_id, item.district_id, baris);
-                        }, 400);
+                            updateDeliveryMap(baris, item.latitude, item.longitude);
+                        }, 200);
 
                     });
 
-
-
                 });
+
+
+
 
             }
         })
@@ -977,7 +1106,6 @@
     }
 
     function resetForm() {
-        $("#branch_id").val("");
         $("#nama_lengkap").val("");
         $("#customer_type").val("");
         $("#alamat").val("");
@@ -986,19 +1114,8 @@
         $("#kecamatan").html('<option value="" disabled selected>pilih kota dahulu</option>');
         $("#postal_code").val("");
         $("#phone").val("");
-        $("#phone2").val("");
         $("#email").val("");
-        $("#contact_person").val("");
-        $("#email_contact_person").val("");
-        $("#contact_person_phone").val("");
-        $("#contact_person_phone2").val("");
         $("#status").val("");
-        $("#akun_hutang").val("");
-        $("#akun_piutang").val("");
-        $("#akun_piutang_sementara").val("");
-        $("#limit_hutang").val("");
-        $("#no_ktp").val("");
-        $("#npwp_induk").val("");
         $("#npwp").val("");
         $("#description").val("");
         $("#bank_account_number").val("");
@@ -1094,4 +1211,9 @@
             $(lngInput).val(lng);
         }
     }
+
+    $('#modal-detail').on('shown.bs.modal', function() {
+        // Aktifkan tab "Home"
+        $('#home-tab').tab('show');
+    });
 </script>

@@ -91,9 +91,38 @@
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label class="label-insoft bintang">Customer Code</label>
-                                                <input type="text" class="form-control" id="customer_code" name="customer_code" placeholder="cth: C-10221">
+                                                <input type="text" class="form-control" id="customer_code"
+                                                    name="customer_code" placeholder="cth: C-10221">
                                             </div>
                                         </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label class="label-insoft bintang">Status</label>
+                                                <select class="form-control" id="status" name="status">
+                                                    <option value="" selected disabled>Pilih Status</option>
+                                                    <option value="1">Aktif</option>
+                                                    <option value="0">Tidak Aktif</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label class="label-insoft bintang">Grade</label>
+                                                <select class="form-control" id="customer_grade" name="customer_grade">
+                                                    <option value="" selected disabled>Pilih Grade</option>
+                                                    <option value="Sangat Baik">Sangat Baik</option>
+                                                    <option value="Baik">Baik</option>
+                                                    <option value="Sedang">Sedang</option>
+                                                    <option value="Kurang Baik">Kurang Baik</option>
+                                                    <option value="Tidak Baik">Tidak Baik</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -361,16 +390,16 @@
                                                                 </div>
                                                                 <div class="col-6">
                                                                     <button onclick="tambah_alamat_pengiriman()"
-                                                                type="button" style="float: right;"
-                                                                class="btn btn-sm btn-success">(+)
-                                                                Tambah Alamat</button>
+                                                                        type="button" style="float: right;"
+                                                                        class="btn btn-sm btn-success">(+)
+                                                                        Tambah Alamat</button>
                                                                 </div>
                                                             </div>
-                                                            
-                                                            
+
+
 
                                                             <div id="alamat_pengiriman_id">
-                                                               
+
 
                                                             </div>
                                                         </div>

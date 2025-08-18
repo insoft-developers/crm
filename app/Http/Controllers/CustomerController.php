@@ -110,8 +110,9 @@ class CustomerController extends Controller
             "kota_pengiriman.*" => "required",
             "kecamatan_pengiriman.*" => "required",
             "latitude_pengiriman.*" => "required",
-            "longitude_pengiriman.*" => "required"
-
+            "longitude_pengiriman.*" => "required",
+            "status" => "required",
+            "customer_grade" => "required"
         ];
 
         $validator = Validator::make($input, $rules);
@@ -191,7 +192,304 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
+        $cust = Customer::find($id);
+        $alamats = CustomerAlamat::where('customer_id', $id)->get();
+        $html = '';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-12">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-body">';
+        $html .= '<div class="card-title">Info Dasar</div>';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-2">';
+        if ($cust->foto == null) {
+            $html .= '<img id="profile-image" class="profile-image-upload"
+                                        src="' . asset('images/avatar_foto.webp') . '">';
+        } else {
+            $html .= '<img id="profile-image" class="profile-image-upload"
+                                        src="' . asset('storage/customers/' . $cust->foto) . '">';
+        }
+        $html .= '</div>'; //col2
+        $html .= '<div class="col-5">';
+        $html .= '<table class="table-compact">';
+
+        $html .= '<tr>';
+        $html .= '<td width="20%">Nama</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . $cust->nama_lengkap . '</td>';
+
+        $html .= '<td width="20%">Tanggal Aktif</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . date('d-m-Y', strtotime($cust->tanggal_aktif)) . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td width="20%">Tanggal Lahir</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . date('d-m-Y', strtotime($cust->tanggal_lahir)) . '</td>';
+
+        $html .= '<td width="20%">Tipe Customer</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . $cust->customer_type . '</td>';
+        $html .= '</tr>';
+
+
+
+        $html .= '<tr>';
+        $html .= '<td width="20%">Kontak</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . $cust->phone . '</td>';
+
+        $html .= '<td width="20%">Status</td>';
+        $html .= '<td width="2%">:</td>';
+        $status = $cust->status === 1 ? 'Aktif' : 'Tidak Aktif';
+
+        $html .= '<td width="28%">' . $status . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td width="20%">Email</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . $cust->email . '</td>';
+
+        $html .= '<td width="20%">Grade</td>';
+        $html .= '<td width="2%">:</td>';
+        $html .= '<td width="28%">' . $cust->customer_grade . '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+        $html .= '</div>'; //col10
+        $html .= '</div>'; //col2
+        $html .= '</div>'; //row
+        $html .= '</div>'; //card body
+        $html . '</div>'; //card
+        $html .= '</div>'; //col12
+        $html .= '</div>'; //row
+        $html .= '</div>'; //row
+
+
+
+        $at = '';
+
+        $at .= '<table class="table-compact">';
+
+        $at .= '<tr>';
+        $at .= '<td width="20%">Nama</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->nama_tagihan . '</td>';
+
+        $at .= '<td width="20%">Kontak</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->kontak_tagihan . '</td>';
+        $at .= '</tr>';
+
+        $at .= '<tr>';
+        $at .= '<td width="20%">Alamat</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->alamat_tagihan . '</td>';
+
+        $at .= '<td width="20%"></td>';
+        $at .= '<td width="2%"></td>';
+        $at .= '<td width="28%"></td>';
+        $at .= '</tr>';
+
+
+
+        $at .= '<tr>';
+        $at .= '<td width="20%">Provinsi</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->province->province_name ?? '' . '</td>';
+
+        $at .= '<td width="20%">Kabupaten/Kota</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->city->city_name ?? '' . '</td>';
+        $at .= '</tr>';
+
+        $at .= '<tr>';
+        $at .= '<td width="20%">Kecamatan</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->district->subdistrict_name ?? '' . '</td>';
+
+        $at .= '<td width="20%">Kode Pos</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->postal_code . '</td>';
+        $at .= '</tr>';
+
+        $at .= '<tr>';
+        $at .= '<td width="20%">Latitude</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->latitude . '</td>';
+
+        $at .= '<td width="20%">Longitude</td>';
+        $at .= '<td width="2%">:</td>';
+        $at .= '<td width="28%">' . $cust->longitude . '</td>';
+        $at .= '</tr>';
+
+        $at .= '<tr>';
+        $at .= '<td colspan="6"><div id="map-detail" style="height: 200px;"></div></td>';
+
+        $at .= '</tr>';
+        $at .= '</table>';
+
+
+        $ac = '';
+
+        $ac .= '<table class="table-compact">';
+
+        $ac .= '<tr>';
+        $ac .= '<td width="20%">Pemegang Kartu</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->account_owner . '</td>';
+
+        $ac .= '<td width="20%">Nomor Rekening</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->bank_account_number . '</td>';
+        $ac .= '</tr>';
+
+        $ac .= '<tr>';
+        $ac .= '<td width="20%">Nama Bank</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->bank_name . '</td>';
+
+        $ac .= '<td width="20%">Nomor Kode Bank</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->bank_code . '</td>';
+        $ac .= '</tr>';
+
+
+
+        $ac .= '<tr>';
+        $ac .= '<td width="20%">Lokasi Bank</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->branch_account . '</td>';
+
+        $ac .= '<td width="20%">NPWP</td>';
+        $ac .= '<td width="2%">:</td>';
+        $ac .= '<td width="28%">' . $cust->npwp . '</td>';
+        $ac .= '</tr>';
+
+        $ac .= '</table>';
+
+
+
+
+        $tj = '';
+
+        $tj .= '<table class="table-compact">';
+
+        $tj .= '<tr>';
+        $tj .= '<td width="20%">Nama</td>';
+        $tj .= '<td width="2%">:</td>';
+        $tj .= '<td width="28%">' . $cust->nama_penanggung_jawab . '</td>';
+
+        $tj .= '<td width="20%">Jabatan</td>';
+        $tj .= '<td width="2%">:</td>';
+        $tj .= '<td width="28%">' . $cust->jabatan_penanggung_jawab . '</td>';
+        $tj .= '</tr>';
+
+        $tj .= '<tr>';
+        $tj .= '<td width="20%">Kontak</td>';
+        $tj .= '<td width="2%">:</td>';
+        $tj .= '<td width="28%">' . $cust->kontak_penanggung_jawab . '</td>';
+
+        $tj .= '<td width="20%">Email</td>';
+        $tj .= '<td width="2%">:</td>';
+        $tj .= '<td width="28%">' . $cust->email_penanggung_jawab . '</td>';
+        $tj .= '</tr>';
+
+        $tj .= '</table>';
+
+        $ap = '';
+        foreach ($alamats as $index => $al) {
+
+            $baris = $index + 1;
+            $ap .= '<div class="row">';
+            $ap .= '<div class="col-12">';
+
+            $ap .= '<div class="card">';
+            $ap .= '<div class="card-body">';
+            $ap .= '<div class="row">';
+            $ap .= '<div class="col-6">';
+
+            $ap .= '<table class="table-compact">';
+
+            $ap .= '<tr>';
+            $ap .= '<td width="20%">Nama</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->nama . '</td>';
+
+            $ap .= '<td width="20%">Kontak</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->kontak . '</td>';
+            $ap .= '</tr>';
+
+            $ap .= '<tr>';
+            $ap .= '<td width="20%">Alamat</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->alamat . '</td>';
+
+            $ap .= '<td width="20%"></td>';
+            $ap .= '<td width="2%"></td>';
+            $ap .= '<td width="28%"></td>';
+            $ap .= '</tr>';
+
+
+            $ap .= '<tr>';
+            $ap .= '<td width="20%">Provinsi</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->province->province_name ?? '' . '</td>';
+
+            $ap .= '<td width="20%">Kabupaten/Kota</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->city->city_name ?? '' . '</td>';
+            $ap .= '</tr>';
+
+
+            $ap .= '<tr>';
+            $ap .= '<td width="20%">Kecamatan</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->district->subdistrict_name ?? '' . '</td>';
+
+            $ap .= '<td width="20%">Kode Pos</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->postal_code . '</td>';
+            $ap .= '</tr>';
+
+
+            $ap .= '<tr>';
+            $ap .= '<td width="20%">Latitude</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->latitude . '</td>';
+
+            $ap .= '<td width="20%">Longitude</td>';
+            $ap .= '<td width="2%">:</td>';
+            $ap .= '<td width="28%">' . $al->longitude . '</td>';
+            $ap .= '</tr>';
+
+            $ap .= '</table>';
+            $ap .= '</div>';
+
+            $ap .= '<div class="col-6">';
+            $ap .= '<div id="map_'.$baris.'" style="height: 200px;"></div>';
+            $ap .= '</div>';
+            $ap .= '</div>';
+            
+            $ap .= '</div>';
+            $ap .= '</div>';
+            $ap .= '</div>';
+            $ap .= '</div>';
+        }
+
+
+        $data['alamat_pengiriman'] = $ap;
+        $data['cust'] = $cust;
+        $data['alamat_tagihan'] = $at;
+        $data['account_detail'] = $ac;
+        $data['tanggung_jawab'] = $tj;
+        $data['html'] = $html;
+        $data['alamat'] = $alamats;
+
+        return $data;
     }
 
     /**
@@ -248,7 +546,9 @@ class CustomerController extends Controller
             "kota_pengiriman.*" => "required",
             "kecamatan_pengiriman.*" => "required",
             "latitude_pengiriman.*" => "required",
-            "longitude_pengiriman.*" => "required"
+            "longitude_pengiriman.*" => "required",
+            "status" => "required",
+            "customer_grade" => "required"
         ];
 
         $validator = Validator::make($input, $rules);
