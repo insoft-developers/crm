@@ -282,4 +282,16 @@
         margin-bottom: 1rem;
         padding-bottom: 1rem;
     }
+
+    input[readonly] {
+        background-color: lightgray !important;
+    }
+
+    #product_items .row {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+
+    
 </style>

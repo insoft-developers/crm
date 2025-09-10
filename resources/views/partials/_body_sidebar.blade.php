@@ -32,6 +32,16 @@
                     </a>
                     <ul id="pembelian" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
+                            <a href="{{ url('product') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Product Data</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
+                            <a href="{{ url('purchase_request') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Purchase Requisition<br>(Permintaan Barang)</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
                             <a href="{{ url('driver') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Purchase Order<br>(Pengadaan Bahan Baku)</span>
                             </a>

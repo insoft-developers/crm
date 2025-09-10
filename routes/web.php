@@ -6,6 +6,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -78,10 +80,19 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('form-add-jabatan', [KaryawanController::class, 'formAddJabatan']);
   Route::post('form-add-department', [KaryawanController::class, 'formAddDepartment']);
 
+  Route::resource('product', ProductController::class);
+  Route::get('product_table', [ProductController::class, 'productTable'])->name('product.table');
 
+  Route::resource('purchase_request', PurchaseRequestController::class);
+  Route::get('purchase_request_table', [PurchaseRequestController::class, 'purchaseRequestTable'])->name('purchase.request.table');
 
-  
+  Route::post('product_category', [PurchaseRequestController::class, 'productCategory'])->name('product.category');
 
+  Route::post('selected_product', [PurchaseRequestController::class, 'selectedProduct'])->name('selected.product');
+  Route::post('generate_pr_number', [PurchaseRequestController::class, 'generatePrNumber'])->name('generate.pr.number');
+  Route::post('purchase_request_approve', [PurchaseRequestController::class, 'approve'])->name('purchase.request.approve');
+
+  Route::post('purchase_request_reject', [PurchaseRequestController::class, 'reject'])->name('purchase.request.reject');
 });
 
 

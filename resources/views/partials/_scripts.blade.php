@@ -44,4 +44,9 @@
         return angka.replace(/\D/g, '') // Hapus semua selain digit
             .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Tambah titik
     }
+
+
+    function ribuan(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 </script>
