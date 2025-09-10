@@ -8,6 +8,8 @@ use App\Models\CustomerAlamat;
 use App\Models\Kecamatan;
 use App\Models\Kota;
 use App\Models\Province;
+use App\Models\Vendor;
+use App\Models\VendorAlamat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,19 +17,19 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 
 
-class CustomerController extends Controller
+class VendorController extends Controller
 {
 
 
 
-    public function customerTable()
+    public function vendorTable()
     {
         $userid = Auth::user()->id ?? 1;
-        $data = Customer::where('userid', $userid);
+        $data = Vendor::where('userid', $userid);
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('customer_code', function ($data) {
-                return '<a onclick="detailData(' . $data->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $data->customer_code . '</div></a>';
+            ->addColumn('vendor_code', function ($data) {
+                return '<a onclick="detailData(' . $data->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $data->vendor_code . '</div></a>';
             })
             ->addColumn('balance', function ($data) {
                 return number_format($data->balance);
@@ -42,7 +44,7 @@ class CustomerController extends Controller
                 $html .= '</center></div>';
                 return $html;
             })
-            ->rawColumns(['action', 'customer_code'])
+            ->rawColumns(['action', 'vendor_code'])
             ->make(true);
     }
 
@@ -53,11 +55,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $view = 'customer';
+        $view = 'vendor';
         $userid = Auth::user()->id ?? 1;
         $branches = Branch::where('userid', $userid)->get();
         $provinces = Province::all();
-        return view('frontend.settingan.customer.index', compact('view', 'branches', 'provinces'));
+        return view('frontend.settingan.vendor.index', compact('view', 'branches', 'provinces'));
     }
 
     /**
@@ -81,14 +83,12 @@ class CustomerController extends Controller
         $input = $request->all();
 
         $rules = [
-            "nama_lengkap" => "required",
-            "tempat_lahir" => "required",
-            "tanggal_lahir" => "required",
-            "phone" => "required|unique:customers,phone",
-            "email" => "email|required|unique:customers,email",
-            "customer_code" => "required|unique:customers,customer_code",
+            "vendor_name" => "required",
+            "phone" => "required|unique:vendors,phone",
+            "email" => "email|required|unique:vendors,email",
+            "vendor_code" => "required|unique:vendors,vendor_code",
             "tanggal_aktif" => "required",
-            "customer_type" => "required",
+            "vendor_type" => "required",
             "nama_tagihan" => "required",
             "kontak_tagihan" => "required",
             "alamat_tagihan" => "required",
@@ -112,7 +112,7 @@ class CustomerController extends Controller
             "latitude_pengiriman.*" => "required",
             "longitude_pengiriman.*" => "required",
             "status" => "required",
-            "customer_grade" => "required"
+            "vendor_grade" => "required"
         ];
 
         $validator = Validator::make($input, $rules);
@@ -138,11 +138,11 @@ class CustomerController extends Controller
             $unik = uniqid();
             if ($request->hasFile('foto')) {
                 $input['foto'] = Str::slug($unik, '-') . '.' . $request->foto->getClientOriginalExtension();
-                $request->foto->move(public_path('/storage/customers'), $input['foto']);
+                $request->foto->move(public_path('/storage/vendors'), $input['foto']);
             }
             $userid = Auth::user()->id ?? 1;
             $input['userid'] = $userid;
-            $customer_id = Customer::create($input)->id;
+            $vendor_id = Vendor::create($input)->id;
 
             $nama_pengiriman = $input['nama_pengiriman'];
             $kontak_pengiriman = $input['kontak_pengiriman'];
@@ -156,8 +156,8 @@ class CustomerController extends Controller
 
             if (!empty($nama_pengiriman)) {
                 foreach ($nama_pengiriman as $index => $nm) {
-                    CustomerAlamat::create([
-                        "customer_id" => $customer_id,
+                    VendorAlamat::create([
+                        "vendor_id" => $vendor_id,
                         "userid" => $userid,
                         "nama" => $nm,
                         "kontak" => $kontak_pengiriman[$index],
@@ -192,8 +192,8 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $cust = Customer::find($id);
-        $alamats = CustomerAlamat::where('customer_id', $id)->get();
+        $cust = Vendor::find($id);
+        $alamats = VendorAlamat::where('vendor_id', $id)->get();
         $html = '';
 
         $html .= '<div class="row">';
@@ -208,7 +208,7 @@ class CustomerController extends Controller
                                         src="' . asset('images/avatar_foto.webp') . '">';
         } else {
             $html .= '<img id="profile-image" class="profile-image-upload"
-                                        src="' . asset('storage/customers/' . $cust->foto) . '">';
+                                        src="' . asset('storage/vendors/' . $cust->foto) . '">';
         }
         $html .= '</div>'; //col2
         $html .= '<div class="col-5">';
@@ -217,7 +217,7 @@ class CustomerController extends Controller
         $html .= '<tr>';
         $html .= '<td width="20%">Nama</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="28%">' . $cust->nama_lengkap . '</td>';
+        $html .= '<td width="28%">' . $cust->vendor_name . '</td>';
 
         $html .= '<td width="20%">Tanggal Aktif</td>';
         $html .= '<td width="2%">:</td>';
@@ -227,11 +227,11 @@ class CustomerController extends Controller
         $html .= '<tr>';
         $html .= '<td width="20%">Tanggal Lahir</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="28%">' . date('d-m-Y', strtotime($cust->tanggal_lahir)) . '</td>';
+        $html .= '<td width="28%"></td>';
 
-        $html .= '<td width="20%">Tipe Customer</td>';
+        $html .= '<td width="20%">Tipe Vendor</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="28%">' . $cust->customer_type . '</td>';
+        $html .= '<td width="28%">' . $cust->vendor_type . '</td>';
         $html .= '</tr>';
 
 
@@ -255,7 +255,7 @@ class CustomerController extends Controller
 
         $html .= '<td width="20%">Grade</td>';
         $html .= '<td width="2%">:</td>';
-        $html .= '<td width="28%">' . $cust->customer_grade . '</td>';
+        $html .= '<td width="28%">' . $cust->vendor_grade . '</td>';
         $html .= '</tr>';
         $html .= '</table>';
         $html .= '</div>'; //col10
@@ -500,8 +500,8 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $data['customer'] = Customer::find($id);
-        $data['alamat'] = CustomerAlamat::where('customer_id', $id)->get();
+        $data['customer'] = Vendor::find($id);
+        $data['alamat'] = VendorAlamat::where('vendor_id', $id)->get();
         return $data;
     }
 
@@ -517,14 +517,12 @@ class CustomerController extends Controller
         $input = $request->all();
 
         $rules = [
-            "nama_lengkap" => "required",
-            "tempat_lahir" => "required",
-            "tanggal_lahir" => "required",
-            "phone" => "required|unique:customers,phone," . $id,
-            "email" => "email|required|unique:customers,email," . $id,
-            "customer_code" => "required|unique:customers,customer_code," . $id,
+            "vendor_name" => "required",
+            "phone" => "required|unique:vendors,phone," . $id,
+            "email" => "email|required|unique:vendors,email," . $id,
+            "vendor_code" => "required|unique:vendors,vendor_code," . $id,
             "tanggal_aktif" => "required",
-            "customer_type" => "required",
+            "vendor_type" => "required",
             "nama_tagihan" => "required",
             "kontak_tagihan" => "required",
             "alamat_tagihan" => "required",
@@ -548,7 +546,7 @@ class CustomerController extends Controller
             "latitude_pengiriman.*" => "required",
             "longitude_pengiriman.*" => "required",
             "status" => "required",
-            "customer_grade" => "required"
+            "vendor_grade" => "required"
         ];
 
         $validator = Validator::make($input, $rules);
@@ -561,17 +559,17 @@ class CustomerController extends Controller
         }
 
         try {
-            $customer = Customer::find($id);
+            $customer = Vendor::find($id);
             $userid = Auth::user()->id ?? 1;
 
             // Upload foto jika ada
             if ($request->hasFile('foto')) {
-                if ($customer->foto && file_exists(public_path('storage/customers/' . $customer->foto))) {
-                    unlink(public_path('storage/customers/' . $customer->foto));
+                if ($customer->foto && file_exists(public_path('storage/vendors/' . $customer->foto))) {
+                    unlink(public_path('storage/vendors/' . $customer->foto));
                 }
                 $unik = uniqid();
                 $foto_name = Str::slug($unik, '-') . '.' . $request->foto->getClientOriginalExtension();
-                $request->foto->move(public_path('storage/customers'), $foto_name);
+                $request->foto->move(public_path('storage/vendors'), $foto_name);
                 $input['foto'] = $foto_name;
             } else {
                 $input['foto'] = $customer->foto;
@@ -588,14 +586,14 @@ class CustomerController extends Controller
             // Hapus alamat yang tidak ada di form
             $toDelete = array_diff($existingAlamatIds, $submittedAlamatIds);
             if (!empty($toDelete)) {
-                CustomerAlamat::whereIn('id', $toDelete)->delete();
+                VendorAlamat::whereIn('id', $toDelete)->delete();
             }
 
             // Proses insert/update alamat
             if (!empty($input['nama_pengiriman'])) {
                 foreach ($input['nama_pengiriman'] as $index => $nm) {
                     $alamatData = [
-                        "customer_id" => $id,
+                        "vendor_id" => $id,
                         "userid" => $userid,
                         "nama" => $nm,
                         "kontak" => $input['kontak_pengiriman'][$index],
@@ -610,17 +608,17 @@ class CustomerController extends Controller
 
                     if (!empty($submittedAlamatIds[$index])) {
                         // update jika alamat_id ada
-                        CustomerAlamat::where('id', $submittedAlamatIds[$index])->update($alamatData);
+                        VendorAlamat::where('id', $submittedAlamatIds[$index])->update($alamatData);
                     } else {
                         // insert baru
-                        CustomerAlamat::create($alamatData);
+                        VendorAlamat::create($alamatData);
                     }
                 }
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Customer berhasil diupdate',
+                'message' => 'Vendor berhasil diupdate',
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -639,8 +637,8 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        CustomerAlamat::where('customer_id', $id)->delete();
-        $data = Customer::destroy($id);
+        VendorAlamat::where('vendor_id', $id)->delete();
+        $data = Vendor::destroy($id);
         return $data;
     }
 

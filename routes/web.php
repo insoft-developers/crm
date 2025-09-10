@@ -9,6 +9,7 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -69,6 +70,12 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::get('customer_table', [CustomerController::class, 'customerTable'])->name('customer.table');
   Route::post('kota_get', [CustomerController::class, 'kotaGet'])->name('kota.get');
   Route::post('kecamtan_get', [CustomerController::class, 'kecamatanGet'])->name('kecamatan.get');
+
+  Route::resource('vendors', VendorController::class);
+  Route::get('vendor_table', [VendorController::class, 'vendorTable'])->name('vendors.table');
+  
+
+
 
 
   Route::resource('supplier', SupplierController::class);
