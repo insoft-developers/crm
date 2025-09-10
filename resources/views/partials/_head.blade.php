@@ -293,5 +293,29 @@
         margin-bottom: 8px;
     }
 
+    label {
+        margin-bottom: -10px !important;
+    }
+
+    a.disabled {
+        pointer-events: none;
+        /* biar tidak bisa diklik */
+        opacity: 0.3;
+        /* tampil lebih pucat */
+        cursor: not-allowed;
+        /* icon cursor silang */
+    }
+
+    .note-list {
+        font-size: 14px;
+        padding: 0px 10px 0px 10px;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
     
 </style>

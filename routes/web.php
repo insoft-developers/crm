@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\VendorController;
@@ -100,6 +101,15 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('purchase_request_approve', [PurchaseRequestController::class, 'approve'])->name('purchase.request.approve');
 
   Route::post('purchase_request_reject', [PurchaseRequestController::class, 'reject'])->name('purchase.request.reject');
+
+  Route::resource('purchase_order', PurchaseOrderController::class);
+  Route::get('purchase_order_table', [PurchaseOrderController::class, 'purchaseOrderTable'])->name('purchase.order.table');
+  Route::post('generate_po_number', [PurchaseOrderController::class, 'generatePoNumber'])->name('generate.po.number');
+  Route::post('vendor_note', [PurchaseOrderController::class, 'vendorNote'])->name('vendor.note');
+  Route::post('vendor_address', [PurchaseOrderController::class, 'vendorAddress'])->name('vendor.address');
+  Route::post('purchase_request_data', [PurchaseOrderController::class, 'purchaseRequestData'])->name('purchase.request.data');
+  Route::post('check_pr_quantity', [PurchaseOrderController::class, 'checkPrQuantity'])->name('check.pr.quantity');
+
 });
 
 

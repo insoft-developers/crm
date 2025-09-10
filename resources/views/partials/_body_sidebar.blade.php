@@ -42,7 +42,7 @@
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('driver') }}">
+                            <a href="{{ url('purchase_order') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Purchase Order<br>(Pengadaan Bahan Baku)</span>
                             </a>
                         </li>

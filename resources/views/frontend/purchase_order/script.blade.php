@@ -1,136 +1,66 @@
 <!-- JAVASCRIPT -->
 <script>
-    let rowCount = 1;
-
-    function add_product_item() {
-        rowCount++;
-        let newRow = $("#baris_1").clone();
-
-        // ganti id sesuai nomor row
-        newRow.attr("id", "baris_" + rowCount);
-
-        // update semua input/select id nya
-        newRow.find("select, input").each(function() {
-            let oldId = $(this).attr("id");
-            if (oldId) {
-                let newId = oldId.replace(/\d+$/, rowCount);
-                $(this).attr("id", newId);
-            }
-            // kosongkan value untuk row baru
-            if ($(this).is("input")) {
-                $(this).val("");
-            } else if ($(this).is("select")) {
-                $(this).val("");
-            }
-        });
-
-
-        newRow.find(".select-product-item").attr("onchange", "selected_product(" + rowCount + ")");
-
-
-        newRow.find(".selected-qty")
-            .attr("onkeyup", "qty_change(" + rowCount + ", this)");
-
-
-
-        // update tombol minus function
-        newRow.find("button.btn-danger").attr("onclick", "remove_product_item(" + rowCount + ")");
-
-        // tambahkan ke container
-        $("#product_items").append(newRow);
-    }
-
-    function remove_product_item(id) {
-        if (id === 1) {
-            alert("Row pertama tidak bisa dihapus!");
-            return;
-        }
-        $("#baris_" + id).remove();
-    }
-
-
-    $("#product_category").change(function() {
-        var category = $(this).val();
-        actions = 'add'
-        get_product_list_by_category(category, actions);
-    });
-
-
-    function get_product_list_by_category(category, actions, callback) {
+    function qty_change(id, el) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
-
+        var qty = $(el).val();
+        var pr_item_id = $("#pr_item_id_" + id).val();
+        var price = $("#price_" + id).val();
+        price = price ? price : 0;
+        var pt = $("#price_type_" + id).val();
         $.ajax({
-            url: "{{ route('product.category') }}",
+            url: "{{ route('check.pr.quantity') }}",
             type: "POST",
             dataType: "JSON",
             data: {
-                "category": category,
+                "qty": qty,
+                "pr_item_id": pr_item_id,
                 "_token": csrf_token
             },
             success: function(data) {
-                var HTML = '';
-                HTML += '<option value="" selected disabled>Pilih Produk</option>';
-                for (var i = 0; i < data.length; i++) {
-                    HTML += '<option value="' + data[i].id + '">' + data[i].product_name +
-                        '</option>';
+                if (data.success) {
+                    console.log(data);
+                    hitung_price_before_tax(id, qty, price, data.weight, pt);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "",
+                        html: data.message,
+                        footer: ''
+                    });
+                    $("#quantity_" + id).val(data.data);
+                    hitung_price_before_tax(id, data.data, price, data.weight, pt);
                 }
-
-                $(".select-product-item").html(HTML);
-
-                if (typeof callback === "function") {
-                    callback();
-                }
-
-            }
-        });
-    }
-
-
-    function selected_product(id) {
-        var product_id = $("#product_id_" + id).val();
-        var csrf_token = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            url: "{{ route('selected.product') }}",
-            type: "POST",
-            dataType: "JSON",
-            data: {
-                "product_id": product_id,
-                "_token": csrf_token
-            },
-            success: function(data) {
-                $("#tebal_" + id).val(data.tebal);
-                $("#lebar_" + id).val(data.lebar);
-                $("#panjang_" + id).val(data.panjang);
-                $("#satuan_" + id).val(data.satuan);
-                $("#weight_" + id).val(0);
-                $("#berat_" + id).val(data.weight);
-                $("#quantity_" + id).val("");
-
             }
         })
     }
 
 
-    function qty_change(id, el) {
+    function hitung_price_before_tax(i, qty, price, w, pt) {
+        console.log(w);
+        if (pt == 1) {
+            var price_before_tax = w * price;
+            $("#price_before_tax_" + i).val(ribuan(price_before_tax));
+            $("#weight_" + i).val(ribuan(w));
+        } else {
+            var price_before_tax = qty * price;
+            $("#price_before_tax_" + i).val(ribuan(price_before_tax));
+            $("#weight_" + i).val(ribuan(w));
+        }
+        hitung_subtotal();
 
-        var qty = $(el).val();
-        var berat = $("#berat_" + id).val();
-        var new_weight = qty * berat;
-        var formatted_weight = ribuan(new_weight);
-        $("#weight_" + id).val(formatted_weight);
     }
 
-    function generate_pr_number() {
+    function generate_po_number() {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
-            url: "{{ route('generate.pr.number') }}",
+            url: "{{ route('generate.po.number') }}",
             type: "POST",
             dataType: "JSON",
             data: {
                 "_token": csrf_token
             },
             success: function(data) {
-                $("#pr_number").val(data.pr_number);
+                $("#purchase_order_number").val(data.purchase_order_number);
             }
 
         });
@@ -153,7 +83,7 @@
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ route('purchase.request.table') }}',
+            url: '{{ route('purchase.order.table') }}',
             data: function(d) {
                 // tambahin parameter filter
                 d.filter_date = $('#filter_date').val();
@@ -169,20 +99,24 @@
                 visible: false
             },
             {
-                data: 'pr_number',
-                name: 'pr_number'
+                data: 'purchase_order_number',
+                name: 'purchase_order_number'
             },
             {
-                data: 'request_user_id',
-                name: 'request_user_id'
+                data: 'vendor_id',
+                name: 'vendor_id'
             },
             {
-                data: 'request_date',
-                name: 'request_date'
+                data: 'contract_number',
+                name: 'contract_number'
             },
             {
-                data: 'description',
-                name: 'description'
+                data: 'purchase_order_date',
+                name: 'purchase_order_date'
+            },
+            {
+                data: 'gudang',
+                name: 'gudang'
             },
             {
                 data: 'status',
@@ -215,12 +149,11 @@
 
     function addData() {
         resetForm();
-        init_add_item();
         save_method = "add";
         $('input[name=_method]').val('POST');
-        $(".modal-title").text("Tambah Permintaan Barang");
+        $(".modal-title").text("Tambah Pembelian Barang");
         $("#modal-add").modal("show");
-        generate_pr_number();
+        generate_po_number();
         unloading();
     }
 
@@ -294,170 +227,16 @@
                 $("#description").val(data.purchase.description);
                 $("#product_category").val(data.purchase.product_category);
                 init_edit_item(data);
-                generate_pr_number();
+                generate_po_number();
 
             }
         })
     }
 
-    function init_add_item() {
-        var HTML = '';
-        HTML += `<div id="baris_1" class="row"
-            style="margin-right:-5px; margin-left:-5px;">
-            <div class="col-3" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Produk</label>
-                    <select onchange="selected_product(1)" class="form-control select-product-item" id="product_id_1"
-                        name="product_id[]">
-                        <option value="" selected disabled>Pilih Produk
-                        </option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Tebal</label>
-                    <input readonly type="text" class="form-control"
-                        id="tebal_1" name="tebal[]">
-                </div>
-            </div>
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Lebar</label>
-                    <input readonly type="text" class="form-control"
-                        id="lebar_1" name="lebar[]">
-                </div>
-            </div>
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Panjang</label>
-                    <input readonly type="text" class="form-control"
-                        id="panjang_1" name="panjang[]">
-                </div>
-            </div>
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Qty</label>
-                    <input onkeyup="qty_change(1, this)" type="text" class="form-control selected-qty" id="quantity_1"
-                        name="quantity[]">
-                </div>
-            </div>
-            <div class="col-2" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Satuan</label>
-                    <input readonly type="text" class="form-control"
-                        id="satuan_1" name="satuan[]">
-                </div>
-            </div>
-            <div class="col-2" style="padding-left:2px; padding-right:2px;">
-                <div class="form-group" style="margin-bottom:5px;">
-                    <label style="margin-bottom:2px;">Berat (Gr)</label>
-                    <input readonly type="text" class="form-control"
-                        id="weight_1" name="weight[]">
-                    <input type="hidden" id="berat_1">
-                </div>
-            </div>
-
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                <div style="display:flex; gap:4px;margin-top:30px;">
-                    <button onclick="add_product_item()" type="button"
-                        class="btn btn-success">+</button>
-                    <button onclick="remove_product_item(1)" type="button"
-                        class="btn btn-danger">-</button>
-                </div>
-            </div>
-        </div>`;
-
-        $("#product_items").html(HTML);
 
 
-    }
 
 
-    function init_edit_item(data) {
-        var HTML = '';
-        rowCount = 0;
-
-        for (var i = 0; i < data.item.length; i++) {
-            rowCount++;
-            HTML += `
-            <div id="baris_${rowCount}" class="row" style="margin-right:-5px; margin-left:-5px; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:8px;">
-                <div class="col-3" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Produk</label>
-                        <select onchange="selected_product(${rowCount})" class="form-control select-product-item" id="product_id_${rowCount}" name="product_id[]">
-                            <option value="" selected disabled>Pilih Produk</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Tebal</label>
-                        <input readonly type="text" class="form-control" id="tebal_${rowCount}" name="tebal[]">
-                    </div>
-                </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Lebar</label>
-                        <input readonly type="text" class="form-control" id="lebar_${rowCount}" name="lebar[]">
-                    </div>
-                </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Panjang</label>
-                        <input readonly type="text" class="form-control" id="panjang_${rowCount}" name="panjang[]">
-                    </div>
-                </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Qty</label>
-                        <input onkeyup="qty_change(${rowCount}, this)" type="text" class="form-control selected-qty" id="quantity_${rowCount}" name="quantity[]">
-                    </div>
-                </div>
-                <div class="col-2" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Satuan</label>
-                        <input readonly type="text" class="form-control" id="satuan_${rowCount}" name="satuan[]">
-                    </div>
-                </div>
-                <div class="col-2" style="padding-left:2px; padding-right:2px;">
-                    <div class="form-group" style="margin-bottom:5px;">
-                        <label style="margin-bottom:2px;">Berat (Gr)</label>
-                        <input readonly type="text" class="form-control" id="weight_${rowCount}" name="weight[]">
-                        <input type="hidden" id="berat_${rowCount}">
-                    </div>
-                </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                    <div style="display:flex; gap:4px;margin-top:30px;">
-                        <button onclick="add_product_item()" type="button" class="btn btn-success">+</button>
-                        <button onclick="remove_product_item(${rowCount})" type="button" class="btn btn-danger">-</button>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
-
-        $("#product_items").html(HTML);
-        var actions = 'edit';
-        var category = data.purchase.product_category;
-        get_product_list_by_category(category, actions, function() {
-            for (var i = 0; i < data.item.length; i++) {
-                var berat = data.item[i].weight / data.item[i].quantity;
-
-                $("#product_id_" + (i + 1)).val(data.item[i].product_id);
-                $("#tebal_" + (i + 1)).val(data.item[i].tebal);
-                $("#lebar_" + (i + 1)).val(data.item[i].lebar);
-                $("#panjang_" + (i + 1)).val(data.item[i].panjang);
-                $("#quantity_" + (i + 1)).val(data.item[i].quantity);
-                $("#satuan_" + (i + 1)).val(data.item[i].satuan);
-                $("#weight_" + (i + 1)).val(ribuan(data.item[i].weight));
-                $("#berat_" + (i + 1)).val(berat);
-
-
-            }
-        });
-
-    }
 
     $("#btn-approve-data").click(function() {
         var id = $("#purchase_id_show").val();
@@ -643,7 +422,7 @@
 
                 for (var i = 0; i < data.item.length; i++) {
                     HTML += '<tr>';
-                    HTML += '<td>'+data.item[i].product.product_name +'</td>';
+                    HTML += '<td>' + data.item[i].product.product_name + '</td>';
                     HTML += '<td>' + data.item[i].tebal + '</td>';
                     HTML += '<td>' + data.item[i].lebar + '</td>';
                     HTML += '<td>' + data.item[i].panjang + '</td>';
@@ -684,7 +463,7 @@
         $("#tebal").val("");
         $("#weight").val("");
         $("#price").val("");
-
+        $("#product_items").html('<center>Belum ada daftar produk</center>');
     }
 
 
@@ -707,5 +486,241 @@
 
             }
         })
+    }
+
+    $("#vendor_id").change(function() {
+        var vendor_id = $(this).val();
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "{{ route('vendor.note') }}",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                "vendor_id": vendor_id,
+                "_token": csrf_token
+            },
+            success: function(data) {
+                console.log(data);
+                var HTML = '';
+                HTML += '<p>';
+                HTML += data.vendor_name + '<br>';
+                HTML += data.kontak_tagihan + '<br>';
+                HTML += data.alamat_tagihan + '<br>';
+                HTML += 'Indonesia, ' + data.city.city_name + ', ';
+                HTML += data.province.province_name + ', ';
+
+                HTML += '</p>';
+                $("#vendor-note").html(HTML);
+
+                var AL = '';
+
+                AL += '<option value="" selected disabled>Pilih Tujuan</option>';
+                for (var i = 0; i < data.alamat.length; i++) {
+                    AL += '<option value="' + data.alamat[i].id + '">' + data.alamat[i].nama +
+                        '</option>';
+                }
+
+                $("#vendor_address_id").html(AL);
+
+            }
+        })
+    });
+
+
+    $("#vendor_address_id").change(function() {
+        var vai = $(this).val();
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "{{ route('vendor.address') }}",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                "id": vai,
+                "_token": csrf_token
+            },
+            success: function(data) {
+                console.log(data);
+                var HTML = '';
+                HTML += '<p>';
+                HTML += data.nama + '<br>';
+                HTML += data.kontak + '<br>';
+                HTML += data.alamat + '<br>';
+                HTML += 'Indonesia, ' + data.city.city_name + ', ';
+                HTML += data.province.province_name + ', ';
+
+                HTML += '</p>';
+                $("#vendor-address-note").html(HTML);
+            }
+        })
+    })
+
+    $("#btn-proses-data").click(function() {
+
+        var pr_number = $("#purchase_request_id").val();
+        if (pr_number == null) {
+            Swal.fire({
+                icon: "error",
+                title: "",
+                text: 'Maaf Nomor PR Harus Dipilih terlebih dahulu !',
+                footer: ''
+            });
+
+
+        } else {
+            var csrf_token = $('meta[name="csrf-token"]').attr('content');
+            $.ajax({
+                url: "{{ route('purchase.request.data') }}",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    "id": pr_number,
+                    "_token": csrf_token
+                },
+                success: function(data) {
+                    console.log(data);
+                    var HTML = '';
+                    for (var i = 0; i < data.items.length; i++) {
+
+                        HTML += `<div id="baris_${i}" class="row"
+                        style="margin-right:-5px; margin-left:-5px;">
+                        <div class="col-2" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Produk</label>
+                                <input value="${data.items[i].id}" type="hidden" id="pr_item_id_${i}" name="pr_item_id[]">
+                                <input value="${data.items[i].product.price_type}" type="hidden" id="price_type_${i}" name="price_type[]">
+                                <input value="${data.items[i].product_id}" type="hidden" id="product_id_${i}" name="product_id[]">
+                                <input type="text" value="${data.items[i].product.product_name}"
+                                    class="form-control" id="product_name_${i}" readonly>
+                                    
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Tebal</label>
+                                <input value="${data.items[i].tebal}" readonly type="text" class="form-control"
+                                    id="tebal_${i}" name="tebal[]">
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Lebar</label>
+                                <input value="${data.items[i].lebar}" readonly type="text" class="form-control"
+                                    id="lebar_${i}" name="lebar[]">
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Panjang</label>
+                                <input value="${data.items[i].panjang}" readonly type="text" class="form-control"
+                                    id="panjang_${i}" name="panjang[]">
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Qty</label>
+                                <input value="${data.items[i].quantity_outstanding}" onkeyup="qty_change(${i}, this)" type="number"
+                                    class="form-control selected-qty" id="quantity_${i}"
+                                    name="quantity[]">
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Satuan</label>
+                                <input value="${data.items[i].satuan}" readonly type="text" class="form-control"
+                                    id="satuan_${i}" name="satuan[]">
+                            </div>
+                        </div>
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Berat (Gr)</label>
+                                <input value="${ribuan(data.items[i].weight_outstanding)}" readonly type="text" class="form-control"
+                                    id="weight_${i}" name="weight[]">
+                                
+                            </div>
+                        </div>
+
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Harga</label>
+                                <input onkeyup="on_price_change(${i}, this)" type="number" class="form-control"
+                                    id="price_${i}" name="price[]">
+                                
+                            </div>
+                        </div>
+
+                        <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Tax</label>
+                                <select onchange="on_tax_change(${i}, this)" class="form-control"
+                                    id="tax_${i}" name="tax[]">
+                                    <option value="" selected disabled>Pilih Tax</option>
+                                    <option value="10">10%</option>
+                                    <option value="11">11%</option>
+                                </select>
+                                
+                            </div>
+                        </div>
+                        <div class="col-2" style="padding-left:2px; padding-right:2px;">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label style="margin-bottom:2px;">Jumlah Sebelum Pajak</label>
+                                <input readonly type="text" class="form-control"
+                                    id="price_before_tax_${i}" name="price_before_tax[]">
+                                
+                            </div>
+                        </div>
+
+                        
+                    </div>`;
+
+                    }
+
+                    $("#product_items").html(HTML);
+                    Swal.fire({
+                        icon: "success",
+                        title: "",
+                        text: 'Data Produk Telah Tersedia',
+                        footer: ''
+                    });
+                }
+            })
+        }
+    });
+
+    function on_price_change(i, el) {
+        var qty = $("#quantity_" + i).val();
+        var price = $(el).val();
+        var weight = $("#weight_" + i).val();
+        var pt = $("#price_type_" + i).val();
+        var wa = angka(weight);
+        hitung_price_before_tax(i, qty, price, wa, pt);
+        
+    }
+
+    function on_tax_change(i, el) {
+        hitung_subtotal();
+    }
+
+    function hitung_subtotal() {
+        let total = 0;
+        let pajak = 0;
+        // cari semua input yang id diawali dengan "a_"
+        $("input[id^='price_before_tax_']").each(function(index, el) {
+            var tax = $("#tax_"+index).val();
+            tax = tax ? tax : 0;
+            var price_before_tax = angka($(this).val());
+            if(tax > 0) {
+                var tpajak = (tax * price_before_tax) / 100;
+                pajak += tpajak;
+            }
+
+            total += angka($(this).val());
+        });
+
+        // tampilkan hasil format ribuan
+        $("#subtotal").val(ribuan(total));
+        $("#total_tax").val(ribuan(pajak));
+        var total_price = total + pajak;
+        $("#total_price").val(ribuan(total_price));
+
     }
 </script>

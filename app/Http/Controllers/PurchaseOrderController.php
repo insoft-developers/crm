@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
+use App\Models\Vendor;
+use App\Models\VendorAlamat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
-class PurchaseRequestController extends Controller
+class PurchaseOrderController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,14 +22,14 @@ class PurchaseRequestController extends Controller
      */
 
 
-    public function purchaseRequestTable(Request $request)
+    public function purchaseOrderTable(Request $request)
     {
         $userid = Auth::user()->id ?? 1;
-        $query = PurchaseRequest::where('userid', $userid);
+        $query = PurchaseOrder::where('userid', $userid);
 
         // filter tanggal
         if ($request->filter_date) {
-            $query->whereDate('request_date', $request->filter_date);
+            $query->whereDate('purchase_order_date', $request->filter_date);
         }
 
         // filter status
@@ -48,42 +51,46 @@ class PurchaseRequestController extends Controller
                     return '<div class="text-danger"><a onclick="view_rejection_note(' . $row->id . ')" href="javascript:void(0);">Ditolak</a></div>';
                 }
             })
-            ->addColumn('pr_number', function ($row) {
-                return '<a onclick="viewData(' . $row->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $row->pr_number . '</div></a>';
+            ->addColumn('purchase_order_number', function ($row) {
+                return '<a onclick="viewData(' . $row->id . ')" href="javascript:void(0);"><div class="karyawan-id">' . $row->purchase_order_number . '</div></a>';
             })
 
-            ->addColumn('request_user_id', function ($row) {
-                return $row->user->name ?? '-';
+            ->addColumn('contract_number', function ($row) {
+                return '';
             })
 
-            ->addColumn('request_date', function ($row) {
-                return date('d F Y', strtotime($row->request_date));
+            ->addColumn('gudang', function ($row) {
+                return '';
+            })
+
+            ->addColumn('purchase_order_date', function ($row) {
+                return date('d F Y', strtotime($row->purchase_order_date));
             })
             ->addColumn('action', function ($row) {
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
-                if ($row->status == 3) {
-                    $html .= '<a class="disabled" title="Copy Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-copy fa-tombol-copy"></i></a>';
-                    $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
-                } else {
+
+                if ($row->status !== 3) {
                     $html .= '<a title="Copy Data" href="javascript:void(0);" onclick="copyData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-copy fa-tombol-copy"></i></a>';
                     $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 }
 
-
                 $html .= '<a title="Lihat Data" href="javascript:void(0);" onclick="viewData(' . $row->id . ')"><i class="fa fa-eye fa-tombol-view"></i></a>';
-
                 $html .= '</center></div>';
                 return $html;
             })
-            ->rawColumns(['action', 'pr_number', 'status'])
+            ->rawColumns(['action', 'purchase_order_number', 'status'])
             ->make(true);
     }
 
 
     public function index()
     {
-        return view('frontend.purchase_request.index');
+        $userid = Auth::user()->id ?? 1;
+        $prs = PurchaseRequest::where('userid', $userid)
+            ->where('status', 3)->get();
+        $vendors = Vendor::where('userid', $userid)->get();
+        return view('frontend.purchase_order.index', compact('prs', 'vendors'));
     }
 
     /**
@@ -340,16 +347,16 @@ class PurchaseRequestController extends Controller
     }
 
     // di controller
-    public function generatePrNumber(Request $request)
+    public function generatePoNumber(Request $request)
     {
-        $lastPR = PurchaseRequest::latest('id')
+        $lastPR = PurchaseOrder::latest('id')
             ->first();
 
         $nextNumber = $lastPR ? $lastPR->id + 1 : 1;
 
-        $prNumber = 'PR-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        $prNumber = 'PO-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
-        return response()->json(['pr_number' => $prNumber]);
+        return response()->json(['purchase_order_number' => $prNumber]);
     }
 
     public function approve(Request $request)
@@ -372,5 +379,63 @@ class PurchaseRequestController extends Controller
         ]);
 
         return $data;
+    }
+
+
+    public function vendorNote(Request $request)
+    {
+        $input = $request->all();
+        $data = Vendor::with('province', 'city', 'district', 'alamat')->find($input['vendor_id']);
+        return $data;
+    }
+
+    public function vendorAddress(Request $request)
+    {
+        $input = $request->all();
+        $data = VendorAlamat::with('province', 'city', 'district')->find($input['id']);
+        return $data;
+    }
+
+    public function purchaseRequestData(Request $request)
+    {
+        $input = $request->all();
+
+        $data['purchase'] = PurchaseRequest::find($input['id']);
+        $data['items'] = PurchaseRequestItem::with('product')->where('purchase_id', $input['id'])->get();
+        return $data;
+    }
+
+    public function checkPrQuantity(Request $request)
+    {
+        $input = $request->all();
+        $qty = $input['qty'];
+        $pr_item = PurchaseRequestItem::find($input['pr_item_id']);
+        $pr_quantity = $pr_item->quantity_outstanding;
+        $pr_weight_unit = $pr_item->weight / $pr_quantity;
+        $new_weight = $pr_weight_unit * $qty;
+
+        if ($qty >= 0) {
+            if ($qty > $pr_quantity) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Qty Tidak Boleh lebih dari jumlah PR",
+                    "data" => $pr_quantity,
+                    "weight" => $pr_item->weight
+                ]);
+            } else {
+                return response()->json([
+                    "success" => true,
+                    "message" => "sukses",
+                    "weight" => $new_weight
+                ]);
+            }
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "Qty Tidak Boleh Kurang dari Nol",
+                "data" => $pr_quantity,
+                "weight" => $pr_item->weight
+            ]);
+        }
     }
 }

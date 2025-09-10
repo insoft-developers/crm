@@ -69,6 +69,11 @@
                                         placeholder="masukkan nama produk..">
                                 </div>
 
+
+
+
+                            </div>
+                            <div class="col-6">
                                 <div class="form-group">
                                     <label>Kategori Produk:</label>
                                     <select class="form-control" id="product_category" name="product_category">
@@ -79,8 +84,9 @@
 
                                     </select>
                                 </div>
+                            </div>
 
-
+                            <div class="col-6">
                                 <div class="form-group">
                                     <label>Satuan Produk:</label>
                                     <select name="satuan" id="satuan" class="form-control">
@@ -193,38 +199,53 @@
                                 </div>
 
                             </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="bintang">Tipe Harga</label>
+                                    <select class="form-control" id="price_type" name="price_type">
+                                        <option value="" selected disabled>Pilih Tipe Harga</option>
+                                        <option value="0">Harga x Quantity</option>
+                                        <option value="1">Harga x Berat</option>
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="col-6">
                                 <div class="form-group">
                                     <label>Panjang (cm):</label>
-                                    <input type="text" id="panjang" name="panjang" class="form-control" placeholder="panjang produk">
+                                    <input type="text" id="panjang" name="panjang" class="form-control"
+                                        placeholder="panjang produk">
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="form-group">
                                     <label>Lebar (cm):</label>
-                                    <input type="text" id="lebar" name="lebar" class="form-control" placeholder="lebar produk">
+                                    <input type="text" id="lebar" name="lebar" class="form-control"
+                                        placeholder="lebar produk">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
                                     <label>Tebal (cm):</label>
-                                    <input type="text" id="tebal" name="tebal" class="form-control" placeholder="tebal produk">
+                                    <input type="text" id="tebal" name="tebal" class="form-control"
+                                        placeholder="tebal produk">
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="form-group">
                                     <label>Berat (gram):</label>
-                                    <input type="text" id="weight" name="weight" class="form-control" placeholder="berat produk">
+                                    <input type="text" id="weight" name="weight" class="form-control"
+                                        placeholder="berat produk">
                                 </div>
                             </div>
 
-                             <div class="col-6">
+                            <div class="col-6">
                                 <div class="form-group">
                                     <label>Harga:</label>
-                                    <input type="number" id="price" name="price" class="form-control" placeholder="harga jual produk">
+                                    <input type="number" id="price" name="price" class="form-control"
+                                        placeholder="harga jual produk">
                                 </div>
                             </div>
 

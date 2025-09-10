@@ -37,10 +37,10 @@
                                         </div>
                                     </div>
                                     <div class="col-1">
-                                        <button id="btn-filter-data" style="margin-top: 48px;" type="button" class="btn btn-info">Filter</button>
+                                        <button id="btn-filter-data" style="margin-top: 38px;" type="button" class="btn btn-info">Filter</button>
                                     </div>
                                     <div class="col-1">
-                                        <button id="btn-refresh-data" style="margin-top: 48px;" type="button" class="btn btn-success">Refresh</button>
+                                        <button id="btn-refresh-data" style="margin-top: 38px;" type="button" class="btn btn-success">Refresh</button>
                                     </div>
 
                                 </div>
@@ -192,7 +192,7 @@
                                                 </div>
 
                                                 <div class="col-1" style="padding-left:2px; padding-right:2px;">
-                                                    <div style="display:flex; gap:4px;margin-top:32px;">
+                                                    <div style="display:flex; gap:4px;margin-top:20px;">
                                                         <button onclick="add_product_item()" type="button"
                                                             class="btn btn-success">+</button>
                                                         <button onclick="remove_product_item(1)" type="button"

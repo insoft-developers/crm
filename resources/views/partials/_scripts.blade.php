@@ -49,4 +49,8 @@
     function ribuan(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
+
+    function angka(str) {
+        return parseInt(str.replace(/\./g, ""), 10) || 0;
+    }
 </script>

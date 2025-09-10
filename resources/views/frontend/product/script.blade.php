@@ -161,6 +161,7 @@
                 $("#tebal").val(data.tebal);
                 $("#weight").val(data.weight);
                 $("#price").val(data.price);
+                $("#price_type").val(data.price_type);
                 
             }
         })
@@ -211,6 +212,7 @@
         $("#tebal").val("");
         $("#weight").val("");
         $("#price").val("");
+        $("#price-type").val("");
         
     }
 </script>

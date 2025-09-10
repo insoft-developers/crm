@@ -34,4 +34,6 @@ class Vendor extends Model
     public function alamat():HasMany{
         return $this->hasMany(VendorAlamat::class, 'vendor_id', 'id');
     }
+
+    
 }
