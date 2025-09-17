@@ -1,0 +1,55 @@
+.add-form-list {    
+    .form-control {
+        &.image-file {
+            line-height: 26px;
+        }
+    }    
+}
+.bootstrap-select {
+    .dropdown-toggle {
+        padding: .375rem .75rem;
+        font-size: 14px;
+        height: 50px;
+        line-height: 50px;
+        border: 2px solid #ffffff;
+        @if $enable-rounded == true {
+            @include radius-mixin($border-radius);
+        }
+        .filter-option-inner-inner {
+            font-weight: normal;
+            color: $bodytext;
+        }
+        &:focus {
+            outline: unset !important;
+        }
+    }
+    .dropdown-menu {
+        border: 1px solid $border-color;
+        box-shadow: none;
+        li {
+            a {
+                line-height: 35px;
+                &:hover {
+                    background-color: $body-bg;
+                }
+                &.active {
+                    background-color: $body-bg;
+                    color: $body-title;
+                }
+            }
+        }
+        .inner {
+            border: unset;
+        }
+    }
+}
+.dataTables_wrapper {
+	.dataTables_length {
+        margin-bottom: 20px;
+	}
+}
+@media (max-width: 790px) {
+    .add-list {
+        margin-top: 20px;
+    }
+}

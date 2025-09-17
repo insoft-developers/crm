@@ -1,0 +1,132 @@
+.login-content {
+	position: relative;
+	height: 100vh;
+	z-index: 99;
+	.floating-label {
+		label {
+			color: $body-text;
+			font-size: 14px;
+			font-weight: 400;
+			position: absolute;
+			pointer-events: none;
+			left: 12px;
+			top: 50%;
+			@include transform-mixin( translateY(-50%));
+			@if $enable-transitions == true {
+				@include transition-mixin(all 0.3s ease-in-out);
+			}
+		}
+	}
+	.form-control {
+		&:focus {
+			border-color: $primary;
+		}
+		border-color: $white;
+	}
+	.custom-control-label {
+		&::before {
+			background-color: $body-bg;
+		}
+		&.control-label-1 {
+			line-height: 24px;
+		}
+	}
+	.auth-card {
+		position: relative;
+		overflow: hidden;
+		width: 100%;
+		min-height: 480px;
+		height: auto;
+		margin: 15px auto;
+		display: block;
+		
+		.auth-content {
+			min-height: 480px;
+			height: 100% !important;
+		}
+	}
+	.content-left {
+		min-height: 480px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	// .auth-content {
+	// 	padding-top: 40px;
+	// }
+	// .image-right {
+	// 	padding-top: 30px;
+	// }
+	.content-right
+	{
+		img 
+		{
+			max-width: 90%;
+		}
+	}
+
+
+}
+.floating-label {
+	position: relative;
+	margin-bottom: 20px;
+}
+.floating-input {
+	&:focus {
+		~ {
+			label {
+				color: $primary;
+				top: 0;
+				left: 6px;
+				font-size: 10px;
+				background: $body-bg;
+				padding: 0px 8px;
+				@if $enable-rounded == true {
+					@include radius-mixin($border-radius);
+				}
+			}
+		}
+	}
+	&:not(:placeholder-shown) {
+		~ {
+			label {
+				top: 0;
+				font-size: 14px;
+				background: $body-bg;
+				padding: 5px 8px;
+			}
+		}
+		color: $body-text;
+		border: 1px solid $border-color;
+	}
+}
+
+@media (min-width:992px) {
+	.lb-img{
+    position:absolute;
+    bottom:0;
+    left:0;    
+    width:213px;
+	}
+	.rb-img{
+		position:absolute;
+		bottom:0;
+		right:0;    
+		width:194px;
+	}
+	.cnf-mail{width:80%;}
+}
+
+@media (max-width:991px){
+	.lb-img {
+		display: none;
+	}
+	.rb-img {
+		display: none;
+	}
+}
+@media (max-width:575px){
+	.content-right {
+		display: none;
+	}
+}

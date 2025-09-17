@@ -1,0 +1,40 @@
+.custom-file {
+    height: 60px;
+    .custom-file-label {
+        height: 60px;
+        line-height: 48px;
+        padding: .375rem 0.938rem;
+
+        &::after {
+            top: 15px;
+            right: 15px;
+            background: $primary;
+            color: $white;
+            font-size: 14px;
+            line-height: 18px;
+            height: 30px;
+            border: 0;
+            @if $enable-rounded == true {
+                @include radius-mixin($border-radius);
+            }
+        }
+    }
+}
+.custom-file-small {
+    .custom-file {
+        height: 45px;
+        .custom-file-label {
+            height: 45px;
+            line-height: 33px;
+            background: $body-bg;
+
+            &::after {
+                font-size: 12px;
+                line-height: 15px;
+                height: 25px;
+                top: 9px;
+                border: 0;
+            }
+        }
+    }
+}

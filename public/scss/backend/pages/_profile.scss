@@ -1,0 +1,225 @@
+.profile-icon.iq-icon-box {
+	height: 58px;
+	width: 58px;
+	line-height: 58px;
+	text-align: center;
+	margin-right: 10px;
+	font-size: 26px;
+	text-decoration: none;
+}
+.profile-overly {
+	position: absolute;
+	left: auto;
+	bottom: 0;
+	right: 0;
+	background: $white;
+	padding: 10px 30px;
+	text-align: center;
+	border-radius: 10px 10px 0 0;
+}
+ul.iq-contact-rest {
+	li {
+		a {
+			p {
+				word-break: break-all;
+			}
+		}
+	}
+}
+.crm-p-image {
+    position: absolute;
+    top: auto;
+    left: 69px;
+    bottom: -9px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 50%;
+    height: 35px;
+    width: 35px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 30px;
+    cursor: pointer;
+    border: 5px solid #fff;
+}
+.card-profile {
+    margin-top: -120px;
+    font-size: 16px;
+}
+.card-profiles
+{
+    margin-top: -120px;
+    font-size: 16px;
+}
+.skill-number {
+    margin-right: 10px;
+    margin-left: 5px;
+}
+.profile-tab {
+	&.nav-pills {
+        .nav-item {  
+			margin-bottom: 10px;          
+            &:first-child {
+                .nav-link {
+                    margin-left: 0;
+                }
+            }
+        }
+		.nav-link {
+			font-size: 18px;
+            @include opacity-mixin(0.5);
+            position: relative;
+            padding: 0 0px 10px;
+            margin: 0 20px;
+
+            &:before {
+                content: "";
+                border: 1px solid $body-title;
+                background: $body-title;
+                width: 100%;
+                height: 1px;
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                @include opacity-mixin(0);
+                @if $enable-transitions == true {
+                    @include transition-mixin(all 0.3s ease-in-out);
+                }
+            }
+            &.active {
+                background: transparent;
+                color: $body-title; 
+                @include opacity-mixin(1);   
+                &:before {
+                    @include opacity-mixin(1);  
+                }            
+            }
+            &:hover {
+                background: transparent;
+                color: $body-title; 
+                @include opacity-mixin(1);     
+                &:before {
+                    @include opacity-mixin(1);  
+                }              
+            }
+		}
+	}
+}
+.profile-content {
+    font-size: 16px;
+    // .tab-pane {
+    //     &.fade {
+    //         display: none;
+    //         &.active {
+	// 			&.show {
+	// 				display: block;
+	// 			}
+	// 		}
+    //     }
+    // }
+}
+.profile-info {
+    position: relative;
+    padding: 0 10px;
+    
+	&:before {
+		content: "";
+        border-right: 1px solid $border-color;
+        background: $border-color;
+		height: 50px;
+		width: 1px;
+		position: absolute;
+		right: 0;
+		top: 30px;
+    }
+    &:first-child {
+        padding-left: 0;
+    }
+    &:last-child {
+        padding-right: 0;
+        &:before {
+            display: none;
+        }
+    }
+    .profile-icon {
+        &.icon {
+            line-height: 36px;
+        }
+    }
+}
+.profile-media {
+    position: relative;
+    padding-bottom: 40px;
+    z-index: 9;
+    &:before {      
+        content: "";
+        border-right: 2px solid $border-color;
+        background: $border-color;
+        height: 100%;
+        width: 1px;
+        position: absolute;
+        left: 9px;
+        top: 0;  
+        z-index: -1;
+    }
+}
+.profile-dots {
+    height: 20px;
+    width: 20px;
+    border: 2px solid;
+    border-radius: 3px;
+    background: $white;
+}
+
+@each $color, $value in $theme-colors {
+    .iq-progress-#{$color} {
+		background: darken($value, 10%) !important;
+    }
+}
+@each $color, $value in $theme-colors {
+    .icon-#{$color} {
+		color: darken($value, 30%) !important;
+    }
+    .icon-text-#{$color} {
+		color: darken($value, 30%) !important;
+    }
+}
+@media (max-width: 991px) {
+	.profile-info{
+		&:before {
+			display: none;
+		}
+	}
+   
+
+
+}
+@media(max-width:575px) {
+    .card-profile {
+        margin-top: -70px;
+    }
+}
+@media(max-width:479px) {
+    .profile-overly {
+        h3{
+            font-size: 14px;
+        }
+    }
+
+    .card-profiles
+    {
+        margin: auto;
+    }
+
+}
+@media (max-width: 379px) {
+	.profile-tab {
+		&.nav-pills {
+			.nav-item {
+				width: 100%;
+				.nav-link {
+					margin: 0;
+				}
+			}
+		}
+	}
+}

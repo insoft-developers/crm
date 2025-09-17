@@ -1,0 +1,5 @@
+public/.htaccess
+node_modules
+vendor
+*.log
+.env

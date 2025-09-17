@@ -1,0 +1,94 @@
+<!-- Backend Bundle JavaScript -->
+<script src="{{ asset('js/backend-bundle.min.js') }}"></script>
+
+<!-- Table Treeview JavaScript -->
+<script src="{{ asset('js/table-treeview.js') }}"></script>
+
+<!-- Chart Custom JavaScript -->
+<script src="{{ asset('js/customizer.js') }}"></script>
+
+<!-- Chart Custom JavaScript -->
+<script async src="{{ asset('js/chart-custom.js') }}"></script>
+<script src="{{ asset('js/charts/01.js?v=1.0.1') }}"></script>
+<script src="{{ asset('js/charts/02.js?v=1.0.1') }}"></script>
+<!-- Chart Custom JavaScript -->
+<script async src="{{ asset('js/slider.js') }}"></script>
+
+<!-- app JavaScript -->
+<script src="{{ asset('js/app.js?v=1.0.1') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<!-- jQuery -->
+{{-- <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+
+
+<!-- DataTables & Buttons -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> --}}
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+<!-- Export dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+    function formatRibuan(angka) {
+        return angka.replace(/\D/g, '') // Hapus semua selain digit
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Tambah titik
+    }
+
+
+    function ribuan(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function angka(str) {
+        return parseInt(str.replace(/\./g, ""), 10) || 0;
+    }
+
+    function formatTanggal(dateStr) {
+        // Ubah string jadi objek Date
+        let date = new Date(dateStr);
+
+        // Array nama bulan dalam bahasa Indonesia
+        const bulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        let tanggal = date.getDate();
+        let namaBulan = bulan[date.getMonth()];
+        let tahun = date.getFullYear();
+
+        return `${tanggal} ${namaBulan} ${tahun}`;
+    }
+
+    function hitungJatuhTempo(tanggalPembelian, hariJatuhTempo) {
+        // ubah string ke objek Date
+        let tgl = new Date(tanggalPembelian);
+
+        // tambahkan jumlah hari
+        tgl.setDate(tgl.getDate() + hariJatuhTempo);
+
+        // format ke Indonesia
+        const bulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        let tanggal = tgl.getDate();
+        let namaBulan = bulan[tgl.getMonth()];
+        let tahun = tgl.getFullYear();
+
+        return `${tanggal} ${namaBulan} ${tahun}`;
+    }
+    
+</script>

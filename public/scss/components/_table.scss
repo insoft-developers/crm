@@ -1,0 +1,108 @@
+.table {
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    overflow: hidden;
+    color: $bodytext;
+
+    &.tble-min-width  {
+        td {
+            min-width: 200px;
+        }
+    }
+
+    &.table-dark {
+        th {
+            border-color: $body-title;
+            color: $white;
+        }
+        td {
+            border-color: $body-title;
+            color: $white;
+        }
+    }
+    span, p{
+        color: $bodytext;
+    }
+    .ligth {
+        white-space: nowrap;
+        th {
+            padding: 15px 20px !important;
+            text-transform: capitalize;
+            font-size: 17px;
+            line-height: 22px;
+            background: transparent;
+            color: $body-title;
+            border: 0px;
+            font-weight: 700 !important;           
+        }
+        &.ligth-data {
+            th {
+                &:first-child {
+                    text-align: center;
+                    background-image: none;
+                }
+                &:last-child {
+                    background-image: none;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    .ligth-body {
+        tr {    
+            td {  
+                &:first-child {
+                    text-align: center;
+                }
+                &:last-child {
+                    text-align: center;
+                }
+            }  
+        }
+        .list-action {
+            justify-content: center;
+        }
+    }
+    td {
+        padding: 20px 30px !important;
+        border: 0px;
+        border-bottom: 1px solid $border-color;
+        color: $body-title;
+
+        
+    }
+    label {
+        color: $body-title;
+    }
+    
+    &#user-list-table {
+        &.dataTable {
+            td {
+                padding: 20px 15px !important;
+            }
+        }
+    }
+}
+.btn {
+    &.add-list {
+        padding: 0.5rem 1rem;
+    }
+}
+
+.table-responsive {
+	.table-striped {
+		thead {
+			background: #ffffff4d;
+		}
+	}
+}
+
+
+.table {
+	th {
+		padding: 20px 30px;
+        white-space: nowrap;
+   
+	}
+}
+

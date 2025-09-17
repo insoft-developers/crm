@@ -1,0 +1,66 @@
+.ui-kit {
+    .iq-top-navbar {
+        width: 100%;
+        padding: 0 15px;        
+    }
+    .content-page {
+        margin: 0;
+    }
+    .iq-footer {
+        width: 100%;
+        margin: 0;
+    }
+    .header-logo {
+        display: flex;
+        align-items: flex-start;
+        img {
+            height: 25px;
+        }
+    }
+    .section-content {
+        padding: 50px 0;
+
+        .buttons {
+            button {
+                margin-right: 10px;
+            }
+        }
+        .content-shadow-input {
+            background: $light-gray;
+            padding: 50px 0;
+            margin-bottom: 50px;
+        }
+        
+        .form-control-alt {
+            box-shadow: 0 1px 3px rgba(50, 50, 93, 0.15), 0 1px 0 rgba(0, 0, 0, 0.2);
+            border: 0;
+            @if $enable-transitions == true {
+                @include transition-mixin(all 0.15s ease-in-out);
+            }
+            
+        }
+    }
+    .btn-inner--icon {
+        i {
+            vertical-align: initial;
+        }
+    }
+    .custom-checkbox {
+        .custom-control-label {
+            &::before {
+                top: 0.1rem;
+            }
+            &::after {
+                top: 0.1rem;
+            }
+        }
+    }
+    .menu {
+        .dropdown-toggle {
+            &::after {
+                vertical-align: middle;
+            }
+        }
+    }
+}
+    
