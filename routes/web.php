@@ -12,6 +12,7 @@ use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -118,6 +119,9 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('purchase_order_approve', [PurchaseOrderController::class, 'approve'])->name('purchase.order.approve');
   Route::post('purchase_order_reject', [PurchaseOrderController::class, 'reject'])->name('purchase.order.reject');
   Route::get('purchase_order_print/{id}', [PurchaseOrderController::class, 'print']);
+
+  Route::resource('warehouse', WarehouseController::class);
+  Route::get('warehouse_table', [WarehouseController::class, 'warehouseTable'])->name('warehouse.table');
 });
 
 

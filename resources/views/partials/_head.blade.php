@@ -20,6 +20,41 @@
 
 
 <style>
+    .select2-container .select2-selection--single {
+        box-sizing: border-box;
+        cursor: pointer;
+        display: block;
+        height: 49px;
+        font-size: 13px !important;
+        user-select: none;
+        -webkit-user-select: none;
+        border: 1px solid #d3d3d3;
+        padding: 11px 0px 0px 3px !important;
+        background: #f5f5f5;
+        border-radius: 7px;
+    }
+
+    /* Perkecil font teks di dalam dropdown Select2 */
+    .select2-container--default .select2-results__option {
+        font-size: 12px;
+        /* atur ukuran sesuai kebutuhan */
+        padding: 4px 8px;
+        /* opsional, supaya lebih rapat */
+    }
+
+    /* Batasi tinggi dropdown agar muncul scroll */
+    .select2-container .select2-results {
+        max-height: 150px;
+        /* tinggi maksimum dropdown */
+        overflow-y: auto;
+
+        list-style: none;
+        margin: 0;
+        padding: 0px 5px;
+        font-size: 13px !important;
+        /* aktifkan scroll vertikal */
+    }
+
     .label-insoft {
         margin-bottom: -4px !important;
         font-size: 15px !important;
@@ -485,8 +520,10 @@
         /* default bisa 8–10px */
     }
 
-    .dataTables_info, .dataTables_paginate, .dataTables_processing {
-        font-size:13px !important;
+    .dataTables_info,
+    .dataTables_paginate,
+    .dataTables_processing {
+        font-size: 13px !important;
     }
 
     .form-group label {
@@ -494,10 +531,14 @@
     }
 
     .btn-fixing {
-            padding: 1px 8px;
+        padding: 1px 8px;
     }
 
-    .text-kuning{
+    .text-kuning {
         color: orange;
+    }
+
+    .dataTables_filter label {
+        font-size: 12px !important;
     }
 </style>

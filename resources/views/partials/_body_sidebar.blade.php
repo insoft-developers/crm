@@ -337,7 +337,7 @@
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="{{ url('branch') }}">
+                            <a href="{{ url('warehouse') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Warehouse Data</span>
                             </a>
                         </li>
