@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 
-
 class WarehouseController extends Controller
 {
     use CommonTrait;
@@ -22,19 +21,19 @@ class WarehouseController extends Controller
         $data = Warehouse::where('userid', $userid);
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('province_id', function($row){
+            ->addColumn('province_id', function ($row) {
                 return $row->rprovince->province_name ?? '';
             })
-            ->addColumn('city_id', function($row){
+            ->addColumn('city_id', function ($row) {
                 return $row->rcity->city_name ?? '';
             })
 
-            ->addColumn('district_id', function($row){
+            ->addColumn('district_id', function ($row) {
                 return $row->rdistrict->subdistrict_name ?? '';
             })
-            ->addColumn('address', function($row){
+            ->addColumn('address', function ($row) {
                 $text = Str::limit($row->address, 30, '.....'); // default tanda akhir '...'
-                return '<div>'.$text.'</div>';
+                return '<div>' . $text . '</div>';
             })
             ->addColumn('action', function ($row) {
                 $html = '';
@@ -45,10 +44,9 @@ class WarehouseController extends Controller
                 $html .= '</center></div>';
                 return $html;
             })
-            ->rawColumns(['action','address'])
+            ->rawColumns(['action', 'address'])
             ->make(true);
     }
-
 
     /**
      * Display a listing of the resource.
@@ -88,7 +86,7 @@ class WarehouseController extends Controller
             'province_id' => 'required',
             'city_id' => 'required',
             'district_id' => 'required',
-            'postal_code' => 'required'
+            'postal_code' => 'required',
         ];
 
         $validator = Validator::make($input, $rules);
@@ -166,7 +164,7 @@ class WarehouseController extends Controller
             'province_id' => 'required',
             'city_id' => 'required',
             'district_id' => 'required',
-            'postal_code' => 'required'
+            'postal_code' => 'required',
         ];
 
         $validator = Validator::make($input, $rules);
@@ -188,7 +186,7 @@ class WarehouseController extends Controller
         try {
             $userid = $this->set_owner_id(Auth::user()->id);
             $input['userid'] = $userid;
-            
+
             $data = Warehouse::find($id);
             $data->update($input);
 
@@ -204,7 +202,6 @@ class WarehouseController extends Controller
         }
     }
 
-
     /**
      * Remove the specified resource from storage.
      *
@@ -217,4 +214,3 @@ class WarehouseController extends Controller
         return $data;
     }
 }
-

@@ -6,10 +6,12 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\MillsController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TaxController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\WarehouseController;
@@ -116,12 +118,20 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('vendor_address', [PurchaseOrderController::class, 'vendorAddress'])->name('vendor.address');
   Route::post('purchase_request_data', [PurchaseOrderController::class, 'purchaseRequestData'])->name('purchase.request.data');
   Route::post('check_pr_quantity', [PurchaseOrderController::class, 'checkPrQuantity'])->name('check.pr.quantity');
+  Route::post('check_pr_weight', [PurchaseOrderController::class, 'checkPrWeight'])->name('check.pr.weight');
   Route::post('purchase_order_approve', [PurchaseOrderController::class, 'approve'])->name('purchase.order.approve');
   Route::post('purchase_order_reject', [PurchaseOrderController::class, 'reject'])->name('purchase.order.reject');
   Route::get('purchase_order_print/{id}', [PurchaseOrderController::class, 'print']);
 
   Route::resource('warehouse', WarehouseController::class);
   Route::get('warehouse_table', [WarehouseController::class, 'warehouseTable'])->name('warehouse.table');
+
+  Route::resource('tax_setting', TaxController::class);
+  Route::get('tax_setting_table', [TaxController::class, 'taxSettingTable'])->name('tax.setting.table');
+
+  Route::resource('mills', MillsController::class);
+  Route::get('mills_table', [MillsController::class, 'millsTable'])->name('mills.table');
+
 });
 
 

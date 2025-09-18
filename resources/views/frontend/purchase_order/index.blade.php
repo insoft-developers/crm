@@ -104,7 +104,7 @@
                             <div class="col-3">
                                 <div class="form-group">
                                     <label>Permintaan Barang (PR)</label>
-                                    <select id="purchase_request_id" name="purchase_request_id" class="form-control">
+                                    <select id="purchase_request_id" name="purchase_request_id" class="form-control select2">
                                         <option value="" selected disabled>Pilih Nomor Permintaan Barang
                                         </option>
                                         @foreach ($prs as $pr)

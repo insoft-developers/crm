@@ -1,5 +1,12 @@
 <!-- JAVASCRIPT -->
 <script>
+
+    $(".select2").select2({
+        theme: 'bootstrap-3', // optional jika pakai tema bootstrap
+        dropdownParent: $('#modal-add'), // 🔑 kunci agar muncul di dalam modal
+        width: '100%'
+    });
+
     function qty_change(id, el, mode) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         var qty = $(el).val();
@@ -38,16 +45,61 @@
     }
 
 
-    function hitung_price_before_tax(i, qty, price, w, pt) {
+    function weight_change(id, el, mode) {
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        var berat = $(el).val();
+        var pr_item_id = $("#pr_item_id_" + id).val();
+        var price = $("#price_" + id).val();
+        var qty = $("#quantity_"+id).val();
+        price = price ? price : 0;
+        var pt = $("#price_type_" + id).val();
+        var po_id = $("#id").val();
+        $.ajax({
+            url: "{{ route('check.pr.weight') }}",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                "qty":qty,
+                "berat": berat,
+                "pr_item_id": pr_item_id,
+                "mode": mode,
+                "po_id": po_id,
+                "_token": csrf_token
+            },
+            success: function(data) {
+                if (data.success) {
+                    console.log(data);
+                    hitung_price_before_tax(id, qty, price, data.weight, pt);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "",
+                        html: data.message,
+                        footer: ''
+                    });
+                    $("#quantity_" + id).val(data.data);
+                    hitung_price_before_tax(id, data.data, price, data.weight, pt, 1);
+                }
+            }
+        })
+    }
+
+
+    function hitung_price_before_tax(i, qty, price, w, pt, er=null) {
         console.log(w);
         if (pt == 1) {
             var price_before_tax = w * price;
             $("#price_before_tax_" + i).val(ribuan(price_before_tax));
-            $("#weight_" + i).val(ribuan(w));
+            if(er==1) {
+                 $("#weight_" + i).val(w);
+            }
+           
         } else {
             var price_before_tax = qty * price;
             $("#price_before_tax_" + i).val(ribuan(price_before_tax));
-            $("#weight_" + i).val(ribuan(w));
+            if(er==1) {
+                 $("#weight_" + i).val(w);
+            }
         }
         hitung_subtotal();
 
@@ -162,6 +214,7 @@
         unloading();
         $("#purchase_request_id").removeClass('readonly-select');
         $("#btn-proses-data").removeAttr("disabled");
+        
     }
 
     $("#form-purchase-order").submit(function(e) {
@@ -504,7 +557,7 @@
     }
 
     function resetForm() {
-        $("#purchase_request_id").val("");
+        $("#purchase_request_id").val("").trigger('change');
         $("#purchase_request_number").val("");
         $("#vendor_id").val("");
         $("#vendor_address_id").html('<option value="" selected disabled>Pilih Tujuan</option>');
@@ -701,7 +754,7 @@
                 <div class="col-1 px-1">
                     <div class="form-group mb-2">
                         <label class="mb-1">Berat (Kg)</label>
-                        <input value="${mode == 1 ? ribuan(data.items[i].weight) : ribuan(data.items[i].weight_outstanding)}" readonly type="text" class="form-control form-control-sm"
+                        <input onkeyup="weight_change(${i}, this, ${mode})" value="${mode == 1 ? data.items[i].weight : data.items[i].weight_outstanding}" type="number" class="form-control form-control-sm"
                             id="weight_${i}" name="weight[]">
                     </div>
                 </div>

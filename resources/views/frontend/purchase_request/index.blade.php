@@ -138,7 +138,7 @@
                                                 <div class="col-3" style="padding-left:2px; padding-right:2px;">
                                                     <div class="form-group" style="margin-bottom:5px;">
                                                         <label style="margin-bottom:2px;">Produk</label>
-                                                        <select onchange="selected_product(1)" class="form-control select-product-item" id="product_id_1"
+                                                        <select onchange="selected_product(1)" class="form-control select-product-item sm-select2" id="product_id_1"
                                                             name="product_id[]">
                                                             <option value="" selected disabled>Pilih Produk
                                                             </option>

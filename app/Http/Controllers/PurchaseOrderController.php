@@ -12,6 +12,7 @@ use App\Models\PurchaseRequestItem;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorAlamat;
+use App\Traits\CommonTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,11 +28,11 @@ class PurchaseOrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
+    use CommonTrait;
 
     public function purchaseOrderTable(Request $request)
     {
-        $userid = Auth::user()->id ?? 1;
+        $userid = $this->set_owner_id(Auth::user()->id);
         $query = PurchaseOrder::where('userid', $userid);
 
         // filter tanggal
@@ -102,9 +103,18 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $userid = Auth::user()->id ?? 1;
+        $userid = $this->set_owner_id(Auth::user()->id);
         $prs = PurchaseRequest::where('userid', $userid)
-            ->where('status', 3)->get();
+            ->where('status', 3)
+            ->where('is_approve_1', 1)
+            ->where('is_approve_2', 1)
+            ->whereHas('item', function ($q) {
+                // hitung total weight di tabel purchase_request_item
+                $q->select(DB::raw('purchase_id, SUM(weight_outstanding) as total_weight'))
+                ->groupBy('purchase_id')
+                ->havingRaw('SUM(weight_outstanding) > 0');
+            })
+            ->get();
         $vendors = Vendor::where('userid', $userid)->get();
         $payment_methods = PaymentMethod::select('id', 'code', 'description')->get();
         $delivery_methods = DeliveryMethod::select('id', 'name', 'description')->get();
@@ -522,7 +532,7 @@ class PurchaseOrderController extends Controller
 
         $data['purchase'] = PurchaseRequest::find($input['id']);
         $data['items'] = PurchaseRequestItem::with('product')
-            ->where('quantity_outstanding', '>', 0)
+            // ->where('quantity_outstanding', '>', 0)
             ->where('purchase_id', $input['id'])->get();
         return $data;
     }
@@ -534,7 +544,7 @@ class PurchaseOrderController extends Controller
         $mode = $input['mode'];
 
 
-        $pr_quantity = null;
+        $pr_quantity = 0;
         $po_weight = 0;
         $pr_item = PurchaseRequestItem::find($input['pr_item_id']);
         if ($mode == 1) {
@@ -575,6 +585,58 @@ class PurchaseOrderController extends Controller
             ]);
         }
     }
+
+
+
+
+    public function checkPrWeight(Request $request)
+    {
+        $input = $request->all();
+        $berat = $input['berat'];
+        $mode = $input['mode'];
+
+
+        $po_weight = null;
+        $pr_quantity = 0;
+        $pr_item = PurchaseRequestItem::find($input['pr_item_id']);
+        if ($mode == 1) {
+            $po_item = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->where('pr_item_id', $input['pr_item_id'])->first();
+            $po_weight = $pr_item->weight_outstanding;
+            $pr_quantity = $po_item->quantity;
+        } else {
+            $po_weight = $pr_item->weight_outstanding;
+            $pr_quantity = $pr_item->quantity_outstanding;
+        }
+
+        // dd($po_weight);
+
+        if ($berat >= 0) {
+            if ($berat > $po_weight) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Berat Tidak Boleh lebih dari Berat PR",
+                    "data" => $pr_quantity,
+                    "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+                ]);
+            } else {
+                return response()->json([
+                    "success" => true,
+                    "message" => "sukses",
+                    "weight" => $berat
+                ]);
+            }
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "Bert Tidak Boleh Kurang dari Nol",
+                "data" => $pr_quantity,
+                "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+            ]);
+        }
+    }
+
+
+
 
     public function print($id) {
         $data['purchase'] = PurchaseOrder::with('vendor.province','vendor.city','gudang.province','gudang.city','alamat','payment_methods','delivery_methods')

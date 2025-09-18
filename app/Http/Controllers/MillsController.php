@@ -2,10 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mills;
+use App\Traits\CommonTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class MillsController extends Controller
 {
+    use CommonTrait;
+
+    public function millsTable()
+    {
+        $userid = $this->set_owner_id(Auth::user()->id);
+        $data = Mills::where('userid', $userid);
+        return DataTables::of($data)
+
+            ->addColumn('action', function ($row) {
+                $html = '';
+                $html .= '<div style="margin-top:-10px;"><center>';
+                $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                $html .= '<a title="Delete Data" href="javascript:void(0);" onclick="deleteData(' . $row->id . ')"><i class="fa fa-trash fa-tombol-delete"></i></a>';
+                $html .= '</center></div>';
+                return $html;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +38,7 @@ class MillsController extends Controller
      */
     public function index()
     {
-        //
+        return view('frontend.mills.index');
     }
 
     /**
@@ -34,7 +59,44 @@ class MillsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = $request->all();
+
+        $rules = [
+            'mills_name' => 'required',
+            
+        ];
+
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $pesan = $validator->errors();
+            $pesanarr = explode(',', $pesan);
+            $find = ['[', ']', '{', '}'];
+            $html = '';
+            foreach ($pesanarr as $p) {
+                $html .= str_replace($find, '', $p) . '<br>';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $html,
+            ]);
+        }
+
+        try {
+            $userid = $this->set_owner_id(Auth::user()->id);
+            $input['userid'] = $userid;
+            Mills::create($input);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -56,7 +118,8 @@ class MillsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data = Mills::find($id);
+        return $data;
     }
 
     /**
@@ -66,9 +129,49 @@ class MillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->all();
+
+        $rules = [
+            'mills_name' => 'required',
+            
+        ];
+
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $pesan = $validator->errors();
+            $pesanarr = explode(',', $pesan);
+            $find = ['[', ']', '{', '}'];
+            $html = '';
+            foreach ($pesanarr as $p) {
+                $html .= str_replace($find, '', $p) . '<br>';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $html,
+            ]);
+        }
+
+        try {
+            $mills = Mills::find($id);
+
+            $userid = $this->set_owner_id(Auth::user()->id);
+            $input['userid'] = $userid;
+            $mills->update($input);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -79,6 +182,7 @@ class MillsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $data = Mills::destroy($id);
+        return $data;
     }
 }
