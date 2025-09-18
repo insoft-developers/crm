@@ -107,9 +107,7 @@
                                     <select id="purchase_request_id" name="purchase_request_id" class="form-control select2">
                                         <option value="" selected disabled>Pilih Nomor Permintaan Barang
                                         </option>
-                                        @foreach ($prs as $pr)
-                                            <option value="{{ $pr->id }}">{{ $pr->pr_number }}</option>
-                                        @endforeach
+                                        
                                     </select>
                                     <input type="hidden" id="purchase_request_number" name="purchase_request_number">
                                 </div>
@@ -138,8 +136,10 @@
                                 <div class="form-group">
                                     <label class="bintang">Tujuan</label>
                                     <select class="form-control" id="vendor_address_id" name="vendor_address_id">
-                                        <option value="" selected disabled>Pilih Vendor Dahulu</option>
-
+                                        <option value="" selected disabled>Pilih Tujuan</option>
+                                        @foreach($whs as $w)
+                                            <option value="{{ $w->id }}">{{ $w->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -166,8 +166,9 @@
                                     <select class="form-control" id="mill"
                                         name="mill">
                                         <option value="" selected disabled>Pilih Mill</option>
-                                        <option value="Dexin">Dexin</option>
-                                        <option value="PWS">PWS</option>
+                                        @foreach($mls as $m)
+                                            <option value="{{ $m->mills_name }}">{{ $m->mills_name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

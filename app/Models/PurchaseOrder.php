@@ -20,7 +20,7 @@ class PurchaseOrder extends Model
 
     public function alamat():BelongsTo
     {
-        return $this->belongsTo(VendorAlamat::class, 'vendor_address_id', 'id');
+        return $this->belongsTo(Warehouse::class, 'vendor_address_id', 'id');
     }
 
     public function user():BelongsTo
@@ -40,6 +40,6 @@ class PurchaseOrder extends Model
 
     public function gudang():BelongsTo
     {
-        return $this->belongsTo(VendorAlamat::class, 'vendor_address_id', 'id');
+        return $this->belongsTo(Warehouse::class, 'vendor_address_id', 'id');
     }
 }

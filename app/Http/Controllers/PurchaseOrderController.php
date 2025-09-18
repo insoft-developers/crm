@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\DeliveryMethod;
+use App\Models\Mills;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
+use App\Models\Tax;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorAlamat;
+use App\Models\Warehouse;
 use App\Traits\CommonTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +22,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
-
 
 class PurchaseOrderController extends Controller
 {
@@ -45,7 +47,6 @@ class PurchaseOrderController extends Controller
             $query->where('status', $request->filter_status);
         }
 
-
         if ($request->filter_vendor) {
             $query->where('vendor_id', $request->filter_vendor);
         }
@@ -57,11 +58,11 @@ class PurchaseOrderController extends Controller
             ->addColumn('status', function ($row) {
                 if ($row->status == 1) {
                     return '<div class="text-info">Diajukan</div>';
-                } else if ($row->status == 2) {
+                } elseif ($row->status == 2) {
                     return '<div class="text-warning">Ditunda</div>';
-                } else if ($row->status == 3) {
+                } elseif ($row->status == 3) {
                     return '<div class="text-success">Disetujui</div>';
-                } else if ($row->status == 4) {
+                } elseif ($row->status == 4) {
                     return '<div class="text-danger"><a onclick="view_rejection_note(' . $row->id . ')" href="javascript:void(0);">Revisi</a></div>';
                 }
             })
@@ -74,7 +75,7 @@ class PurchaseOrderController extends Controller
             })
 
             ->addColumn('gudang', function ($row) {
-                return $row->alamat->nama ?? '';
+                return $row->alamat->name ?? '';
             })
 
             ->addColumn('purchase_order_date', function ($row) {
@@ -85,7 +86,7 @@ class PurchaseOrderController extends Controller
                 $html .= '<div style="margin-top:-10px;"><center>';
 
                 if ($row->status == 3) {
-                    $html .= '<a target="_blank" href="'.url('purchase_order_print/'.$row->id).'" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
+                    $html .= '<a target="_blank" href="' . url('purchase_order_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
                     $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 } else {
                     $html .= '<a class="disabled" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
@@ -100,25 +101,17 @@ class PurchaseOrderController extends Controller
             ->make(true);
     }
 
-
     public function index()
     {
         $userid = $this->set_owner_id(Auth::user()->id);
-        $prs = PurchaseRequest::where('userid', $userid)
-            ->where('status', 3)
-            ->where('is_approve_1', 1)
-            ->where('is_approve_2', 1)
-            ->whereHas('item', function ($q) {
-                // hitung total weight di tabel purchase_request_item
-                $q->select(DB::raw('purchase_id, SUM(weight_outstanding) as total_weight'))
-                ->groupBy('purchase_id')
-                ->havingRaw('SUM(weight_outstanding) > 0');
-            })
-            ->get();
+
         $vendors = Vendor::where('userid', $userid)->get();
         $payment_methods = PaymentMethod::select('id', 'code', 'description')->get();
         $delivery_methods = DeliveryMethod::select('id', 'name', 'description')->get();
-        return view('frontend.purchase_order.index', compact('prs', 'vendors', 'payment_methods', 'delivery_methods'));
+        $whs = Warehouse::where('userid', $userid)->get();
+        $taxes = Tax::where('userid', $userid)->get();
+        $mls = Mills::where('userid', $userid)->get();
+        return view('frontend.purchase_order.index', compact('vendors', 'payment_methods', 'delivery_methods', 'whs', 'taxes', 'mls'));
     }
 
     /**
@@ -160,7 +153,7 @@ class PurchaseOrderController extends Controller
             'price_before_tax.*' => 'required',
             'subtotal' => 'required',
             'total_tax' => 'required',
-            'total_price' => 'required'
+            'total_price' => 'required',
         ];
 
         $validator = Validator::make($input, $rules);
@@ -187,60 +180,56 @@ class PurchaseOrderController extends Controller
             $input['quantity_total'] = 0;
             $input['weight_total'] = 0;
             $input['status'] = 1;
-            $input['subtotal'] = str_replace(".", "", $input['subtotal']);
-            $input['total_tax'] = str_replace(".", "", $input['total_tax']);
-            $input['total_price'] = str_replace(".", "", $input['total_price']);
+            $input['subtotal'] = str_replace('.', '', $input['subtotal']);
+            $input['total_tax'] = str_replace('.', '', $input['total_tax']);
+            $input['total_price'] = str_replace('.', '', $input['total_price']);
             $purchase_id = PurchaseOrder::create($input)->id;
 
             $product_ids = $input['product_id'];
 
             if (count($product_ids) > 0) {
-
                 $total_quantity = 0;
                 $total_weight = 0;
                 foreach ($product_ids as $index => $pid) {
-
-                    $berat = str_replace(".", "", $input['weight'][$index]);
-                    $pbt = str_replace(".", "", $input['price_before_tax'][$index]);
+                    $berat = str_replace('.', '', $input['weight'][$index]);
+                    $pbt = str_replace('.', '', $input['price_before_tax'][$index]);
 
                     $total_quantity = $total_quantity + $input['quantity'][$index];
                     $total_weight = $total_weight + $berat;
 
                     PurchaseOrderItem::create([
-                        "purchase_order_id" => $purchase_id,
-                        "purchase_order_number" => $input['purchase_order_number'],
-                        "product_id" => $pid,
-                        "satuan" => $input['satuan'][$index],
-                        "panjang" => $input['panjang'][$index],
-                        "lebar" => $input['lebar'][$index],
-                        "tebal" => $input['tebal'][$index],
-                        "quantity" => $input['quantity'][$index],
-                        "quantity_outstanding" => $input['quantity'][$index],
-                        "quantity_received" => 0,
-                        "weight" => $berat,
-                        "weight_outstanding" => $berat,
-                        "weight_received" => 0,
-                        "price" => $input['price'][$index],
-                        "tax" => $input['tax'][$index],
-                        "price_before_tax" => $pbt,
-                        "userid" => $userid,
-                        "pr_item_id" => $input['pr_item_id'][$index]
+                        'purchase_order_id' => $purchase_id,
+                        'purchase_order_number' => $input['purchase_order_number'],
+                        'product_id' => $pid,
+                        'satuan' => $input['satuan'][$index],
+                        'panjang' => $input['panjang'][$index],
+                        'lebar' => $input['lebar'][$index],
+                        'tebal' => $input['tebal'][$index],
+                        'quantity' => $input['quantity'][$index],
+                        'quantity_outstanding' => $input['quantity'][$index],
+                        'quantity_received' => 0,
+                        'weight' => $berat,
+                        'weight_outstanding' => $berat,
+                        'weight_received' => 0,
+                        'price' => $input['price'][$index],
+                        'tax' => $input['tax'][$index],
+                        'price_before_tax' => $pbt,
+                        'userid' => $userid,
+                        'pr_item_id' => $input['pr_item_id'][$index],
                     ]);
 
+                    PurchaseRequestItem::where('id', $input['pr_item_id'][$index])->update([
+                        'quantity_po' => DB::raw('COALESCE(quantity_po,0) + ' . (int) $input['quantity'][$index]),
+                        'quantity_outstanding' => DB::raw('COALESCE(quantity_outstanding,0) - ' . (int) $input['quantity'][$index]),
 
-                    PurchaseRequestItem::where('id', $input['pr_item_id'][$index])
-                        ->update([
-                            'quantity_po' => DB::raw('COALESCE(quantity_po,0) + ' . (int) $input['quantity'][$index]),
-                            'quantity_outstanding' => DB::raw('COALESCE(quantity_outstanding,0) - ' . (int) $input['quantity'][$index]),
-
-                            'weight_po' => DB::raw('COALESCE(weight_po,0) + ' . (int) $berat),
-                            'weight_outstanding' => DB::raw('COALESCE(weight_outstanding,0) - ' . (int) $berat),
-                        ]);
+                        'weight_po' => DB::raw('COALESCE(weight_po,0) + ' . (int) $berat),
+                        'weight_outstanding' => DB::raw('COALESCE(weight_outstanding,0) - ' . (int) $berat),
+                    ]);
                 }
 
                 PurchaseOrder::where('id', $purchase_id)->update([
-                    "quantity_total" => $total_quantity,
-                    "weight_total" => $total_weight
+                    'quantity_total' => $total_quantity,
+                    'weight_total' => $total_weight,
                 ]);
             }
 
@@ -266,7 +255,7 @@ class PurchaseOrderController extends Controller
      */
     public function show($id)
     {
-        $data['purchase'] = PurchaseOrder::with('vendor.province','vendor.city','gudang.province','gudang.city','alamat','payment_methods','delivery_methods')->find($id);
+        $data['purchase'] = PurchaseOrder::with('vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'alamat', 'payment_methods', 'delivery_methods')->find($id);
         $data['item'] = PurchaseOrderItem::with('product')->where('purchase_order_id', $id)->get();
         $data['request_user_name'] = $data['purchase']->user->name ?? '-';
 
@@ -295,7 +284,6 @@ class PurchaseOrderController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    
     public function update(Request $request, $id)
     {
         $input = $request->all();
@@ -319,7 +307,7 @@ class PurchaseOrderController extends Controller
             'price_before_tax.*' => 'required',
             'subtotal' => 'required',
             'total_tax' => 'required',
-            'total_price' => 'required'
+            'total_price' => 'required',
         ];
 
         $validator = Validator::make($input, $rules);
@@ -336,9 +324,9 @@ class PurchaseOrderController extends Controller
             $userid = Auth::user()->id ?? 1;
 
             // format angka
-            $input['subtotal'] = str_replace(".", "", $input['subtotal']);
-            $input['total_tax'] = str_replace(".", "", $input['total_tax']);
-            $input['total_price'] = str_replace(".", "", $input['total_price']);
+            $input['subtotal'] = str_replace('.', '', $input['subtotal']);
+            $input['total_tax'] = str_replace('.', '', $input['total_tax']);
+            $input['total_price'] = str_replace('.', '', $input['total_price']);
 
             $purchase = PurchaseOrder::findOrFail($id);
 
@@ -389,31 +377,31 @@ class PurchaseOrderController extends Controller
             $total_weight = 0;
 
             foreach ($input['product_id'] as $index => $pid) {
-                $berat = str_replace(".", "", $input['weight'][$index]);
-                $pbt = str_replace(".", "", $input['price_before_tax'][$index]);
+                $berat = str_replace('.', '', $input['weight'][$index]);
+                $pbt = str_replace('.', '', $input['price_before_tax'][$index]);
 
                 $total_quantity += $input['quantity'][$index];
                 $total_weight += $berat;
 
                 PurchaseOrderItem::create([
-                    "purchase_order_id" => $purchase->id,
-                    "purchase_order_number" => $input['purchase_order_number'],
-                    "product_id" => $pid,
-                    "satuan" => $input['satuan'][$index],
-                    "panjang" => $input['panjang'][$index],
-                    "lebar" => $input['lebar'][$index],
-                    "tebal" => $input['tebal'][$index],
-                    "quantity" => $input['quantity'][$index],
-                    "quantity_outstanding" => $input['quantity'][$index],
-                    "quantity_received" => 0,
-                    "weight" => $berat,
-                    "weight_outstanding" => $berat,
-                    "weight_received" => 0,
-                    "price" => $input['price'][$index],
-                    "tax" => $input['tax'][$index],
-                    "price_before_tax" => $pbt,
-                    "userid" => $userid,
-                    "pr_item_id" => $input['pr_item_id'][$index]
+                    'purchase_order_id' => $purchase->id,
+                    'purchase_order_number' => $input['purchase_order_number'],
+                    'product_id' => $pid,
+                    'satuan' => $input['satuan'][$index],
+                    'panjang' => $input['panjang'][$index],
+                    'lebar' => $input['lebar'][$index],
+                    'tebal' => $input['tebal'][$index],
+                    'quantity' => $input['quantity'][$index],
+                    'quantity_outstanding' => $input['quantity'][$index],
+                    'quantity_received' => 0,
+                    'weight' => $berat,
+                    'weight_outstanding' => $berat,
+                    'weight_received' => 0,
+                    'price' => $input['price'][$index],
+                    'tax' => $input['tax'][$index],
+                    'price_before_tax' => $pbt,
+                    'userid' => $userid,
+                    'pr_item_id' => $input['pr_item_id'][$index],
                 ]);
 
                 PurchaseRequestItem::where('id', $input['pr_item_id'][$index])->update([
@@ -426,8 +414,8 @@ class PurchaseOrderController extends Controller
 
             // update total header
             $purchase->update([
-                "quantity_total" => $total_quantity,
-                "weight_total" => $total_weight,
+                'quantity_total' => $total_quantity,
+                'weight_total' => $total_weight,
             ]);
 
             DB::commit();
@@ -443,7 +431,6 @@ class PurchaseOrderController extends Controller
             ]);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -461,9 +448,7 @@ class PurchaseOrderController extends Controller
         $input = $request->all();
 
         $userid = Auth::user()->id ?? 1;
-        $products = Product::where('product_category', $input['category'])
-            ->where('userid', $userid)
-            ->get();
+        $products = Product::where('product_category', $input['category'])->where('userid', $userid)->get();
 
         return $products;
     }
@@ -479,8 +464,7 @@ class PurchaseOrderController extends Controller
     // di controller
     public function generatePoNumber(Request $request)
     {
-        $lastPR = PurchaseOrder::latest('id')
-            ->first();
+        $lastPR = PurchaseOrder::latest('id')->first();
 
         $nextNumber = $lastPR ? $lastPR->id + 1 : 1;
 
@@ -493,24 +477,22 @@ class PurchaseOrderController extends Controller
     {
         $input = $request->all();
         $data = PurchaseOrder::where('id', $input['id'])->update([
-            "status" => 3
+            'status' => 3,
         ]);
 
         return $data;
     }
-
 
     public function reject(Request $request)
     {
         $input = $request->all();
         $data = PurchaseOrder::where('id', $input['id'])->update([
-            "status" => 4,
-            "rejection_note_1" => $input['reason']
+            'status' => 4,
+            'rejection_note_1' => $input['reason'],
         ]);
 
         return $data;
     }
-
 
     public function vendorNote(Request $request)
     {
@@ -522,7 +504,7 @@ class PurchaseOrderController extends Controller
     public function vendorAddress(Request $request)
     {
         $input = $request->all();
-        $data = VendorAlamat::with('province', 'city', 'district')->find($input['id']);
+        $data = Warehouse::with('rprovince', 'rcity', 'rdistrict')->find($input['id']);
         return $data;
     }
 
@@ -533,7 +515,8 @@ class PurchaseOrderController extends Controller
         $data['purchase'] = PurchaseRequest::find($input['id']);
         $data['items'] = PurchaseRequestItem::with('product')
             // ->where('quantity_outstanding', '>', 0)
-            ->where('purchase_id', $input['id'])->get();
+            ->where('purchase_id', $input['id'])
+            ->get();
         return $data;
     }
 
@@ -543,7 +526,6 @@ class PurchaseOrderController extends Controller
         $qty = $input['qty'];
         $mode = $input['mode'];
 
-
         $pr_quantity = 0;
         $po_weight = 0;
         $pr_item = PurchaseRequestItem::find($input['pr_item_id']);
@@ -552,10 +534,8 @@ class PurchaseOrderController extends Controller
             $pr_quantity = $po_item->quantity;
             $po_weight = $po_item->weight;
         } else {
-
             $pr_quantity = $pr_item->quantity_outstanding;
         }
-
 
         $pr_default = $pr_item->quantity;
         $pr_weight_unit = $pr_item->weight / $pr_default;
@@ -564,37 +544,33 @@ class PurchaseOrderController extends Controller
         if ($qty >= 0) {
             if ($qty > $pr_quantity) {
                 return response()->json([
-                    "success" => false,
-                    "message" => "Qty Tidak Boleh lebih dari jumlah PR",
-                    "data" => $pr_quantity,
-                    "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+                    'success' => false,
+                    'message' => 'Qty Tidak Boleh lebih dari jumlah PR',
+                    'data' => $pr_quantity,
+                    'weight' => $mode == 1 ? $po_weight : $pr_item->weight_outstanding,
                 ]);
             } else {
                 return response()->json([
-                    "success" => true,
-                    "message" => "sukses",
-                    "weight" => $new_weight
+                    'success' => true,
+                    'message' => 'sukses',
+                    'weight' => $new_weight,
                 ]);
             }
         } else {
             return response()->json([
-                "success" => false,
-                "message" => "Qty Tidak Boleh Kurang dari Nol",
-                "data" => $pr_quantity,
-                "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+                'success' => false,
+                'message' => 'Qty Tidak Boleh Kurang dari Nol',
+                'data' => $pr_quantity,
+                'weight' => $mode == 1 ? $po_weight : $pr_item->weight_outstanding,
             ]);
         }
     }
-
-
-
 
     public function checkPrWeight(Request $request)
     {
         $input = $request->all();
         $berat = $input['berat'];
         $mode = $input['mode'];
-
 
         $po_weight = null;
         $pr_quantity = 0;
@@ -613,46 +589,55 @@ class PurchaseOrderController extends Controller
         if ($berat >= 0) {
             if ($berat > $po_weight) {
                 return response()->json([
-                    "success" => false,
-                    "message" => "Berat Tidak Boleh lebih dari Berat PR",
-                    "data" => $pr_quantity,
-                    "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+                    'success' => false,
+                    'message' => 'Berat Tidak Boleh lebih dari Berat PR',
+                    'data' => $pr_quantity,
+                    'weight' => $mode == 1 ? $po_weight : $pr_item->weight_outstanding,
                 ]);
             } else {
                 return response()->json([
-                    "success" => true,
-                    "message" => "sukses",
-                    "weight" => $berat
+                    'success' => true,
+                    'message' => 'sukses',
+                    'weight' => $berat,
                 ]);
             }
         } else {
             return response()->json([
-                "success" => false,
-                "message" => "Bert Tidak Boleh Kurang dari Nol",
-                "data" => $pr_quantity,
-                "weight" => $mode == 1 ? $po_weight : $pr_item->weight_outstanding
+                'success' => false,
+                'message' => 'Bert Tidak Boleh Kurang dari Nol',
+                'data' => $pr_quantity,
+                'weight' => $mode == 1 ? $po_weight : $pr_item->weight_outstanding,
             ]);
         }
     }
 
-
-
-
-    public function print($id) {
-        $data['purchase'] = PurchaseOrder::with('vendor.province','vendor.city','gudang.province','gudang.city','alamat','payment_methods','delivery_methods')
-        ->where('status', 3)
-        ->where('id', $id)->firstOrFail();
+    public function print($id)
+    {
+        $data['purchase'] = PurchaseOrder::with('vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'alamat', 'payment_methods', 'delivery_methods')->where('status', 3)->where('id', $id)->firstOrFail();
         $data['items'] = PurchaseOrderItem::with('product')->where('purchase_order_id', $id)->get();
         $data['request_user_name'] = $data['purchase']->user->name ?? '-';
-        $data['title'] = "Purchase Order";
+        $data['title'] = 'Purchase Order';
         $userid = Auth::user()->id;
         $data['user'] = User::find($userid);
 
+        $pdf = Pdf::loadView('frontend.purchase_order.print', $data)->setPaper('a4', 'portrait'); // bisa portrait/landscape
 
+        return $pdf->stream('purchase_order.pdf');
+    }
 
-        $pdf = Pdf::loadView('frontend.purchase_order.print', $data)
-                  ->setPaper('a4', 'portrait'); // bisa portrait/landscape
+    public function getPrData(Request $request)
+    {
+        $userid = $this->set_owner_id(Auth::user()->id);
+        $data = PurchaseRequest::where('userid', $userid)
+            ->where('status', 3)
+            ->where('is_approve_1', 1)
+            ->where('is_approve_2', 1)
+            ->whereHas('item', function ($q) {
+                // hitung total weight di tabel purchase_request_item
+                $q->select(DB::raw('purchase_id, SUM(weight_outstanding) as total_weight'))->groupBy('purchase_id')->havingRaw('SUM(weight_outstanding) > 0');
+            })
+            ->get();
 
-        return $pdf->stream('purchase_order.pdf'); 
+        return $data;
     }
 }

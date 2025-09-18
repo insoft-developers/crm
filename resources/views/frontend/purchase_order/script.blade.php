@@ -1,11 +1,37 @@
 <!-- JAVASCRIPT -->
 <script>
+    const taxList = @json($taxes);
+
 
     $(".select2").select2({
         theme: 'bootstrap-3', // optional jika pakai tema bootstrap
         dropdownParent: $('#modal-add'), // 🔑 kunci agar muncul di dalam modal
         width: '100%'
     });
+
+
+    function get_pr_data() {
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "{{ route('get.pr.data') }}",
+            type: "POST",
+            data: {
+                "_token": csrf_token
+            },
+            success: function(data) {
+                console.log(data);
+                var HTML = '';
+                HTML += '<option value="">Pilih Nomor PR </option>';
+                for (var i = 0; i < data.length; i++) {
+                    HTML += '<option value="' + data[i].id + '">' + data[i].pr_number + '</option>';
+                }
+
+                $("#purchase_request_id").html(HTML);
+
+
+            }
+        });
+    }
 
     function qty_change(id, el, mode) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
@@ -50,7 +76,7 @@
         var berat = $(el).val();
         var pr_item_id = $("#pr_item_id_" + id).val();
         var price = $("#price_" + id).val();
-        var qty = $("#quantity_"+id).val();
+        var qty = $("#quantity_" + id).val();
         price = price ? price : 0;
         var pt = $("#price_type_" + id).val();
         var po_id = $("#id").val();
@@ -59,7 +85,7 @@
             type: "POST",
             dataType: "JSON",
             data: {
-                "qty":qty,
+                "qty": qty,
                 "berat": berat,
                 "pr_item_id": pr_item_id,
                 "mode": mode,
@@ -85,20 +111,20 @@
     }
 
 
-    function hitung_price_before_tax(i, qty, price, w, pt, er=null) {
+    function hitung_price_before_tax(i, qty, price, w, pt, er = null) {
         console.log(w);
         if (pt == 1) {
             var price_before_tax = w * price;
             $("#price_before_tax_" + i).val(ribuan(price_before_tax));
-            if(er==1) {
-                 $("#weight_" + i).val(w);
+            if (er == 1) {
+                $("#weight_" + i).val(w);
             }
-           
+
         } else {
             var price_before_tax = qty * price;
             $("#price_before_tax_" + i).val(ribuan(price_before_tax));
-            if(er==1) {
-                 $("#weight_" + i).val(w);
+            if (er == 1) {
+                $("#weight_" + i).val(w);
             }
         }
         hitung_subtotal();
@@ -206,6 +232,7 @@
 
     function addData() {
         resetForm();
+        get_pr_data();
         save_method = "add";
         $('input[name=_method]').val('POST');
         $(".modal-title").text("Tambah Pembelian Barang");
@@ -214,7 +241,7 @@
         unloading();
         $("#purchase_request_id").removeClass('readonly-select');
         $("#btn-proses-data").removeAttr("disabled");
-        
+
     }
 
     $("#form-purchase-order").submit(function(e) {
@@ -406,9 +433,9 @@
                     .kontak_tagihan + '</td>';
 
                 HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%">' + data
-                    .purchase.gudang.nama + '<br>' + data.purchase.gudang.alamat + '<br>' + data.purchase
-                    .gudang.city.city_name + '<br>' + data.purchase.gudang.province.province_name + ' ' +
-                    data.purchase.gudang.postal_code + '<br>' + data.purchase.gudang.kontak + '</td>';
+                    .purchase.gudang.name + '<br>' + data.purchase.gudang.address + '<br>' + data.purchase
+                    .gudang.rcity.city_name + '<br>' + data.purchase.gudang.rprovince.province_name + ' ' +
+                    data.purchase.gudang.postal_code + '<br>' + data.purchase.gudang.contact + '</td>';
 
                 HTML += '<td width="15%">Kategori</td>';
                 HTML += '<td width="2%">:</td>';
@@ -516,23 +543,23 @@
                 HTML += '<tr>';
                 HTML += '<th colspan="8"></th>';
                 HTML += '<th>Subtotal</th>';
-                HTML += '<th>'+ribuan(data.purchase.subtotal)+'</th>';
+                HTML += '<th>' + ribuan(data.purchase.subtotal) + '</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
                 HTML += '<th colspan="8"></th>';
                 HTML += '<th>Pajak</th>';
-                HTML += '<th>'+ribuan(data.purchase.total_tax)+'</th>';
+                HTML += '<th>' + ribuan(data.purchase.total_tax) + '</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
                 HTML += '<th colspan="8"></th>';
                 HTML += '<th>Jumlah Total</th>';
-                HTML += '<th>'+ribuan(data.purchase.total_price)+'</th>';
+                HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
                 HTML += '<th colspan="8"></th>';
                 HTML += '<th>Jumlah Tagihan</th>';
-                HTML += '<th>'+ribuan(data.purchase.total_price)+'</th>';
+                HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
                 HTML += '</tr>';
 
                 HTML += '</table>';
@@ -560,7 +587,7 @@
         $("#purchase_request_id").val("").trigger('change');
         $("#purchase_request_number").val("");
         $("#vendor_id").val("");
-        $("#vendor_address_id").html('<option value="" selected disabled>Pilih Tujuan</option>');
+        $("#vendor_address_id").val("");
         $("#vendor-note").html('');
         $("#vendor-address-note").html('');
         $("#product_category").val("");
@@ -619,17 +646,6 @@
 
                 HTML += '</p>';
                 $("#vendor-note").html(HTML);
-
-                var AL = '';
-
-                AL += '<option value="" selected disabled>Pilih Tujuan</option>';
-                for (var i = 0; i < data.alamat.length; i++) {
-                    AL += '<option value="' + data.alamat[i].id + '">' + data.alamat[i].nama +
-                        '</option>';
-                }
-
-                $("#vendor_address_id").html(AL);
-
             }
         })
     });
@@ -650,11 +666,11 @@
                 console.log(data);
                 var HTML = '';
                 HTML += '<p>';
-                HTML += data.nama + '<br>';
-                HTML += data.kontak + '<br>';
-                HTML += data.alamat + '<br>';
-                HTML += 'Indonesia, ' + data.city.city_name + ', ';
-                HTML += data.province.province_name + ', ';
+                HTML += data.name + '<br>';
+                HTML += data.contact + '<br>';
+                HTML += data.address + '<br>';
+                HTML += 'Indonesia, ' + data.rcity.city_name + ', ';
+                HTML += data.rprovince.province_name + ', ';
 
                 HTML += '</p>';
                 $("#vendor-address-note").html(HTML);
@@ -697,6 +713,21 @@
     function show_items(data, mode) {
         var HTML = '';
         for (var i = 0; i < data.items.length; i++) {
+
+
+            let taxOptions = `
+            <option value="" disabled ${!data.items[i].tax ? 'selected' : ''}>
+                Pilih Tax
+            </option>`;
+
+            // loop untuk setiap pajak yang sudah dikirim dari server
+            for (let t = 0; t < taxList.length; t++) {
+                const tax = taxList[t];
+                const selected = Number(data.items[i].tax) === Number(tax.tax) ? 'selected' : '';
+                taxOptions += `<option value="${tax.tax}" ${selected}>${tax.tax_name}</option>`;
+            }
+
+
             HTML += `
             <div id="baris_${i}" class="row align-items-end" 
                 style="margin-right:-5px; margin-left:-5px; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:6px;">
@@ -773,8 +804,7 @@
                         <select onchange="on_tax_change(${i}, this)" class="form-control form-control-sm"
                             id="tax_${i}" name="tax[]">
                             <option value="" disabled ${!data.items[i].tax ? "selected" : ""}>Pilih Tax</option>
-                            <option value="10" ${data.items[i].tax == 10 ? "selected" : ""}>10%</option>
-                            <option value="11" ${data.items[i].tax == 11 ? "selected" : ""}>11%</option>
+                            ${taxOptions}
                         </select>
                     </div>
                 </div>
@@ -807,6 +837,38 @@
             footer: ''
         });
     }
+
+
+    function loadTaxOptions(i, selectedValue = null) {
+        const $select = $(`#tax_${i}`);
+
+        // kosongkan & tambahkan placeholder
+        $select.empty().append(
+            $('<option>', {
+                value: '',
+                text: 'Pilih Tax',
+                disabled: true,
+                selected: true
+            })
+        );
+
+        // isi dari taxList yang sudah ada
+        taxList.forEach(item => {
+            const opt = $('<option>', {
+                value: item.tax,
+                text: item.tax_name
+            });
+
+            if (selectedValue !== null && Number(selectedValue) === Number(item.tax)) {
+                opt.prop('selected', true);
+            }
+            $select.append(opt);
+        });
+
+        // kalau pakai select2:
+        // $select.trigger('change');
+    }
+
 
     function on_price_change(i, el) {
         var qty = $("#quantity_" + i).val();
