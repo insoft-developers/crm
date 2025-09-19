@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class PurchaseOrderController extends Controller
 {
@@ -51,19 +52,27 @@ class PurchaseOrderController extends Controller
             $query->where('vendor_id', $request->filter_vendor);
         }
 
+        $query->where(function ($q) {
+            $q->where('request_user_id', Auth::id())->orWhere('status', '>', 1);
+        });
+
         $data = $query->get();
         return DataTables::of($data)
             ->addIndexColumn()
 
             ->addColumn('status', function ($row) {
                 if ($row->status == 1) {
-                    return '<div class="text-info">Diajukan</div>';
+                    return '<div class="text-info">Draft</div>';
                 } elseif ($row->status == 2) {
-                    return '<div class="text-warning">Ditunda</div>';
+                    return '<div class="text-kuning">Pengajuan</div>';
                 } elseif ($row->status == 3) {
-                    return '<div class="text-success">Disetujui</div>';
+                    if ($row->is_approve_2 === 1) {
+                        return '<div class="text-success">Disetujui <i class="fa fa-check-circle"></i><i class="fa fa-check-circle"></i></div>';
+                    } else {
+                        return '<div class="text-success">Disetujui <i class="fa fa-check-circle"></i></div>';
+                    }
                 } elseif ($row->status == 4) {
-                    return '<div class="text-danger"><a onclick="view_rejection_note(' . $row->id . ')" href="javascript:void(0);">Revisi</a></div>';
+                    return '<div class="text-danger"><a onclick="view_rejection_note(' . $row->id . ')" href="javascript:void(0);">Ditolak</a></div>';
                 }
             })
             ->addColumn('purchase_order_number', function ($row) {
@@ -81,19 +90,31 @@ class PurchaseOrderController extends Controller
             ->addColumn('purchase_order_date', function ($row) {
                 return date('d F Y', strtotime($row->purchase_order_date));
             })
+            ->addColumn('request_user_id', function ($row) {
+                return $row->user->name ?? '';
+            })
             ->addColumn('action', function ($row) {
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
 
-                if ($row->status == 3) {
+                if ($row->status == 3 && $row->is_approve_1 == 1 && $row->is_approve_2 == 1 && $row->request_user_id == Auth::user()->id) {
                     $html .= '<a target="_blank" href="' . url('purchase_order_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-                    $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 } else {
                     $html .= '<a class="disabled" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-                    $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                }
+
+                if ($row->status == 3 || $row->status == 4) {
+                    $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                } else {
+                    if (Auth::user()->id === $row->request_user_id) {
+                        $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                    } else {
+                        $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                    }
                 }
 
                 $html .= '<a title="Lihat Data" href="javascript:void(0);" onclick="viewData(' . $row->id . ')"><i class="fa fa-eye fa-tombol-view"></i></a>';
+
                 $html .= '</center></div>';
                 return $html;
             })
@@ -144,7 +165,6 @@ class PurchaseOrderController extends Controller
             'product_category' => 'required',
             'payment_method' => 'required',
             'delivery_method' => 'required',
-            'description' => 'required',
             'pr_item_id.*' => 'required',
             'product_id.*' => 'required',
             'quantity.*' => 'required',
@@ -174,9 +194,9 @@ class PurchaseOrderController extends Controller
 
         try {
             DB::beginTransaction();
-            $userid = Auth::user()->id ?? 1;
+            $userid = $this->set_owner_id(Auth::user()->id);
             $input['userid'] = $userid;
-            $input['request_user_id'] = $userid;
+            $input['request_user_id'] = Auth::user()->id;
             $input['quantity_total'] = 0;
             $input['weight_total'] = 0;
             $input['status'] = 1;
@@ -258,6 +278,7 @@ class PurchaseOrderController extends Controller
         $data['purchase'] = PurchaseOrder::with('vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'alamat', 'payment_methods', 'delivery_methods')->find($id);
         $data['item'] = PurchaseOrderItem::with('product')->where('purchase_order_id', $id)->get();
         $data['request_user_name'] = $data['purchase']->user->name ?? '-';
+        $data['user'] = User::find(Auth::user()->id);
 
         return $data;
     }
@@ -298,7 +319,6 @@ class PurchaseOrderController extends Controller
             'product_category' => 'required',
             'payment_method' => 'required',
             'delivery_method' => 'required',
-            'description' => 'required',
             'pr_item_id.*' => 'required',
             'product_id.*' => 'required',
             'quantity.*' => 'required',
@@ -321,7 +341,7 @@ class PurchaseOrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $userid = Auth::user()->id ?? 1;
+            $userid = $this->set_owner_id(Auth::user()->id);
 
             // format angka
             $input['subtotal'] = str_replace('.', '', $input['subtotal']);
@@ -447,7 +467,7 @@ class PurchaseOrderController extends Controller
     {
         $input = $request->all();
 
-        $userid = Auth::user()->id ?? 1;
+        $userid = $this->set_owner_id(Auth::user()->id);
         $products = Product::where('product_category', $input['category'])->where('userid', $userid)->get();
 
         return $products;
@@ -476,9 +496,36 @@ class PurchaseOrderController extends Controller
     public function approve(Request $request)
     {
         $input = $request->all();
-        $data = PurchaseOrder::where('id', $input['id'])->update([
-            'status' => 3,
-        ]);
+
+        $user = User::find(Auth::user()->id);
+        if ($user->approve_1 == 1 && $user->approve_2 == 0) {
+            $update = [
+                'status' => 3,
+                'is_approve_1' => 1,
+                'updated_at' => Carbon::now(),
+            ];
+        } elseif ($user->approve_1 == 0 && $user->approve_2 == 1) {
+            $update = [
+                'status' => 3,
+                'is_approve_2' => 1,
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        $data = PurchaseOrder::where('id', $input['id'])->update($update);
+
+        return $data;
+    }
+
+    public function propose(Request $request)
+    {
+        $input = $request->all();
+        $data = PurchaseOrder::where('id', $input['id'])
+            ->where('status', 1)
+            ->update([
+                'status' => 2,
+                'updated_at' => Carbon::now(),
+            ]);
 
         return $data;
     }
@@ -486,10 +533,21 @@ class PurchaseOrderController extends Controller
     public function reject(Request $request)
     {
         $input = $request->all();
-        $data = PurchaseOrder::where('id', $input['id'])->update([
-            'status' => 4,
-            'rejection_note_1' => $input['reason'],
-        ]);
+
+        $user = User::find(Auth::user()->id);
+        if ($user->approve_1 == 1 && $user->approve_2 == 0) {
+            $update = [
+                'status' => 4,
+                'rejection_note_1' => $input['reason'],
+            ];
+        } elseif ($user->approve_2 == 1 && $user->approve_1 == 0) {
+            $update = [
+                'status' => 4,
+                'rejection_note_2' => $input['reason'],
+            ];
+        }
+
+        $data = PurchaseOrder::where('id', $input['id'])->update($update);
 
         return $data;
     }
@@ -613,11 +671,20 @@ class PurchaseOrderController extends Controller
 
     public function print($id)
     {
-        $data['purchase'] = PurchaseOrder::with('vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'alamat', 'payment_methods', 'delivery_methods')->where('status', 3)->where('id', $id)->firstOrFail();
+        
+        $data['purchase'] = PurchaseOrder::with('vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'alamat', 'payment_methods', 'delivery_methods')->where('status', 3)
+        ->where('is_approve_1', 1)
+        ->where('is_approve_2', 1)
+        ->where('id', $id)->firstOrFail();
+
+        if(Auth::user()->id !== $data['purchase']->request_user_id) {
+            return redirect('/');
+        }
+
         $data['items'] = PurchaseOrderItem::with('product')->where('purchase_order_id', $id)->get();
         $data['request_user_name'] = $data['purchase']->user->name ?? '-';
         $data['title'] = 'Purchase Order';
-        $userid = Auth::user()->id;
+        $userid = $this->set_owner_id(Auth::user()->id);
         $data['user'] = User::find($userid);
 
         $pdf = Pdf::loadView('frontend.purchase_order.print', $data)->setPaper('a4', 'portrait'); // bisa portrait/landscape

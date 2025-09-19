@@ -68,6 +68,7 @@
                                         <th scope="col">Nomor PO</th>
                                         <th scope="col">Vendor</th>
                                         <th scope="col">Tanggal Pembelian</th>
+                                        <th scope="col">PIC</th>
                                         <th scope="col">Gudang</th>
                                         <th scope="col">Mill</th>
                                         <th scope="col">Status</th>
@@ -289,6 +290,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
                         <button id="btn-save-data" type="submit" class="btn btn-success btn-sm">Save</button>
+                        
                     </div>
                 </form>
             </div>
@@ -309,10 +311,12 @@
                 <div class="modal-body" id="modal-view-content"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Batal</button>
-                    <button id="btn-reject-data" type="button" class="btn btn-danger btn-sm"><i
+                    <button style="display: none;" id="btn-reject-data" type="button" class="btn btn-danger btn-sm"><i
                             class="fa fa-close"></i> Revisi</button>
-                    <button id="btn-approve-data" type="button" class="btn btn-success btn-sm"><i
+                    <button style="display: none;" id="btn-approve-data" type="button" class="btn btn-success btn-sm"><i
                             class="fa fa-check"></i>Setujui</button>
+                    <button style="display: none;" id="btn-propose-data" style="display: none"; type="button" class="btn btn-info btn-sm"><i class="fa fa-arrow-right"></i>Ajukan</button>
+
 
                 </div>
             </div>

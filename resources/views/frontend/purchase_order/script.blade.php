@@ -194,6 +194,10 @@
                 name: 'purchase_order_date'
             },
             {
+                data: 'request_user_id',
+                name: 'request_user_id'
+            },
+            {
                 data: 'gudang',
                 name: 'gudang'
             },
@@ -488,13 +492,13 @@
                 HTML += '<td width="2%">:</td>';
 
                 if (data.purchase.status == 1) {
-                    HTML += '<td width="*"><div class="text-info">Pengajuan</div></td>';
+                    HTML += '<td width="*"><div class="text-info">Draft</div></td>';
                 } else if (data.purchase.status == 2) {
-                    HTML += '<td width="*"><div class="text-warning">Ditunda</div></td>';
+                    HTML += '<td width="*"><div class="text-warning">Pengajuan</div></td>';
                 } else if (data.purchase.status == 3) {
                     HTML += '<td width="*"><div class="text-success">Disetujui</div></td>';
                 } else if (data.purchase.status == 4) {
-                    HTML += '<td width="*"><div class="text-danger">Revisi</div></td>';
+                    HTML += '<td width="*"><div class="text-danger">Ditolak</div></td>';
                 }
                 HTML += '</tr>';
 
@@ -567,6 +571,29 @@
                 HTML += '</div>';
 
                 $("#modal-view-content").html(HTML);
+
+
+                $("#btn-approve-data").hide();
+                $("#btn-reject-data").hide();
+                $("#btn-propose-data").hide();
+
+                if(data.purchase.status == 1) {
+                    if(data.purchase.request_user_id == data.user.id) {
+                        $("#btn-propose-data").show();
+                    }
+                }
+                else if(data.purchase.status == 2) {
+                    if(data.user.approve_1 === 1) { 
+                        $("#btn-approve-data").show();
+                        $("#btn-reject-data").show();
+                    }
+                }
+                else if(data.purchase.status == 3) {
+                    if(data.user.approve_2 === 1 && data.purchase.is_approve_2 === null) { 
+                        $("#btn-approve-data").show();
+                        $("#btn-reject-data").show();
+                    }
+                }
                 $("#modal-view").modal("show");
             }
         })
@@ -610,10 +637,15 @@
             dataType: "JSON",
             success: function(data) {
                 console.log(data);
+                
+                var note = data.purchase.rejection_note_1 === null ? data.purchase.rejection_note_2 : $data.purchase.rejection_note_1;
+                
                 var HTML = '';
+
+
                 HTML += '<div class="form-group">';
                 HTML += '<label>Alasan Revisi</label>';
-                HTML += '<textarea readonly class="form-control">' + data.purchase.rejection_note_1 +
+                HTML += '<textarea readonly class="form-control">' + note +
                     '</textarea>';
                 HTML += '</div>';
                 $("#modal-reason-content").html(HTML);
@@ -921,9 +953,6 @@
     });
 
     function hapusBaris(index) {
-
-
-
         Swal.fire({
             icon: 'question',
             title: 'Hapus data ini?',
@@ -958,4 +987,35 @@
         });
 
     }
+
+
+    $("#btn-propose-data").click(function() {
+        var id = $("#purchase_id_show").val();
+        Swal.fire({
+            icon: 'question',
+            title: 'Ajukan data ini?',
+
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Ajukan',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var csrf_token = $('meta[name="csrf-token"]').attr('content');
+                $.ajax({
+                    url: "{{ route('purchase.order.propose') }}",
+                    type: "POST",
+                    data: {
+                        'id': id,
+                        '_token': csrf_token
+                    },
+                    success: function($data) {
+                        reloadTable();
+                        $("#modal-view").modal("hide");
+                    }
+                });
+            }
+        });
+    });
 </script>

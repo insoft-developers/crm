@@ -7,6 +7,7 @@ use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
 use App\Models\User;
 use App\Traits\CommonTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -389,12 +390,14 @@ class PurchaseRequestController extends Controller
         if($user->approve_1 == 1 && $user->approve_2 == 0) {
             $update = [
                 "status" => 3,
-                "is_approve_1" => 1
+                "is_approve_1" => 1,
+                "updated_at"=> Carbon::now()
             ];
         } else if($user->approve_1 == 0 && $user->approve_2 == 1){
             $update = [
                 "status" => 3,
-                "is_approve_2" => 1
+                "is_approve_2" => 1,
+                "updated_at"=> Carbon::now()
             ];
         }
 
@@ -411,7 +414,8 @@ class PurchaseRequestController extends Controller
         $data = PurchaseRequest::where('id', $input['id'])
         ->where('status', 1)
         ->update([
-            "status" => 2
+            "status" => 2,
+            "updated_at"=> Carbon::now()
         ]);
 
         return $data;

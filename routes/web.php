@@ -123,6 +123,7 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('purchase_order_reject', [PurchaseOrderController::class, 'reject'])->name('purchase.order.reject');
   Route::get('purchase_order_print/{id}', [PurchaseOrderController::class, 'print']);
   Route::post('get_pr_data', [PurchaseOrderController::class, 'getPrData'])->name('get.pr.data');
+  Route::post('purchase_order_propose', [PurchaseOrderController::class, 'propose'])->name('purchase.order.propose');
 
   Route::resource('warehouse', WarehouseController::class);
   Route::get('warehouse_table', [WarehouseController::class, 'warehouseTable'])->name('warehouse.table');

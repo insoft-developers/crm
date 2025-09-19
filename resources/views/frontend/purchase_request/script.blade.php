@@ -633,7 +633,7 @@
                 if (data.purchase.status == 1) {
                     HTML += '<td width="*"><div class="text-info">Draft</div></td>';
                 } else if (data.purchase.status == 2) {
-                    HTML += '<td width="*"><div class="text-warning">Pengajuan</div></td>';
+                    HTML += '<td width="*"><div class="text-kuning">Pengajuan</div></td>';
                 } else if (data.purchase.status == 3) {
                     HTML += '<td width="*"><div class="text-success">Disetujui</div></td>';
                 } else if (data.purchase.status == 4) {
