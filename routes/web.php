@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoodReceiveController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\MillsController;
@@ -133,6 +134,13 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
 
   Route::resource('mills', MillsController::class);
   Route::get('mills_table', [MillsController::class, 'millsTable'])->name('mills.table');
+
+
+  Route::resource('good_receive', GoodReceiveController::class);
+  Route::get('good_receive_table', [GoodReceiveController::class, 'goodReceiveTable'])->name('good.receive.table');
+  Route::post('get_po_data', [GoodReceiveController::class, 'getPoData'])->name('get.po.data');
+  Route::post('generate_gr_number', [GoodReceiveController::class, 'generateGrNumber'])->name('generate.gr.number');
+  Route::post('po_data_serve', [GoodReceiveController::class, 'poDataServe'])->name('po.data.serve');
 
 });
 

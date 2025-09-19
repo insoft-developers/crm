@@ -20,6 +20,13 @@
 
 
 <style>
+    .sm-input {
+        padding: 0px 10px 0px 10px !important;
+        height: 30px;
+        font-size: 12px !important;
+
+    }
+
     .select2-container .select2-selection--single {
         box-sizing: border-box;
         cursor: pointer;

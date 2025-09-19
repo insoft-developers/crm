@@ -188,7 +188,7 @@
                     </a>
                     <ul id="stock-management" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
-                            <a href="#">
+                            <a href="{{ url('good_receive') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Penerimaan Barang<br>Material Masuk</span>
                             </a>
                         </li>
