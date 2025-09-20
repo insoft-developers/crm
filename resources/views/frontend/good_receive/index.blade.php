@@ -29,10 +29,10 @@
                                             <label>Vendor</label>
                                             <select id="filter_vendor" class="form-control">
                                                 <option value="" selected>Semua Vendor</option>
-                                                {{-- @foreach($vendors as $vendor)
+                                                {{-- @foreach ($vendors as $vendor)
                                                     <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
                                                 @endforeach --}}
-                                               
+
                                             </select>
                                         </div>
                                     </div>
@@ -104,16 +104,18 @@
                     <div class="modal-body">
 
                         <div class="row">
-                            <div class="col-9">
+                            <div class="col-12">
                                 <table class="table-compact">
                                     <tr>
-                                        <th width="10%">&nbsp;&nbsp;&nbsp;&nbsp;Nomor GR</th>
+                                        <th width="8%">&nbsp;&nbsp;&nbsp;&nbsp;Nomor GR</th>
                                         <td width="1%">:</td>
-                                        <td width="22%"><input readonly type="text" class="form-control sm-input" id="gr_number" name="gr_number"></td>
-                                        <th width="12%">&nbsp;&nbsp;&nbsp;&nbsp;Tanggal Pesan</th>
+                                        <td width="18%"><input readonly type="text" class="form-control sm-input"
+                                                id="gr_number" name="gr_number"></td>
+                                        <th width="10%">&nbsp;&nbsp;&nbsp;&nbsp;Tanggal Pesan</th>
                                         <td width="1%">:</td>
-                                        <td width="22%"><input type="date" class="form-control sm-input" id="gr_date" name="gr_date"></td>
-                                        <th width="17%">&nbsp;&nbsp;&nbsp;&nbsp;Tanggal Jatuh Tempo</th>
+                                        <td width="18%"><input type="date" class="form-control sm-input"
+                                                id="gr_date" name="gr_date"></td>
+                                        <th width="13%">&nbsp;&nbsp;&nbsp;&nbsp;Tanggal Jatuh Tempo</th>
                                         <td width="1%">:</td>
                                         <td width="*"><span id="due_date"></span></td>
                                     </tr>
@@ -126,19 +128,25 @@
                                         </td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;ID Kontrak</th>
                                         <td>:</td>
-                                        <td><input type="text" class="form-control sm-input" id="contact_number" name="contact_number"></td>
+                                        <td><input type="text" class="form-control sm-input" id="contract_number"
+                                                name="contract_number"></td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Kategori</th>
                                         <td>:</td>
-                                        <td><span id="product_category">Bahan Baku</span></td>
+                                        <td><span id="product_category"></span></td>
                                     </tr>
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Vendor</th>
                                         <td></td>
-                                        <td rowspan="5"><div style="font-size:11px;line-height:16px;position:relative;top:-18px;" id="vendor_id"></div>
+                                        <td rowspan="5">
+                                            <div style="font-size:11px;line-height:16px;position:relative;top:-17px;"
+                                                id="vendor_id"></div>
                                         </td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Tujuan</th>
                                         <td></td>
-                                        <td rowspan="5"><div style="font-size:11px;line-height:16px;position:relative;top:-26px;" id="warehouse_id"></div></td>
+                                        <td rowspan="5">
+                                            <div style="font-size:11px;line-height:16px;position:relative;top:-24px;"
+                                                id="warehouse_id"></div>
+                                        </td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Metode Pembayaran</th>
                                         <td>:</td>
                                         <td><span id="payment_method"></span></td>
@@ -146,10 +154,10 @@
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Mills</th>
                                         <td>:</td>
                                         <td><span id="mills"></span></td>
@@ -157,10 +165,10 @@
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                    
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Metode Pengiriman</th>
                                         <td>:</td>
                                         <td><span id="delivery_method"></span></td>
@@ -168,10 +176,10 @@
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Deskripsi</th>
                                         <td>:</td>
                                         <td><span id="description"></span></td>
@@ -179,10 +187,10 @@
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-                                        
+
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Status</th>
                                         <td>:</td>
                                         <td><span id="status"></span></td>
@@ -191,7 +199,7 @@
 
                                 </table>
                             </div>
-                            <div class="col-3"></div>
+
                         </div>
                         <div class="row">
                             <div class="col-12">
@@ -203,45 +211,46 @@
                                         </div>
                                         <!-- container untuk menampung semua row -->
                                         <div id="product_items">
-                                            <center>Belum ada daftar produk</center>
+                                            
+                                            {{-- <center>Belum ada daftar produk</center> --}}
 
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-8" style="padding-left:0px; padding-right:0px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
-                                                Subtotal&nbsp;&nbsp;&nbsp;&nbsp;
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
+                                                Total Berat Order&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="subtotal"
-                                                    name="subtotal">
+                                                <input type="text" readonly class="form-control sm-input" id="total_weight"
+                                                    name="total_weight">
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
                                             <div class="col-8" style="padding-left:2px; padding-right:2px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
-                                                Pajak&nbsp;&nbsp;&nbsp;&nbsp;
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
+                                                Total Berat Diterima&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="total_tax"
-                                                    name="total_tax">
+                                                <input type="text" readonly class="form-control sm-input" id="total_weight_received"
+                                                    name="total_weight_received">
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-8" style="padding-left:2px; padding-right:2px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
-                                                Jumlah Total&nbsp;&nbsp;&nbsp;&nbsp;
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
+                                                Total Berat Outstanding&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="total_price"
-                                                    name="total_price">
+                                                <input type="text" readonly class="form-control sm-input" id="total_weight_outstanding"
+                                                    name="total_weight_outstanding">
                                             </div>
                                         </div>
 
@@ -256,7 +265,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
                         <button id="btn-save-data" type="submit" class="btn btn-success btn-sm">Save</button>
-                        
+
                     </div>
                 </form>
             </div>
@@ -277,11 +286,12 @@
                 <div class="modal-body" id="modal-view-content"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Batal</button>
-                    <button style="display: none;" id="btn-reject-data" type="button" class="btn btn-danger btn-sm"><i
-                            class="fa fa-close"></i> Revisi</button>
-                    <button style="display: none;" id="btn-approve-data" type="button" class="btn btn-success btn-sm"><i
-                            class="fa fa-check"></i>Setujui</button>
-                    <button style="display: none;" id="btn-propose-data" style="display: none"; type="button" class="btn btn-info btn-sm"><i class="fa fa-arrow-right"></i>Ajukan</button>
+                    <button style="display: none;" id="btn-reject-data" type="button"
+                        class="btn btn-danger btn-sm"><i class="fa fa-close"></i> Revisi</button>
+                    <button style="display: none;" id="btn-approve-data" type="button"
+                        class="btn btn-success btn-sm"><i class="fa fa-check"></i>Setujui</button>
+                    <button style="display: none;" id="btn-propose-data" style="display: none"; type="button"
+                        class="btn btn-info btn-sm"><i class="fa fa-arrow-right"></i>Ajukan</button>
 
 
                 </div>

@@ -20,6 +20,17 @@
 
 
 <style>
+    .btn-hapus-row2 {
+        position: absolute;
+        right: -7px;
+        margin-top: 22px;
+        color: red;
+    }
+
+    .col-custom {
+        margin-left: -22px;
+    }
+
     .sm-input {
         padding: 0px 10px 0px 10px !important;
         height: 30px;

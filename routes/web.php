@@ -141,6 +141,7 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('get_po_data', [GoodReceiveController::class, 'getPoData'])->name('get.po.data');
   Route::post('generate_gr_number', [GoodReceiveController::class, 'generateGrNumber'])->name('generate.gr.number');
   Route::post('po_data_serve', [GoodReceiveController::class, 'poDataServe'])->name('po.data.serve');
+  Route::post('weight_receive_change', [GoodReceiveController::class, 'weightReceiveChange'])->name('weight.receive.change');
 
 });
 

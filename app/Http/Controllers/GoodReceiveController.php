@@ -3,11 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodReceive;
+use App\Models\GoodReceiveItem;
+use App\Models\Location;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Traits\CommonTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class GoodReceiveController extends Controller
@@ -39,17 +45,13 @@ class GoodReceiveController extends Controller
 
             ->addColumn('status', function ($row) {
                 if ($row->status == 1) {
-                    return '<div class="text-info">Draft</div>';
+                    return '<div class="text-info">Dikirim</div>';
                 } elseif ($row->status == 2) {
-                    return '<div class="text-kuning">Pengajuan</div>';
+                    return '<div class="text-kuning">Outstanding</div>';
                 } elseif ($row->status == 3) {
-                    if ($row->is_approve_2 === 1) {
-                        return '<div class="text-success">Disetujui <i class="fa fa-check-circle"></i><i class="fa fa-check-circle"></i></div>';
-                    } else {
-                        return '<div class="text-success">Disetujui <i class="fa fa-check-circle"></i></div>';
-                    }
+                    return '<div class="text-success">Proses</div>';
                 } elseif ($row->status == 4) {
-                    return '<div class="text-danger"><a onclick="view_rejection_note(' . $row->id . ')" href="javascript:void(0);">Ditolak</a></div>';
+                    return '<div class="text-success">Selesai</div>';
                 }
             })
             ->addColumn('gr_number', function ($row) {
@@ -59,15 +61,30 @@ class GoodReceiveController extends Controller
             ->addColumn('vendor_id', function ($row) {
                 return $row->vendor->vendor_name ?? '';
             })
+            ->addColumn('warehouse_id', function ($row) {
+                return $row->warehouse->name ?? '';
+            })
             ->addColumn('gr_date', function ($row) {
                 return date('d F Y', strtotime($row->gr_date));
+            })
+            ->addColumn('total_weight_received', function ($row) {
+                return number_format($row->total_weight_received);
+            })
+            ->addColumn('good_status', function ($row) {
+                return $row->good_status == 1 ? 'Stok' : 'Titipan';
             })
             ->addColumn('action', function ($row) {
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
 
                 $html .= '<a target="_blank" href="' . url('purchase_order_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-                $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                
+                if($row->status == 4) {
+                    $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                } else {
+                    $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                }
+                
 
                 $html .= '<a title="Lihat Data" href="javascript:void(0);" onclick="viewData(' . $row->id . ')"><i class="fa fa-eye fa-tombol-view"></i></a>';
 
@@ -85,7 +102,9 @@ class GoodReceiveController extends Controller
      */
     public function index()
     {
-        return view('frontend.good_receive.index');
+        $locations = Location::where('userid', $this->set_owner_id(Auth::user()->id))->get();
+
+        return view('frontend.good_receive.index', compact('locations'));
     }
 
     /**
@@ -106,7 +125,144 @@ class GoodReceiveController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = $request->all();
+
+        $rules = [
+            'gr_number' => 'required',
+            'gr_date' => 'required',
+            'po_id' => 'required',
+            'contract_number' => 'required',
+            'good_id_item.*' => 'required',
+            'sp_number.*' => 'required',
+            'delivery_date.*' => 'required',
+            'arrive_date.*' => 'required',
+            'coil_number.*' => 'required',
+            'quantity_received.*' => 'required',
+            'weight_received.*' => 'required',
+            'total_weight' => 'required',
+            'total_weight_received' => 'required',
+            'total_weight_outstanding' => 'required',
+        ];
+
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $pesan = $validator->errors();
+            $pesanarr = explode(',', $pesan);
+            $find = ['[', ']', '{', '}'];
+            $html = '';
+            foreach ($pesanarr as $p) {
+                $html .= str_replace($find, '', $p) . '<br>';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $html,
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $userid = $this->set_owner_id(Auth::user()->id);
+            $order = PurchaseOrder::with('payment_methods')->find($input['po_id']);
+            $item_count = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->sum('weight_outstanding');
+
+            $jatuh_tempo = $this->hitung_jatuh_tempo($order->purchase_order_date, $order->payment_methods->term_days);
+
+            $wo = str_replace('.', '', $input['total_weight_outstanding']);
+
+            $input['po_number'] = $order->purchase_order_number;
+            $input['vendor_id'] = $order->vendor_id;
+            $input['warehouse_id'] = $order->vendor_address_id;
+            $input['mills'] = $order->mill;
+            $input['product_category'] = $order->product_category;
+            $input['total_quantity'] = 0;
+            $input['total_weight'] = str_replace('.', '', $input['total_weight']);
+            $input['total_weight_received'] = str_replace('.', '', $input['total_weight_received']);
+            $input['total_weight_outstanding'] = $wo;
+            $input['good_status'] = 1;
+            $input['due_date'] = $jatuh_tempo;
+            $input['payment_method_id'] = $order->payment_method;
+            $input['delivery_method_id'] = $order->delivery_method;
+            $input['description'] = $order->description;
+            $input['request_user_id'] = Auth::user()->id;
+            $input['userid'] = $userid;
+
+            $id = GoodReceive::create($input)->id;
+            $items = $input['product_id'];
+
+            if (count($items) > 0) {
+                $received = 0;
+                foreach ($items as $index => $item) {
+                    $int_berat = str_replace('.', '', $input['weight'][$index]);
+                    $received = $received + $input['weight_received'][$index];
+                    $gr = GoodReceiveItem::create([
+                        'gr_id' => $id,
+                        'po_item_id' => $input['good_id_item'][$index],
+                        'sp_number' => $input['sp_number'][$index],
+                        'delivery_date' => $input['delivery_date'][$index],
+                        'arrive_date' => $input['arrive_date'][$index],
+                        'coil_number' => $input['coil_number'][$index],
+                        'product_id' => $input['product_id'][$index],
+                        'tebal' => $input['tebal'][$index],
+                        'lebar' => $input['lebar'][$index],
+                        'panjang' => $input['panjang'][$index],
+                        'quantity' => $input['quantity'][$index],
+                        'quantity_received' => $input['quantity_received'][$index],
+                        'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
+                        'weight' => $int_berat,
+                        'weight_received' => $input['weight_received'][$index],
+                        'weight_outstanding' => $int_berat - $input['weight_received'][$index],
+                        'satuan' => $input['satuan'][$index],
+                        'location' => $input['location'][$index],
+                        'userid' => $userid,
+                    ]);
+
+                    if ($gr) {
+                        $curr_po = PurchaseOrderItem::find($input['good_id_item'][$index]);
+                        PurchaseOrderItem::where('id', $input['good_id_item'][$index])->update([
+                            'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
+                            'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
+                            'weight_received' => $curr_po->weight_received + $input['weight_received'][$index],
+                            'weight_outstanding' => $curr_po->weight_outstanding - $input['weight_received'][$index],
+                        ]);
+
+                        $pro_list = Product::find($item);
+                        Product::where('id', $item)
+                        ->update([
+                            "quantity" => $pro_list->quantity + $input['quantity_received'][$index],
+                            "weight" => $pro_list->weight + $input['weight_received'][$index],
+                        ]);
+                    }
+                }
+            }
+
+
+
+            if ($item_count == $received) {
+                GoodReceive::where('po_id', $input['po_id'])->update([
+                    'status' => 4,
+                    'updated_at' => Carbon::now(),
+                ]);
+            } else {
+                GoodReceive::where('po_id', $input['po_id'])->update([
+                    'status' => 2,
+                    'updated_at' => Carbon::now(),
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -128,7 +284,8 @@ class GoodReceiveController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data = GoodReceive::with('items')->find($id);
+        return $data;
     }
 
     /**
@@ -154,7 +311,6 @@ class GoodReceiveController extends Controller
         //
     }
 
-
     public function getPoData(Request $request)
     {
         $userid = $this->set_owner_id(Auth::user()->id);
@@ -171,7 +327,6 @@ class GoodReceiveController extends Controller
         return $data;
     }
 
-
     public function generateGrNumber(Request $request)
     {
         $lastPR = GoodReceive::latest('id')->first();
@@ -183,10 +338,38 @@ class GoodReceiveController extends Controller
         return response()->json(['gr_number' => $prNumber]);
     }
 
-    public function poDataServe(Request $request) {
+    public function poDataServe(Request $request)
+    {
         $input = $request->all();
 
-        $data['po'] = PurchaseOrder::with('item','vendor.province','vendor.city','gudang.rprovince','gudang.rcity')->find($input['id']);
+        $data['po'] = PurchaseOrder::with('item.product', 'vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'payment_methods', 'delivery_methods')->find($input['id']);
         return $data;
+    }
+
+    public function weightReceiveChange(Request $request)
+    {
+        $input = $request->all();
+        $po_item = PurchaseOrderItem::find($input['item_id']);
+        $berat = $input['berat'] ?? 0;
+
+        if ($berat == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Berat tidak boleh 0',
+                'data' => $po_item->weight_outstanding,
+            ]);
+        }
+
+        if ($berat > $po_item->weight_outstanding) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Berat tidak boleh lebih dari berat PO',
+                'data' => $po_item->weight_outstanding,
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+            ]);
+        }
     }
 }
