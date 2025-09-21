@@ -319,48 +319,60 @@
 
 
     function viewData(id) {
-        $(".modal-title").text('Detail Pembelian Barang');
+        $(".modal-title").text('Detail Penerimaan Barang Masuk');
         $("#purchase_id_show").val(id);
         $.ajax({
-            url: "{{ url('purchase_order') }}" + "/" + id,
+            url: "{{ url('good_receive') }}" + "/" + id,
             type: "GET",
             dataType: "JSON",
             success: function(data) {
-                console.log(data);
 
                 var HTML = '';
                 HTML += '<div class="card">';
                 HTML += '<div class="card-body">';
                 HTML += '<table class="table-compact">';
                 HTML += '<tr>';
-                HTML += '<td width="8%">NO PO</td>';
+                HTML += '<td width="8%">NO GR</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.purchase_order_number + '</td>';
+                HTML += '<td width="*">' + data.gr.gr_number + '</td>';
                 HTML += '<td width="8%">Tanggal Pesan</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + formatTanggal(data.purchase.purchase_order_date) + '</td>';
+                HTML += '<td width="*">' + formatTanggal(data.gr.gr_date) + '</td>';
 
                 HTML += '<td width="15%">Tanggal Jatuh Tempo</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + hitungJatuhTempo(data.purchase.purchase_order_date, data.purchase
-                    .payment_method.term_days) + '</td>';
+                HTML += '<td width="*">'+formatTanggal(data.gr.due_date)+'</td>';
+                HTML += '</tr>';
+
+
+                HTML += '<tr>';
+                HTML += '<td width="8%">NO PO</td>';
+                HTML += '<td width="2%">:</td>';
+                HTML += '<td width="*">' + data.gr.po_number + '</td>';
+                HTML += '<td width="8%">ID Kontrak</td>';
+                HTML += '<td width="2%">:</td>';
+                HTML += '<td width="*">'+data.gr.contract_number+'</td>';
+
+                HTML += '<td width="15%"></td>';
+                HTML += '<td width="2%">:</td>';
+                HTML += '<td width="*"></td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
-                HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%">' + data
-                    .purchase.vendor.vendor_name + '<br>' + data.purchase.vendor.alamat_tagihan + '<br>' +
-                    data.purchase.vendor.city.city_name + '<br>' + data.purchase.vendor.province
-                    .province_name + ' ' + data.purchase.vendor.postal_code + '<br>' + data.purchase.vendor
+                HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' + data
+                    .gr.vendor.vendor_name + '</strong><br>' + data.gr.vendor.alamat_tagihan + '<br>' +
+                    data.gr.vendor.city.city_name + '<br>' + data.gr.vendor.province
+                    .province_name + ' ' + data.gr.vendor.postal_code + '<br>' + data.gr.vendor
                     .kontak_tagihan + '</td>';
 
-                HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%">' + data
-                    .purchase.gudang.name + '<br>' + data.purchase.gudang.address + '<br>' + data.purchase
-                    .gudang.rcity.city_name + '<br>' + data.purchase.gudang.rprovince.province_name + ' ' +
-                    data.purchase.gudang.postal_code + '<br>' + data.purchase.gudang.contact + '</td>';
+                HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' + data
+                    .gr.warehouse.name + '</strong><br>' + data.gr.warehouse.address + '<br>' + data.gr
+                    .warehouse.rcity.city_name + '<br>' + data.gr.warehouse.rprovince.province_name + ' ' +
+                    data.gr.warehouse.postal_code + '<br>' + data.gr.warehouse.contact + '</td>';
 
                 HTML += '<td width="15%">Kategori</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.product_category + '</td>';
+                HTML += '<td width="*">' + data.gr.product_category + '</td>';
                 HTML += '</tr>';
 
 
@@ -369,7 +381,7 @@
 
                 HTML += '<td width="15%">Metode Pembayaran</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.payment_methods.code + '</td>';
+                HTML += '<td width="*">' + data.gr.payment_methods.code + '</td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
@@ -377,7 +389,7 @@
 
                 HTML += '<td width="15%">Mill</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.mill + '</td>';
+                HTML += '<td width="*">' + data.gr.mills + '</td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
@@ -385,7 +397,7 @@
 
                 HTML += '<td width="15%">Metode Pengiriman</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.delivery_methods.name + '</td>';
+                HTML += '<td width="*">' + data.gr.delivery_methods.name + '</td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
@@ -393,29 +405,29 @@
 
                 HTML += '<td width="15%">Deskripsi</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.description + '</td>';
+                HTML += '<td width="*">' + data.gr.description + '</td>';
                 HTML += '</tr>';
 
 
                 HTML += '<tr>';
                 HTML += '<td width="8%">Nomor Pajak</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.vendor.npwp + '</td>';
+                HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
                 HTML += '<td width="8%">Nomor Pajak</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.vendor.npwp + '</td>';
+                HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
 
                 HTML += '<td width="15%">Status</td>';
                 HTML += '<td width="2%">:</td>';
 
-                if (data.purchase.status == 1) {
-                    HTML += '<td width="*"><div class="text-info">Draft</div></td>';
-                } else if (data.purchase.status == 2) {
-                    HTML += '<td width="*"><div class="text-warning">Pengajuan</div></td>';
-                } else if (data.purchase.status == 3) {
-                    HTML += '<td width="*"><div class="text-success">Disetujui</div></td>';
-                } else if (data.purchase.status == 4) {
-                    HTML += '<td width="*"><div class="text-danger">Ditolak</div></td>';
+                if (data.gr.status == 1) {
+                    HTML += '<td width="*"><div class="text-info">Dikirim</div></td>';
+                } else if (data.gr.status == 2) {
+                    HTML += '<td width="*"><div class="text-kuning">Outstanding</div></td>';
+                } else if (data.gr.status == 3) {
+                    HTML += '<td width="*"><div class="text-danger">Proses</div></td>';
+                } else if (data.gr.status == 4) {
+                    HTML += '<td width="*"><div class="text-success">Selesai</div></td>';
                 }
                 HTML += '</tr>';
 
@@ -434,53 +446,55 @@
                 HTML += '<tr>';
 
                 HTML += '<tr>';
+                HTML += '<th>Nomor SP</th>';
+                HTML += '<th>Tgl Kirim</th>';
+                HTML += '<th>Tgl Datang</th>';
+                HTML += '<th>Nomor Coil</th>';
                 HTML += '<th>Nama Spek</th>';
                 HTML += '<th>Tebal</th>';
                 HTML += '<th>Lebar</th>';
                 HTML += '<th>Panjang</th>';
-                HTML += '<th>Kuantitas Jumlah</th>';
-                HTML += '<th>Kuantitas Berat</th>';
+                HTML += '<th>Qty</th>';
+                HTML += '<th>Qty Received</th>';
                 HTML += '<th>Satuan</th>';
-                HTML += '<th>Harga</th>';
-                HTML += '<th>Pajak</th>';
-                HTML += '<th>Jumlah Sebelum Pajak</th>';
+                HTML += '<th>Berat</th>';
+                HTML += '<th>Berat Received</th>';
+                HTML += '<th>Lokasi</th>';
                 HTML += '</tr>';
 
-                for (var i = 0; i < data.item.length; i++) {
+                for (var i = 0; i < data.gr.item.length; i++) {
                     HTML += '<tr>';
-                    HTML += '<td>' + data.item[i].product.product_name + '</td>';
-                    HTML += '<td>' + data.item[i].tebal + '</td>';
-                    HTML += '<td>' + data.item[i].lebar + '</td>';
-                    HTML += '<td>' + data.item[i].panjang + '</td>';
-                    HTML += '<td>' + ribuan(data.item[i].quantity) + '</td>';
-                    HTML += '<td>' + ribuan(data.item[i].weight) + '</td>';
-                    HTML += '<td>' + data.item[i].satuan + '</td>';
-                    HTML += '<td>' + ribuan(data.item[i].price) + '</td>';
-                    HTML += '<td>PPN ' + data.item[i].tax + '%</td>';
-                    HTML += '<td>' + ribuan(data.item[i].price_before_tax) + '</td>';
+                    HTML += '<td>'+data.gr.item[i].sp_number+'</td>';
+                    HTML += '<td>'+data.gr.item[i].delivery_date+'</td>';
+                    HTML += '<td>'+data.gr.item[i].arrive_date+'</td>';
+                    HTML += '<td>'+data.gr.item[i].coil_number+'</td>';
+                    HTML += '<td>'+data.gr.item[i].product.product_name+'</td>';
+                    HTML += '<td>'+data.gr.item[i].tebal+'</td>';
+                    HTML += '<td>'+data.gr.item[i].lebar+'</td>';
+                    HTML += '<td>'+data.gr.item[i].panjang+'</td>';
+                    HTML += '<td>'+data.gr.item[i].quantity+'</td>';
+                    HTML += '<td>'+data.gr.item[i].quantity_received+'</td>';
+                    HTML += '<td>'+data.gr.item[i].satuan+'</td>';
+                    HTML += '<td>'+ribuan(data.gr.item[i].weight)+'</td>';
+                    HTML += '<td>'+ribuan(data.gr.item[i].weight_received)+'</td>';
+                    HTML += '<td>'+data.gr.item[i].location+'</td>';
                     HTML += '</tr>';
                 }
 
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
-                HTML += '<th>Subtotal</th>';
-                HTML += '<th>' + ribuan(data.purchase.subtotal) + '</th>';
+                HTML += '<th colspan="12"></th>';
+                HTML += '<th>Total Berat</th>';
+                HTML += '<th>'+ribuan(data.gr.total_weight)+'</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
-                HTML += '<th>Pajak</th>';
-                HTML += '<th>' + ribuan(data.purchase.total_tax) + '</th>';
+                HTML += '<th colspan="12"></th>';
+                HTML += '<th>Total Berat Diterima</th>';
+                HTML += '<th>'+ribuan(data.gr.total_weight_received)+'</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
-                HTML += '<th>Jumlah Total</th>';
-                HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
-                HTML += '</tr>';
-
-                HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
-                HTML += '<th>Jumlah Tagihan</th>';
-                HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
+                HTML += '<th colspan="12"></th>';
+                HTML += '<th>Total Berat Outstanding</th>';
+                HTML += '<th>'+ribuan(data.gr.total_weight_outstanding)+'</th>';
                 HTML += '</tr>';
 
                 HTML += '</table>';
@@ -489,26 +503,6 @@
 
                 $("#modal-view-content").html(HTML);
 
-
-                $("#btn-approve-data").hide();
-                $("#btn-reject-data").hide();
-                $("#btn-propose-data").hide();
-
-                if (data.purchase.status == 1) {
-                    if (data.purchase.request_user_id == data.user.id) {
-                        $("#btn-propose-data").show();
-                    }
-                } else if (data.purchase.status == 2) {
-                    if (data.user.approve_1 === 1) {
-                        $("#btn-approve-data").show();
-                        $("#btn-reject-data").show();
-                    }
-                } else if (data.purchase.status == 3) {
-                    if (data.user.approve_2 === 1 && data.purchase.is_approve_2 === null) {
-                        $("#btn-approve-data").show();
-                        $("#btn-reject-data").show();
-                    }
-                }
                 $("#modal-view").modal("show");
             }
         })

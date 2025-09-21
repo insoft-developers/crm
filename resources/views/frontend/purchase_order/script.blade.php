@@ -368,7 +368,6 @@
             inputValue: '',
             showCancelButton: true,
             confirmButtonText: 'Revisi',
-            
             cancelButtonText: 'Batal',
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',

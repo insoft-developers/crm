@@ -8,7 +8,10 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\User;
+use App\Models\Vendor;
 use App\Traits\CommonTrait;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,11 +80,18 @@ class GoodReceiveController extends Controller
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
 
-                $html .= '<a target="_blank" href="' . url('purchase_order_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
+                
 
                 if ($row->status == 4) {
+                    $html .= '<a target="_blank" href="' . url('good_receive_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
+
+
                     $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 } else {
+
+                    $html .= '<a class="disabled" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
+
+
                     $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 }
 
@@ -102,8 +112,8 @@ class GoodReceiveController extends Controller
     public function index()
     {
         $locations = Location::where('userid', $this->set_owner_id(Auth::user()->id))->get();
-
-        return view('frontend.good_receive.index', compact('locations'));
+        $vendors = Vendor::where('userid', $this->set_owner_id(Auth::user()->id))->get();
+        return view('frontend.good_receive.index', compact('locations','vendors'));
     }
 
     /**
@@ -269,7 +279,9 @@ class GoodReceiveController extends Controller
      */
     public function show($id)
     {
-        //
+        $data['gr'] = GoodReceive::with('item.product','vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity','payment_methods', 'delivery_methods')->find($id);
+
+        return $data;
     }
 
     /**
@@ -525,13 +537,25 @@ class GoodReceiveController extends Controller
                 ]);
             }
         }
+    }
 
-        // if ($berat == 0) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Berat tidak boleh 0',
-        //         'data' => $po_item->weight_outstanding,
-        //     ]);
-        // }
+
+    public function print($id)
+    {
+        
+        $data['purchase'] = GoodReceive::with('vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity', 'payment_methods', 'delivery_methods')->where('status', 4)->where('id', $id)->firstOrFail();
+
+        $data['items'] = GoodReceiveItem::with('product')->where('gr_id', $id)->get();
+        $data['request_user_name'] = $data['purchase']->user->name ?? '-';
+        $data['title'] = 'Good Receive';
+        $userid = $this->set_owner_id(Auth::user()->id);
+        $data['user'] = User::find($userid);
+
+        $pdf = Pdf::loadView('frontend.good_receive.print', $data)->setPaper('a4', 'portrait');
+
+        return $pdf->stream('good_receive.pdf');
+        
+
+        
     }
 }

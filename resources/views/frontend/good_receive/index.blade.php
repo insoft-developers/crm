@@ -29,22 +29,22 @@
                                             <label>Vendor</label>
                                             <select id="filter_vendor" class="form-control sm-input">
                                                 <option value="" selected>Semua Vendor</option>
-                                                {{-- @foreach ($vendors as $vendor)
+                                                @foreach ($vendors as $vendor)
                                                     <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
-                                                @endforeach --}}
+                                                @endforeach
 
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-3 p-2">
                                         <div class="form-group">
-                                            <label>Status</label>
+                                            <label>Status Barang</label>
                                             <select id="filter_status" class="form-control sm-input">
                                                 <option value="" selected>Semua</option>
-                                                <option value="1">Pengajuan</option>
-                                                <option value="2">Tunda</option>
-                                                <option value="3">Disetujui</option>
-                                                <option value="4">Revisi</option>
+                                                <option value="1">Dikirim</option>
+                                                <option value="2">Outstanding</option>
+                                                <option value="3">Proses</option>
+                                                <option value="4">Selesai</option>
                                             </select>
                                         </div>
                                     </div>
