@@ -21,13 +21,13 @@
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Tanggal</label>
-                                            <input type="date" id="filter_date" class="form-control">
+                                            <input type="date" id="filter_date" class="form-control sm-input">
                                         </div>
                                     </div>
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Vendor</label>
-                                            <select id="filter_vendor" class="form-control">
+                                            <select id="filter_vendor" class="form-control sm-input">
                                                 <option value="" selected>Semua Vendor</option>
                                                 {{-- @foreach ($vendors as $vendor)
                                                     <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
@@ -39,7 +39,7 @@
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <select id="filter_status" class="form-control">
+                                            <select id="filter_status" class="form-control sm-input">
                                                 <option value="" selected>Semua</option>
                                                 <option value="1">Pengajuan</option>
                                                 <option value="2">Tunda</option>

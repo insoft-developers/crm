@@ -25,8 +25,19 @@ class GoodReceive extends Model
         return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
     }
 
-    public function items():HasMany
+    public function item():HasMany
     {
         return $this->hasMany(GoodReceiveItem::class, 'gr_id', 'id');
+    }
+
+
+    public function payment_methods():BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id','id');
+    }
+
+    public function delivery_methods():BelongsTo
+    {
+        return $this->belongsTo(DeliveryMethod::class, 'delivery_method_id', 'id');
     }
 }

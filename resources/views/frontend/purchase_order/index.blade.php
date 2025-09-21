@@ -21,13 +21,13 @@
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Tanggal</label>
-                                            <input type="date" id="filter_date" class="form-control">
+                                            <input type="date" id="filter_date" class="form-control sm-input">
                                         </div>
                                     </div>
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Vendor</label>
-                                            <select id="filter_vendor" class="form-control">
+                                            <select id="filter_vendor" class="form-control sm-input">
                                                 <option value="" selected>Semua Vendor</option>
                                                 @foreach($vendors as $vendor)
                                                     <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
@@ -39,7 +39,7 @@
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <select id="filter_status" class="form-control">
+                                            <select id="filter_status" class="form-control sm-input">
                                                 <option value="" selected>Semua</option>
                                                 <option value="1">Pengajuan</option>
                                                 <option value="2">Tunda</option>
@@ -105,7 +105,7 @@
                             <div class="col-3">
                                 <div class="form-group">
                                     <label>Permintaan Barang (PR)</label>
-                                    <select id="purchase_request_id" name="purchase_request_id" class="form-control select2">
+                                    <select id="purchase_request_id" name="purchase_request_id" class="form-control select2 sm-input">
                                         <option value="" selected disabled>Pilih Nomor Permintaan Barang
                                         </option>
                                         
@@ -114,8 +114,8 @@
                                 </div>
 
                             </div>
-                            <div class="col-1" style="margin-left: -22px;">
-                                <button id="btn-proses-data" style="margin-top: 32px;" type="button"
+                            <div class="col-1" style="margin-left: -27px;">
+                                <button id="btn-proses-data" style="margin-top: 30px;" type="button"
                                     class="btn btn-info">Proses</button>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                             <div class="col-3">
                                 <div class="form-group">
                                     <label class="bintang">Vendor</label>
-                                    <select class="form-control" id="vendor_id" name="vendor_id">
+                                    <select class="form-control sm-input" id="vendor_id" name="vendor_id">
                                         <option value="" selected disabled>Pilih Vendor</option>
                                         @foreach ($vendors as $vendor)
                                             <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
@@ -136,7 +136,7 @@
                             <div class="col-3">
                                 <div class="form-group">
                                     <label class="bintang">Tujuan</label>
-                                    <select class="form-control" id="vendor_address_id" name="vendor_address_id">
+                                    <select class="form-control sm-input" id="vendor_address_id" name="vendor_address_id">
                                         <option value="" selected disabled>Pilih Tujuan</option>
                                         @foreach($whs as $w)
                                             <option value="{{ $w->id }}">{{ $w->name }}</option>
@@ -148,7 +148,7 @@
                             <div class="col-2">
                                 <div class="form-group">
                                     <label class="bintang">Nomor PO</label>
-                                    <input class="form-control" type="text" id="purchase_order_number"
+                                    <input class="form-control sm-input" type="text" id="purchase_order_number"
                                         name="purchase_order_number" readonly>
                                 </div>
                             </div>
@@ -156,7 +156,7 @@
                             <div class="col-2">
                                 <div class="form-group">
                                     <label class="bintang">Tanggal Pesan</label>
-                                    <input value="{{ date('Y-m-d') }}" class="form-control" type="date"
+                                    <input value="{{ date('Y-m-d') }}" class="form-control sm-input" type="date"
                                         id="purchase_order_date" name="purchase_order_date">
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                             <div class="col-2">
                                 <div class="form-group">
                                     <label class="bintang">Mill</label>
-                                    <select class="form-control" id="mill"
+                                    <select class="form-control sm-input" id="mill"
                                         name="mill">
                                         <option value="" selected disabled>Pilih Mill</option>
                                         @foreach($mls as $m)
@@ -180,15 +180,15 @@
 
                         <div class="row">
                             <div class="col-3">
-                                <div class="note-list" id="vendor-note"></div>
+                                <div style="font-size:11px;line-height:16px;position:relative;top:-6px;" class="note-list" id="vendor-note"></div>
                             </div>
                             <div class="col-3">
-                                <div class="note-list" id="vendor-address-note"></div>
+                                <div style="font-size:11px;line-height:16px;position:relative;top:-6px;" class="note-list" id="vendor-address-note"></div>
                             </div>
                             <div class="col-2">
                                 <div class="form-group">
                                     <label>Kategori</label>
-                                    <input readonly type="text" class="form-control" id="product_category"
+                                    <input readonly type="text" class="form-control sm-input" id="product_category"
                                         name="product_category">
 
                                 </div>
@@ -196,7 +196,7 @@
                             <div class="col-2">
                                 <div class="form-group">
                                     <label class="bintang">Metode Pembayaran</label>
-                                    <select class="form-control" id="payment_method" name="payment_method">
+                                    <select class="form-control sm-input" id="payment_method" name="payment_method">
                                         <option value="" selected disabled>Pilih Metode Pembayaran</option>
                                         @foreach($payment_methods as $payment)
                                             <option value="{{ $payment->id }}">{{ $payment->code }} ( {{ $payment->description }} )</option>
@@ -208,7 +208,7 @@
                             <div class="col-2">
                                 <div class="form-group">
                                     <label class="bintang">Metode Pengiriman</label>
-                                    <select class="form-control" id="delivery_method" name="delivery_method">
+                                    <select class="form-control sm-input" id="delivery_method" name="delivery_method">
                                         <option value="" selected disabled>Pilih Metode Pengiriman</option>
                                         @foreach($delivery_methods as $delivery)
                                             <option value="{{ $delivery->id }}">{{ $delivery->name }} ( {{ $delivery->description }} )</option>
@@ -237,18 +237,18 @@
                                         </div>
                                         <!-- container untuk menampung semua row -->
                                         <div id="product_items">
-                                            <center>Belum ada daftar produk</center>
+                                            <center><span style="font-size: 12px;">Belum ada daftar produk</span></center>
 
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-8" style="padding-left:0px; padding-right:0px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
                                                 Subtotal&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="subtotal"
+                                                <input type="text" readonly class="form-control sm-input" id="subtotal"
                                                     name="subtotal">
                                             </div>
                                         </div>
@@ -256,12 +256,12 @@
                                         <div class="row mb-3">
                                             <div class="col-8" style="padding-left:2px; padding-right:2px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
                                                 Pajak&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="total_tax"
+                                                <input type="text" readonly class="form-control sm-input" id="total_tax"
                                                     name="total_tax">
                                             </div>
                                         </div>
@@ -269,12 +269,12 @@
                                         <div class="row">
                                             <div class="col-8" style="padding-left:2px; padding-right:2px;"></div>
                                             <div class="col-2"
-                                                style="margin-left:-10px;padding-left:0px; padding-right:0px; text-align:right; display:flex; align-items:center; justify-content:flex-end;">
+                                                style="font-size:13px;margin-left:-10px;padding-left:0px; padding-right:0px; text-align:left; display:flex; align-items:center; justify-content:flex-start;">
                                                 Jumlah Total&nbsp;&nbsp;&nbsp;&nbsp;
                                             </div>
 
                                             <div class="col-2" style="padding-left:2px; padding-right:0px;">
-                                                <input type="text" readonly class="form-control" id="total_price"
+                                                <input type="text" readonly class="form-control sm-input" id="total_price"
                                                     name="total_price">
                                             </div>
                                         </div>

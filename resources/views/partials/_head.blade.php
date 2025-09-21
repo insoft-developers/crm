@@ -20,6 +20,13 @@
 
 
 <style>
+    #btn-filter-data,
+    #btn-refresh-data,
+    #btn-proses-data {
+        font-size: 12px;
+        padding: 6px 24px;
+    }
+
     .btn-hapus-row2 {
         position: absolute;
         right: -7px;
@@ -38,7 +45,7 @@
 
     }
 
-    .select2-container .select2-selection--single {
+    /* .select2-container .select2-selection--single {
         box-sizing: border-box;
         cursor: pointer;
         display: block;
@@ -52,30 +59,30 @@
         border-radius: 7px;
     }
 
-    /* Perkecil font teks di dalam dropdown Select2 */
+   
     .select2-container--default .select2-results__option {
         font-size: 12px;
-        /* atur ukuran sesuai kebutuhan */
+     
         padding: 4px 8px;
-        /* opsional, supaya lebih rapat */
+       
     }
 
-    /* Batasi tinggi dropdown agar muncul scroll */
+  
     .select2-container .select2-results {
         max-height: 150px;
-        /* tinggi maksimum dropdown */
+       
         overflow-y: auto;
 
         list-style: none;
         margin: 0;
         padding: 0px 5px;
         font-size: 13px !important;
-        /* aktifkan scroll vertikal */
-    }
+        
+    } */
 
 
 
-    #product_items .select2-container .select2-selection--single {
+    .select2-container .select2-selection--single {
         box-sizing: border-box;
         cursor: pointer;
         display: block;
@@ -90,7 +97,7 @@
     }
 
     /* Perkecil font teks di dalam dropdown Select2 */
-    #product_items .select2-container--default .select2-results__option {
+    .select2-container--default .select2-results__option {
         font-size: 12px;
         /* atur ukuran sesuai kebutuhan */
         padding: 4px 8px;
@@ -98,7 +105,7 @@
     }
 
     /* Batasi tinggi dropdown agar muncul scroll */
-    #product_items .select2-container .select2-results {
+    .select2-container .select2-results {
         max-height: 150px;
         /* tinggi maksimum dropdown */
         overflow-y: auto;

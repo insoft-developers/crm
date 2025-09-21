@@ -78,13 +78,12 @@ class GoodReceiveController extends Controller
                 $html .= '<div style="margin-top:-10px;"><center>';
 
                 $html .= '<a target="_blank" href="' . url('purchase_order_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-                
-                if($row->status == 4) {
+
+                if ($row->status == 4) {
                     $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 } else {
                     $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 }
-                
 
                 $html .= '<a title="Lihat Data" href="javascript:void(0);" onclick="viewData(' . $row->id . ')"><i class="fa fa-eye fa-tombol-view"></i></a>';
 
@@ -228,16 +227,13 @@ class GoodReceiveController extends Controller
                         ]);
 
                         $pro_list = Product::find($item);
-                        Product::where('id', $item)
-                        ->update([
-                            "quantity" => $pro_list->quantity + $input['quantity_received'][$index],
-                            "weight" => $pro_list->weight + $input['weight_received'][$index],
+                        Product::where('id', $item)->update([
+                            'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
+                            'weight' => $pro_list->weight + $input['weight_received'][$index],
                         ]);
                     }
                 }
             }
-
-
 
             if ($item_count == $received) {
                 GoodReceive::where('po_id', $input['po_id'])->update([
@@ -284,7 +280,7 @@ class GoodReceiveController extends Controller
      */
     public function edit($id)
     {
-        $data = GoodReceive::with('items')->find($id);
+        $data = GoodReceive::with('item')->find($id);
         return $data;
     }
 
@@ -297,7 +293,151 @@ class GoodReceiveController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->all();
+
+        $rules = [
+            'gr_number' => 'required',
+            'gr_date' => 'required',
+            'po_id' => 'required',
+            'contract_number' => 'required',
+            'good_id_item.*' => 'required',
+            'sp_number.*' => 'required',
+            'delivery_date.*' => 'required',
+            'arrive_date.*' => 'required',
+            'coil_number.*' => 'required',
+            'quantity_received.*' => 'required',
+            'weight_received.*' => 'required',
+            'total_weight' => 'required',
+            'total_weight_received' => 'required',
+            'total_weight_outstanding' => 'required',
+        ];
+
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $pesan = $validator->errors();
+            $pesanarr = explode(',', $pesan);
+            $find = ['[', ']', '{', '}'];
+            $html = '';
+            foreach ($pesanarr as $p) {
+                $html .= str_replace($find, '', $p) . '<br>';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $html,
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $query = GoodReceive::find($id);
+
+            $userid = $this->set_owner_id(Auth::user()->id);
+            $order = PurchaseOrder::with('payment_methods')->find($input['po_id']);
+            $item_count = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->sum('weight_outstanding');
+
+            $input['total_quantity'] = 0;
+            $input['total_weight'] = str_replace('.', '', $input['total_weight']);
+            $input['total_weight_received'] = str_replace('.', '', $input['total_weight_received']);
+            $input['total_weight_outstanding'] = str_replace('.', '', $input['total_weight_outstanding']);
+            $input['good_status'] = 1;
+            $input['request_user_id'] = Auth::user()->id;
+            $input['userid'] = $userid;
+
+            $query->update($input);
+
+            $old_items = GoodReceiveItem::where('gr_id', $id)->get();
+            
+            foreach ($old_items as $old) {
+                $curr_po = PurchaseOrderItem::find($old->po_item_id);
+                PurchaseOrderItem::where('id', $old->po_item_id)->update([
+                    'quantity_received' => $curr_po->quantity_received - $old->quantity_received,
+                    'quantity_outstanding' => $curr_po->quantity_outstanding + $old->quantity_received,
+                    'weight_received' => $curr_po->weight_received - $old->weight_received,
+                    'weight_outstanding' => $curr_po->weight_outstanding + $old->weight_received,
+                ]);
+
+                $pro_list = Product::find($old->product_id);
+                Product::where('id', $old->product_id)->update([
+                    'quantity' => $pro_list->quantity - $old->quantity_received,
+                    'weight' => $pro_list->weight - $old->weight_received,
+                ]);
+
+                $old->delete();
+            }
+
+            $items = $input['product_id'];
+
+            if (count($items) > 0) {
+                $received = 0;
+                foreach ($items as $index => $item) {
+                    $int_berat = str_replace('.', '', $input['weight'][$index]);
+                    $received = $received + $input['weight_received'][$index];
+                    $gr = GoodReceiveItem::create([
+                        'gr_id' => $id,
+                        'po_item_id' => $input['good_id_item'][$index],
+                        'sp_number' => $input['sp_number'][$index],
+                        'delivery_date' => $input['delivery_date'][$index],
+                        'arrive_date' => $input['arrive_date'][$index],
+                        'coil_number' => $input['coil_number'][$index],
+                        'product_id' => $input['product_id'][$index],
+                        'tebal' => $input['tebal'][$index],
+                        'lebar' => $input['lebar'][$index],
+                        'panjang' => $input['panjang'][$index],
+                        'quantity' => $input['quantity'][$index],
+                        'quantity_received' => $input['quantity_received'][$index],
+                        'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
+                        'weight' => $int_berat,
+                        'weight_received' => $input['weight_received'][$index],
+                        'weight_outstanding' => $int_berat - $input['weight_received'][$index],
+                        'satuan' => $input['satuan'][$index],
+                        'location' => $input['location'][$index],
+                        'userid' => $userid,
+                    ]);
+
+                    if ($gr) {
+                        $curr_po = PurchaseOrderItem::find($input['good_id_item'][$index]);
+                        PurchaseOrderItem::where('id', $input['good_id_item'][$index])->update([
+                            'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
+                            'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
+                            'weight_received' => $curr_po->weight_received + $input['weight_received'][$index],
+                            'weight_outstanding' => $curr_po->weight_outstanding - $input['weight_received'][$index],
+                        ]);
+
+                        $pro_list = Product::find($item);
+                        Product::where('id', $item)->update([
+                            'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
+                            'weight' => $pro_list->weight + $input['weight_received'][$index],
+                        ]);
+                    }
+                }
+            }
+
+            if ($item_count == $received) {
+                GoodReceive::where('po_id', $input['po_id'])->update([
+                    'status' => 4,
+                    'updated_at' => Carbon::now(),
+                ]);
+            } else {
+                GoodReceive::where('po_id', $input['po_id'])->update([
+                    'status' => 2,
+                    'updated_at' => Carbon::now(),
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -342,34 +482,56 @@ class GoodReceiveController extends Controller
     {
         $input = $request->all();
 
-        $data['po'] = PurchaseOrder::with('item.product', 'vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'payment_methods', 'delivery_methods')->find($input['id']);
+        if ($input['save_index'] == 'add') {
+            $data['po'] = PurchaseOrder::with('item.product', 'vendor.province', 'vendor.city', 'gudang.rprovince', 'gudang.rcity', 'payment_methods', 'delivery_methods')->find($input['id']);
+        } else {
+            $data['po'] = GoodReceive::with('item.product', 'vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity', 'payment_methods', 'delivery_methods')->find($input['gr_id']);
+        }
+
         return $data;
     }
 
     public function weightReceiveChange(Request $request)
     {
         $input = $request->all();
-        $po_item = PurchaseOrderItem::find($input['item_id']);
+        $save_index = $input['save_index'];
+        $po_item = null;
         $berat = $input['berat'] ?? 0;
 
-        if ($berat == 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Berat tidak boleh 0',
-                'data' => $po_item->weight_outstanding,
-            ]);
+        if ($save_index == 'edit') {
+            $po_item = GoodReceiveItem::find($input['item_id']);
+            if ($berat > $po_item->weight_received) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Berat tidak boleh lebih dari berat PO',
+                    'data' => $po_item->weight_received,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+                ]);
+            }
+        } else {
+            $po_item = PurchaseOrderItem::find($input['item_id']);
+            if ($berat > $po_item->weight_outstanding) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Berat tidak boleh lebih dari berat PO',
+                    'data' => $po_item->weight_outstanding,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+                ]);
+            }
         }
 
-        if ($berat > $po_item->weight_outstanding) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Berat tidak boleh lebih dari berat PO',
-                'data' => $po_item->weight_outstanding,
-            ]);
-        } else {
-            return response()->json([
-                'success' => true,
-            ]);
-        }
+        // if ($berat == 0) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Berat tidak boleh 0',
+        //         'data' => $po_item->weight_outstanding,
+        //     ]);
+        // }
     }
 }

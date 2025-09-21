@@ -2,6 +2,7 @@
 <script>
     const locationList = @json($locations);
     let rowIndex = 1;
+    let save_index = '';
 
     $(".select2").select2({
         theme: 'bootstrap-3', // optional jika pakai tema bootstrap
@@ -60,8 +61,8 @@
 
     $("#po_id").change(function() {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
-        var id = $(this).val();
-
+        var id = $("#po_id").val();
+        var gr_id = $("#id").val();
         if (id == null) {
 
         } else {
@@ -71,6 +72,8 @@
                 dataType: "JSON",
                 data: {
                     "id": id,
+                    "save_index": save_index,
+                    "gr_id": gr_id,
                     "_token": csrf_token
                 },
                 success: function(data) {
@@ -85,33 +88,58 @@
                     vendors += '<strong>Nomor Pajak : </strong>' + data.po.vendor.npwp + '<br>';
                     $("#vendor_id").html(vendors);
 
-
                     var whs = '';
-                    whs += data.po.gudang.name + '<br>';
-                    whs += data.po.gudang.address + '<br>';
-                    whs += data.po.gudang.rcity.city_name + ', ' + data.po.gudang.rprovince
-                        .province_name + ' ' + data.po.gudang.postal_code + '<br>';
-                    whs += 'Indonesia <br>';
-                    whs += data.po.gudang.contact + '<br>';
-                    // whs += '<strong>Nomor Pajak : </strong>'+data.po.gudang.npwp+'<br>';
+                    if (save_index == 'add') {
+                        
+                        whs += data.po.gudang.name + '<br>';
+                        whs += data.po.gudang.address + '<br>';
+                        whs += data.po.gudang.rcity.city_name + ', ' + data.po.gudang.rprovince
+                            .province_name + ' ' + data.po.gudang.postal_code + '<br>';
+                        whs += 'Indonesia <br>';
+                        whs += data.po.gudang.contact + '<br>';
+                        // whs += '<strong>Nomor Pajak : </strong>'+data.po.gudang.npwp+'<br>';
+                        $("#mills").text(data.po.mill);
+                         var jatuh_tempo = hitungJatuhTempo(data.po.purchase_order_date, data.po
+                        .payment_methods.term_days);
+                        
+                    } else {
+                        whs += data.po.warehouse.name + '<br>';
+                        whs += data.po.warehouse.address + '<br>';
+                        whs += data.po.warehouse.rcity.city_name + ', ' + data.po.warehouse.rprovince
+                            .province_name + ' ' + data.po.warehouse.postal_code + '<br>';
+                        whs += 'Indonesia <br>';
+                        whs += data.po.warehouse.contact + '<br>';
+
+                        $("#mills").text(data.po.mills);
+                         var jatuh_tempo = hitungJatuhTempo(data.po.due_date, 0);
+                    }
+                    
                     $("#warehouse_id").html(whs);
 
-                    var jatuh_tempo = hitungJatuhTempo(data.po.purchase_order_date, data.po
-                        .payment_methods.term_days);
+
+                   
                     $("#due_date").text(jatuh_tempo);
 
                     $("#payment_method").text(data.po.payment_methods.code);
                     $("#product_category").text(data.po.product_category);
-                    $("#mills").text(data.po.mill);
+                    
                     $("#delivery_method").text(data.po.delivery_methods.name);
                     $("#description").text(data.po.description);
+                    var status_text = null;
+                    if (data.po.status == 1) {
+                        status_text = 'Dikirim';
+                    } else if (data.po.status == 2) {
+                        status_text = 'Outstanding';
+                    } else if (data.po.status == 3) {
+                        status_text = 'Proses';
+                    } else if (data.po.status == 4) {
+                        status_text = 'Selesai';
+                    }
 
-                    $("#status").text("Outstanding");
-
-                    show_items(data.po);
+                    $("#status").text(status_text);
 
 
-
+                    show_items(data.po, save_index);
 
                 }
             });
@@ -219,6 +247,7 @@
 
 
     function addData() {
+        save_index = 'add';
         resetForm();
         get_po_data();
         save_method = "add";
@@ -265,7 +294,7 @@
 
     function editData(id) {
         save_method = "edit";
-
+        save_index = 'edit';
         $('input[name=_method]').val('PATCH');
         $.ajax({
             url: "{{ url('/good_receive') }}" + "/" + id + "/edit",
@@ -275,11 +304,12 @@
                 console.log(data);
                 $('#modal-add').modal("show");
                 $('.modal-title').text("Edit Penerimaan Barang Masuk");
+                $("#id").val(data.id);
                 $("#gr_number").val(data.gr_number);
                 get_po_data(data.po_id);
                 $("#gr_date").val(data.gr_date);
                 $("#contract_number").val(data.contract_number);
-                
+
 
 
             }
@@ -496,6 +526,7 @@
     }
 
     function resetForm() {
+        $("#id").val("");
         $("#po_id").val("").trigger('change');
         $("#vendor_id").html("");
         $("#warehouse_id").html("");
@@ -519,8 +550,8 @@
 
 
 
-    function show_items(data, mode) {
-
+    function show_items(data, save_index) {
+        console.log(data);
         rowIndex = 1;
 
         var HTML = '';
@@ -535,38 +566,42 @@
             // loop untuk setiap pajak yang sudah dikirim dari server
             for (let t = 0; t < locationList.length; t++) {
                 const loc = locationList[t];
-                const selected = Number(data.item[i].location) === Number(loc.location_name) ? 'selected' : '';
+                const selected = data.item[i].location === loc.location_name ? 'selected' : '';
                 locationOptions += `<option value="${loc.location_name}" ${selected}>${loc.location_name}</option>`;
             }
 
+
+            // <input value="${ save_index == 'edit' ? data.item[i].id: ''}" type="hidden" id="gr_item_id_${rowIndex}" name="gr_item_id[]">
 
             HTML += `<div id="row_${rowIndex}" class="row">
                 <div class="col-1">
                     <div class="form-group">
                         <label>Nomor SP</label>
-                        <input value="${data.item[i].id}" type="hidden" id="good_id_item_${rowIndex}" name="good_id_item[]">
-                        <input type="text" class="form-control sm-input"
+                        
+                        <input value="${ save_index == 'edit' ? data.item[i].id :''}" type="hidden" id="gr_id_item_${rowIndex}" name="gr_id_item[]">
+                        <input value="${ save_index == 'edit' ? data.item[i].po_item_id : data.item[i].id}" type="hidden" id="good_id_item_${rowIndex}" name="good_id_item[]">
+                        <input value="${ save_index == 'edit' ? data.item[i].sp_number : ''}" type="text" class="form-control sm-input"
                             id="sp_number_${rowIndex}" name="sp_number[]">
                     </div>
                 </div>
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Tgl Kirim</label>
-                        <input type="date" class="form-control sm-input"
+                        <input value="${save_index == 'edit' ? data.item[i].delivery_date :'' }" type="date" class="form-control sm-input"
                             id="delivery_date_${rowIndex}" name="delivery_date[]">
                     </div>
                 </div>
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Tgl Datang</label>
-                        <input type="date" class="form-control sm-input"
+                        <input value="${save_index == 'edit' ? data.item[i].arrive_date : ''}" type="date" class="form-control sm-input"
                             id="arrive_date_${rowIndex}" name="arrive_date[]">
                     </div>
                 </div>
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Nomor Coil</label>
-                        <input type="text" class="form-control sm-input"
+                        <input value="${save_index == 'edit'? data.item[i].coil_number : ''}" type="text" class="form-control sm-input"
                             id="coil_number_${rowIndex}" name="coil_number[]">
                     </div>
                 </div>
@@ -606,7 +641,7 @@
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Qty</label>
-                        <input value="${ribuan(data.item[i].quantity_outstanding)}" readonly type="number" class="form-control sm-input"
+                        <input value="${save_index=='edit'?ribuan(Number(data.item[i].quantity_outstanding)+Number(data.item[i].quantity_received)):ribuan(data.item[i].quantity_outstanding)}" readonly type="number" class="form-control sm-input"
                             id="quantity_${rowIndex}" name="quantity[]">
 
                     </div>
@@ -614,7 +649,7 @@
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Received</label>
-                        <input type="number" class="form-control sm-input"
+                        <input value="${save_index=='edit'?data.item[i].quantity_received:' '}" type="number" class="form-control sm-input"
                             id="quantity_received_${rowIndex}" name="quantity_received[]"
                             placeholder="Qty">
 
@@ -631,7 +666,7 @@
                 <div class="col-1 col-custom">
                     <div class="form-group">
                         <label>Berat</label>
-                        <input value="${ribuan(data.item[i].weight_outstanding)}" readonly type="text" class="form-control sm-input berat-order"
+                        <input value="${save_index=='edit'?ribuan(Number(data.item[i].weight_outstanding) + Number(data.item[i].weight_received)):ribuan(data.item[i].weight_outstanding)}" readonly type="text" class="form-control sm-input berat-order"
                             id="weight_${rowIndex}" name="weight[]">
 
                     </div>
@@ -639,7 +674,7 @@
                 <div class="col-2 col-custom">
                     <div class="form-group">
                         <label>Received</label>
-                        <input onkeyup="weight_receive_onchange(${rowIndex}, this)" type="number" class="form-control sm-input berat-diterima"
+                        <input value="${save_index=='edit'?data.item[i].weight_received:''}" onkeyup="weight_receive_onchange(${rowIndex}, this)" type="number" class="form-control sm-input berat-diterima"
                             id="weight_received_${rowIndex}" name="weight_received[]"
                             placeholder="Berat">
 
@@ -681,13 +716,18 @@
 
     function weight_receive_onchange(index, el) {
         var berat = $(el).val();
-        var item_id = $("#good_id_item_" + index).val();
+        var edit_id = $("#gr_id_item_"+index).val();
+        var add_id = $("#good_id_item_"+index).val();
+
+        var item_id = save_index == 'edit' ? edit_id : add_id;
+    
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: "{{ route('weight.receive.change') }}",
             type: "POST",
             dataType: "JSON",
             data: {
+                "save_index":save_index,
                 "item_id": item_id,
                 "berat": berat,
                 "_token": csrf_token

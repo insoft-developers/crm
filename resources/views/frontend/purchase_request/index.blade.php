@@ -21,13 +21,13 @@
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Tanggal</label>
-                                            <input type="date" id="filter_date" class="form-control">
+                                            <input type="date" id="filter_date" class="form-control sm-input">
                                         </div>
                                     </div>
                                     <div class="col-3 p-2">
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <select id="filter_status" class="form-control">
+                                            <select id="filter_status" class="form-control sm-input">
                                                 <option value="" selected>Semua</option>
                                                 <option value="1">Draft</option>
                                                 <option value="2">Pengajuan</option>
@@ -91,14 +91,14 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>Nomor PR</label>
-                                            <input readonly type="text" class="form-control" id="pr_number"
+                                            <input readonly type="text" class="form-control sm-input" id="pr_number"
                                                 name="pr_number">
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>Tanggal Pesan</label>
-                                            <input value="{{ date('Y-m-d') }}" type="date" class="form-control" id="request_date"
+                                            <input value="{{ date('Y-m-d') }}" type="date" class="form-control sm-input" id="request_date"
                                                 name="request_date">
                                         </div>
                                     </div>
@@ -106,7 +106,7 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label>Kategori</label>
-                                            <select id="product_category" name="product_category" class="form-control">
+                                            <select id="product_category" name="product_category" class="form-control sm-input">
                                                 <option value="" selected disabled>Pilih Kategori Produk</option>
                                                 <option value="bahan-baku">Bahan Baku</option>
                                                 <option value="bahan-setengah-jadi">Bahan Setengah Jadi</option>
