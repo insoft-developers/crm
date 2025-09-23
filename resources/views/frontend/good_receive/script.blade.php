@@ -161,13 +161,25 @@
 
 
     function loading() {
-        $("#btn-save-data").text("Processing....");
-        $("#btn-save-data").attr("disabled", true);
+        $("#form-add #btn-save-data").text("Processing....");
+        $("#form-add #btn-save-data").attr("disabled", true);
+
+        $("#form-titipan #btn-save-data").text("Processing....");
+        $("#form-titipan #btn-save-data").attr("disabled", true);
     }
 
     function unloading() {
-        $("#btn-save-data").text("Save");
-        $("#btn-save-data").removeAttr("disabled");
+        $("#form-add #btn-save-data").text("Save");
+        $("#form-add #btn-save-data").removeAttr("disabled");
+
+        $("#form-titipan #btn-save-data").text("Save");
+        $("#form-titipan #btn-save-data").removeAttr("disabled");
+
+        $("#form-add #btn-save-data").text("Save");
+        $("#form-add #btn-save-data").removeAttr("disabled");
+
+        $("#form-titipan #btn-save-data").text("Save");
+        $("#form-titipan #btn-save-data").removeAttr("disabled");
     }
 
     let table = $('#table-list').DataTable({
@@ -326,15 +338,27 @@
             dataType: "JSON",
             success: function(data) {
                 console.log(data);
-                $('#modal-add').modal("show");
-                $('.modal-title').text("Edit Penerimaan Barang Masuk");
-                $("#id").val(data.id);
-                $("#gr_number").val(data.gr_number);
-                get_po_data(data.po_id);
-                $("#gr_date").val(data.gr_date);
-                $("#contract_number").val(data.contract_number);
-
-
+               
+                if(data.good_status == 2) {
+                    $('.modal-title').text("Edit Penerimaan Barang Titipan");
+                    $('#modal-titipan').modal("show");
+                    $("#titipan_id").val(data.id);
+                    $('#titipan_number').val(data.gr_number);
+                    $("#customer_id").val(data.vendor_id);
+                    $("#titipan_product_category").val(data.product_category);
+                    $("#titipan_warehouse_id").val(data.warehouse_id);
+                    $("#titipan_gr_date").val(data.gr_date);
+                    $("#titipan_mills").val(data.mills);
+                    $("#titipan_status").html('<span class="text-success">Selesai</span>');
+                } else {
+                    $('.modal-title').text("Edit Penerimaan Barang Masuk");
+                    $('#modal-add').modal("show");
+                    $("#id").val(data.id);
+                    $("#gr_number").val(data.gr_number);
+                    get_po_data(data.po_id);
+                    $("#gr_date").val(data.gr_date);
+                    $("#contract_number").val(data.contract_number);
+                }
 
             }
         })
@@ -343,7 +367,7 @@
 
 
     function viewData(id) {
-        $(".modal-title").text('Detail Penerimaan Barang Masuk');
+       
         $("#purchase_id_show").val(id);
         $.ajax({
             url: "{{ url('good_receive') }}" + "/" + id,
@@ -383,12 +407,23 @@
                 HTML += '</tr>';
 
                 HTML += '<tr>';
-                HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' +
-                    data
-                    .gr.vendor.vendor_name + '</strong><br>' + data.gr.vendor.alamat_tagihan + '<br>' +
-                    data.gr.vendor.city.city_name + '<br>' + data.gr.vendor.province
-                    .province_name + ' ' + data.gr.vendor.postal_code + '<br>' + data.gr.vendor
-                    .kontak_tagihan + '</td>';
+                if (data.gr.good_status == 2) {
+                    HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' +
+                        data
+                        .gr.customer.nama_lengkap + '</strong><br>' + data.gr.customer.alamat_tagihan +
+                        '<br>' +
+                        data.gr.customer.city.city_name + '<br>' + data.gr.customer.province
+                        .province_name + ' ' + data.gr.customer.postal_code + '<br>' + data.gr.customer
+                        .kontak_tagihan + '</td>';
+                } else {
+                    HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' +
+                        data
+                        .gr.vendor.vendor_name + '</strong><br>' + data.gr.vendor.alamat_tagihan + '<br>' +
+                        data.gr.vendor.city.city_name + '<br>' + data.gr.vendor.province
+                        .province_name + ' ' + data.gr.vendor.postal_code + '<br>' + data.gr.vendor
+                        .kontak_tagihan + '</td>';
+                }
+
 
                 HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%"><strong>' +
                     data
@@ -438,10 +473,18 @@
                 HTML += '<tr>';
                 HTML += '<td width="8%">Nomor Pajak</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
-                HTML += '<td width="8%">Nomor Pajak</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
+                if (data.gr.good_status == 2) {
+                    HTML += '<td width="*">' + data.gr.customer.npwp + '</td>';
+                    HTML += '<td width="8%">Nomor Pajak</td>';
+                    HTML += '<td width="2%">:</td>';
+                    HTML += '<td width="*">' + data.gr.customer.npwp + '</td>';
+                } else {
+                    HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
+                    HTML += '<td width="8%">Nomor Pajak</td>';
+                    HTML += '<td width="2%">:</td>';
+                    HTML += '<td width="*">' + data.gr.vendor.npwp + '</td>';
+                }
+
 
                 HTML += '<td width="15%">Status</td>';
                 HTML += '<td width="2%">:</td>';
@@ -524,7 +567,11 @@
                 HTML += '</div>';
 
                 $("#modal-view-content").html(HTML);
-
+                if(data.gr.good_status == 2) {
+                     $(".modal-title").text('Detail Penerimaan Barang Titipan');
+                } else {
+                     $(".modal-title").text('Detail Penerimaan Barang Masuk');
+                }
                 $("#modal-view").modal("show");
             }
         })
@@ -726,35 +773,12 @@
 
 
         hitung_total_berat();
-
-        // var csrf_token = $('meta[name="csrf-token"]').attr('content');
-        // $.ajax({
-        //     url: "{{ route('weight.receive.change') }}",
-        //     type: "POST",
-        //     dataType: "JSON",
-        //     data: {
-        //         "save_index": save_index,
-        //         "item_id": item_id,
-        //         "berat": berat,
-        //         "_token": csrf_token
-        //     },
-        //     success: function(data) {
-        //         if (data.success) {
-
-        //         } else {
-        //             Swal.fire({
-        //                 icon: "error",
-        //                 title: "",
-        //                 html: data.message,
-        //                 footer: ''
-        //             });
-        //             $("#weight_received_" + index).val(data.data);
-        //         }
-
-        //     }
-        // });
-
     }
+
+
+
+
+
 
     function hitung_total_berat() {
         let total_berat_order = 0;
@@ -789,7 +813,7 @@
             total_berat_order = total_berat_order + berat;
         });
 
-        $("#titipan_total_weight").val(ribuan(total_berat_order));
+        $("#total_weight").val(ribuan(total_berat_order));
 
 
         let total_berat_diterima = 0;
@@ -798,11 +822,30 @@
             total_berat_diterima = total_berat_diterima + terima;
         });
 
-        $("#titipan_total_weight_received").val(ribuan(total_berat_diterima));
+        $("#total_weight_received").val(ribuan(total_berat_diterima));
 
 
         var total_sisa = total_berat_order - total_berat_diterima;
-        $("#titipan_total_weight_outstanding").val(ribuan(total_sisa));
+        $("#total_weight_outstanding").val(ribuan(total_sisa));
+
+    }
+
+
+
+    function hitung_total_berat_titipan() {
+
+        let total_berat_diterima = 0;
+        $(".berat-titipan-diterima").each(function() {
+            var terima = Number($(this).val()) || 0;
+            total_berat_diterima = total_berat_diterima + terima;
+        });
+
+        $("#titipan_total_weight").val(ribuan(total_berat_diterima));
+        $("#titipan_total_weight_received").val(ribuan(total_berat_diterima));
+
+
+
+        $("#titipan_total_weight_outstanding").val(0);
 
     }
 
@@ -859,7 +902,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
 
-                let $row = $("#row_" + index);
+                let $row = $("#row_titipan_" + index);
 
                 if ($row.length) { // pastikan row ada
                     $row.fadeOut(200, function() {
@@ -1052,14 +1095,14 @@
 
 
 
-    function init_titipan_item(actions=null) {
+    function init_titipan_item(actions = null) {
 
-        if(actions == 1) {
+        if (actions == 1) {
 
         } else {
             rowTitipan = 1;
         }
-        
+
         var HTML = '';
 
         let locationOptions = `
@@ -1076,44 +1119,44 @@
 
         // <input value="${ save_index == 'edit' ? data.item[i].id: ''}" type="hidden" id="gr_item_id_${rowIndex}" name="gr_item_id[]">
 
-        HTML += `<div id="row_${rowTitipan}" class="row">
+        HTML += `<div id="row_titipan_${rowTitipan}" class="row">
             <div class="col-1">
                 <div class="form-group">
                     <label>Nomor SP</label>
                     
-                    <input type="hidden" id="gr_id_item_${rowTitipan}" name="gr_id_item[]">
-                    <input type="hidden" id="good_id_item_${rowTitipan}" name="good_id_item[]">
+                    <input type="hidden" id="gr_id_item_titipan_${rowTitipan}" name="gr_id_item[]">
+                    <input type="hidden" id="good_id_item_titipan_${rowTitipan}" name="good_id_item[]">
                     <input type="text" class="form-control sm-input"
-                        id="sp_number_${rowTitipan}" name="sp_number[]">
+                        id="sp_number_titipan_${rowTitipan}" name="sp_number[]">
                 </div>
             </div>
             <div class="col-1 col-custom">
                 <div class="form-group">
                     <label>Tgl Kirim</label>
                     <input type="date" class="form-control sm-input"
-                        id="delivery_date_${rowTitipan}" name="delivery_date[]">
+                        id="delivery_date_titipan_${rowTitipan}" name="delivery_date[]">
                 </div>
             </div>
             <div class="col-1 col-custom">
                 <div class="form-group">
                     <label>Tgl Datang</label>
                     <input type="date" class="form-control sm-input"
-                        id="arrive_date_${rowTitipan}" name="arrive_date[]">
+                        id="arrive_date_titipan_${rowTitipan}" name="arrive_date[]">
                 </div>
             </div>
             <div class="col-1 col-custom">
                 <div class="form-group">
                     <label>Nomor Coil</label>
                     <input type="text" class="form-control sm-input"
-                        id="coil_number_${rowTitipan}" name="coil_number[]">
+                        id="coil_number_titipan_${rowTitipan}" name="coil_number[]">
                 </div>
             </div>
 
             <div class="col-3 col-custom">
                 <div class="form-group">
                     <label>Spec</label>
-                    <select class="form-control sm-input product-id"
-                        id="product_id_${rowTitipan}" name="product_id[]">
+                    <select onchange="selected_product(${rowTitipan})" class="form-control sm-input product-id"
+                        id="product_id_titipan_${rowTitipan}" name="product_id[]">
                         <option value="">Pilih Spec</option>
                     </select>
                 </div>
@@ -1122,7 +1165,7 @@
                 <div class="form-group">
                     <label>Tebal</label>
                     <input readonly type="text" class="form-control sm-input"
-                        id="tebal_${rowTitipan}" name="tebal[]">
+                        id="tebal_titipan_${rowTitipan}" name="tebal[]">
 
                 </div>
             </div>
@@ -1130,7 +1173,7 @@
                 <div class="form-group">
                     <label>Lebar</label>
                     <input readonly type="text" class="form-control sm-input"
-                        id="lebar_${rowTitipan}" name="lebar[]">
+                        id="lebar_titipan_${rowTitipan}" name="lebar[]">
 
                 </div>
             </div>
@@ -1138,7 +1181,7 @@
                 <div class="form-group">
                     <label>Panjang</label>
                     <input readonly type="text" class="form-control sm-input"
-                        id="panjang_${rowTitipan}" name="panjang[]">
+                        id="panjang_titipan_${rowTitipan}" name="panjang[]">
 
                 </div>
             </div>
@@ -1147,15 +1190,15 @@
                 <div class="form-group">
                     <label>Satuan</label>
                     <input readonly type="text" class="form-control sm-input"
-                        id="satuan_${rowTitipan}" name="satuan[]">
+                        id="satuan_titipan_${rowTitipan}" name="satuan[]">
 
                 </div>
             </div>
             <div class="col-2 col-custom">
                 <div class="form-group">
                     <label>Received</label>
-                    <input onkeyup="weight_receive_onchange(${rowTitipan}, this)" type="number" class="form-control sm-input berat-diterima"
-                        id="weight_received_${rowTitipan}" name="weight_received[]"
+                    <input onkeyup="weight_titipan_onchange(${rowTitipan}, this)" type="number" class="form-control sm-input berat-titipan-diterima"
+                        id="weight_received_titipan_${rowTitipan}" name="weight_received[]"
                         placeholder="Berat">
 
                 </div>
@@ -1163,7 +1206,7 @@
             <div class="col-1 col-custom">
                 <div class="form-group">
                     <label>Lokasi</label>
-                    <select class="form-control sm-input" id="location_${rowTitipan}"
+                    <select class="form-control sm-input" id="location_titipan_${rowTitipan}"
                         name="location[]">
                         <option value="" selected disabled>Pilih</option>
                         ${locationOptions}
@@ -1183,17 +1226,50 @@
         </div>`;
 
 
-        if(actions == 1) {
+        if (actions == 1) {
             $("#product_titipan").append(HTML);
-            var optionList = $('#product_id_1 option:not(:first)').clone();
+            var optionList = $('#product_id_titipan_1 option:not(:first)').clone();
 
-            $('#product_id_'+rowTitipan).not('#product_id_1').append(optionList);
-            
+            $('#product_id_titipan_' + rowTitipan).not('#product_id_titipan_1').append(optionList);
+
         } else {
             $("#product_titipan").html(HTML);
         }
-        
+
         rowTitipan++;
+    }
+
+
+    function weight_titipan_onchange(index, el) {
+        var berat = $(el).val();
+        var edit_id = $("#gr_id_item_titipan_" + index).val();
+        var add_id = $("#good_id_item_titipan_" + index).val();
+
+        var item_id = save_index == 'edit' ? edit_id : add_id;
+
+        hitung_total_berat_titipan();
+    }
+
+    function selected_product(id) {
+        var product_id = $("#product_id_titipan_" + id).val();
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "{{ route('selected.product') }}",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                "product_id": product_id,
+                "_token": csrf_token
+            },
+            success: function(data) {
+                $("#tebal_titipan_" + id).val(data.tebal);
+                $("#lebar_titipan_" + id).val(data.lebar);
+                $("#panjang_titipan_" + id).val(data.panjang);
+                $("#satuan_titipan_" + id).val(data.satuan);
+
+
+            }
+        })
     }
 
 
@@ -1224,7 +1300,8 @@
                 var HTML = '';
                 HTML += '<option value="" selected disabled>Pilih Spec</option>';
                 for (var i = 0; i < data.length; i++) {
-                    HTML += '<option value="' + data[i].id + '">' + data[i].product_name +' ('+data[i].lebar+' x '+data[i].tebal+' x '+data[i].panjang+') </option>';
+                    HTML += '<option value="' + data[i].id + '">' + data[i].product_name + ' (' + data[i]
+                        .lebar + ' x ' + data[i].tebal + ' x ' + data[i].panjang + ') </option>';
                 }
 
                 $(".product-id").html(HTML);
@@ -1254,7 +1331,7 @@
                 console.log(data);
 
                 var cust = '';
-                cust += '<strong>'+data.nama_lengkap + '</strong><br>';
+                cust += '<strong>' + data.nama_lengkap + '</strong><br>';
                 cust += data.alamat_tagihan + '<br>';
                 cust += data.city.city_name + ', ' + data.province
                     .province_name + ' ' + data.postal_code + '<br>';
@@ -1284,16 +1361,48 @@
                 console.log(data);
 
                 var cust = '';
-                cust += '<strong>'+data.name + '</strong><br>';
+                cust += '<strong>' + data.name + '</strong><br>';
                 cust += data.address + '<br>';
                 cust += data.rcity.city_name + ', ' + data.rprovince
                     .province_name + ' ' + data.postal_code + '<br>';
                 cust += 'Indonesia <br>';
                 cust += data.contact + '<br>';
-                
+
                 $("#warehouse_note").html(cust);
             }
         })
 
+    });
+
+
+
+    $("#form-titipan").submit(function(e) {
+        loading();
+        e.preventDefault();
+        var id = $('#titipan_id').val();
+        if (save_method == "add") url = "{{ route('titipan.add') }}";
+        else url = "{{ route('titipan.edit') }}";
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: new FormData($('#modal-titipan form')[0]),
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                unloading();
+                if (data.success) {
+                    $('#modal-titipan').modal('hide');
+                    reloadTable();
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "",
+                        html: data.message,
+                        footer: ''
+                    });
+                }
+            }
+
+        });
     });
 </script>
