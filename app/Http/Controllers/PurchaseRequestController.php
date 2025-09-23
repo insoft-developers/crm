@@ -140,7 +140,6 @@ class PurchaseRequestController extends Controller
             'request_date' => 'required',
             'product_category' => 'required',
             'product_id.*' => 'required',
-            'quantity.*' => 'required',
             'weight.*' => 'required'
         ];
 
@@ -178,7 +177,7 @@ class PurchaseRequestController extends Controller
                 $total_weight = 0;
                 foreach ($product_ids as $index => $pid) {
 
-                    $berat = str_replace(".", "", $input['weight'][$index]);
+                    $berat = $input['weight'][$index];
 
                     $total_quantity = $total_quantity + $input['quantity'][$index];
                     $total_weight = $total_weight + $berat;
@@ -263,7 +262,6 @@ class PurchaseRequestController extends Controller
             'request_date' => 'required',
             'product_category' => 'required',
             'product_id.*' => 'required',
-            'quantity.*' => 'required',
             'weight.*' => 'required'
         ];
 
@@ -302,7 +300,7 @@ class PurchaseRequestController extends Controller
                 PurchaseRequestItem::where('purchase_id', $id)->delete();
                 foreach ($product_ids as $index => $pid) {
 
-                    $berat = str_replace(".", "", $input['weight'][$index]);
+                    $berat = $input['weight'][$index];
 
                     $total_quantity = $total_quantity + $input['quantity'][$index];
                     $total_weight = $total_weight + $berat;

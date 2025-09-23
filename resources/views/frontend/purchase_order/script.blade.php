@@ -10,28 +10,32 @@
     });
 
 
-    function get_pr_data() {
+    function get_pr_data(selectedId = null) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: "{{ route('get.pr.data') }}",
             type: "POST",
             data: {
+                "selected_id":selectedId,
                 "_token": csrf_token
             },
             success: function(data) {
-                console.log(data);
-                var HTML = '';
-                HTML += '<option value="">Pilih Nomor PR </option>';
+                var HTML = '<option value="">Pilih Nomor PR</option>';
                 for (var i = 0; i < data.length; i++) {
-                    HTML += '<option value="' + data[i].id + '">' + data[i].pr_number + '</option>';
+                    // jika id sama, tambahkan atribut selected
+                    var selectedAttr = (selectedId && String(data[i].id) === String(selectedId)) ?
+                        ' selected' :
+                        '';
+                    HTML += '<option value="' + data[i].id + '"' + selectedAttr + '>' +
+                        data[i].pr_number +
+                        '</option>';
                 }
-
                 $("#purchase_request_id").html(HTML);
-
-
             }
         });
     }
+
+
 
     function qty_change(id, el, mode) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
@@ -76,10 +80,12 @@
         var berat = $(el).val();
         var pr_item_id = $("#pr_item_id_" + id).val();
         var price = $("#price_" + id).val();
-        var qty = $("#quantity_" + id).val();
+        var qty = 0;
         price = price ? price : 0;
         var pt = $("#price_type_" + id).val();
         var po_id = $("#id").val();
+
+        // hitung_price_before_tax(id, qty, price, berat, pt);
         $.ajax({
             url: "{{ route('check.pr.weight') }}",
             type: "POST",
@@ -287,10 +293,14 @@
             type: "GET",
             dataType: "JSON",
             success: function(data) {
+                
+                console.log(data.purchase.purchase_request_id);
                 $('#modal-add').modal("show");
                 $('.modal-title').text("Edit Pembelian Barang");
                 $('#id').val(data.purchase.id);
-                $("#purchase_request_id").val(data.purchase.purchase_request_id);
+                
+                get_pr_data(data.purchase.purchase_request_id);
+                // $("#purchase_request_id").val(data.purchase.purchase_request_id).trigger('change');
                 $("#purchase_request_id").addClass('readonly-select');
                 $("#btn-proses-data").attr("disabled", true);
                 $("#purchase_request_number").val(data.purchase.purchase_request_number);
@@ -426,7 +436,7 @@
                 HTML += '<td width="15%">Tanggal Jatuh Tempo</td>';
                 HTML += '<td width="2%">:</td>';
                 HTML += '<td width="*">' + hitungJatuhTempo(data.purchase.purchase_order_date, data.purchase
-                    .payment_method.term_days) + '</td>';
+                    .payment_methods.term_days) + '</td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
@@ -521,7 +531,7 @@
                 HTML += '<th>Tebal</th>';
                 HTML += '<th>Lebar</th>';
                 HTML += '<th>Panjang</th>';
-                HTML += '<th>Kuantitas Jumlah</th>';
+                // HTML += '<th>Kuantitas Jumlah</th>';
                 HTML += '<th>Kuantitas Berat</th>';
                 HTML += '<th>Satuan</th>';
                 HTML += '<th>Harga</th>';
@@ -535,7 +545,7 @@
                     HTML += '<td>' + data.item[i].tebal + '</td>';
                     HTML += '<td>' + data.item[i].lebar + '</td>';
                     HTML += '<td>' + data.item[i].panjang + '</td>';
-                    HTML += '<td>' + ribuan(data.item[i].quantity) + '</td>';
+                    // HTML += '<td>' + ribuan(data.item[i].quantity) + '</td>';
                     HTML += '<td>' + ribuan(data.item[i].weight) + '</td>';
                     HTML += '<td>' + data.item[i].satuan + '</td>';
                     HTML += '<td>' + ribuan(data.item[i].price) + '</td>';
@@ -545,23 +555,23 @@
                 }
 
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
+                HTML += '<th colspan="7"></th>';
                 HTML += '<th>Subtotal</th>';
                 HTML += '<th>' + ribuan(data.purchase.subtotal) + '</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
+                HTML += '<th colspan="7"></th>';
                 HTML += '<th>Pajak</th>';
                 HTML += '<th>' + ribuan(data.purchase.total_tax) + '</th>';
                 HTML += '</tr>';
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
+                HTML += '<th colspan="7"></th>';
                 HTML += '<th>Jumlah Total</th>';
                 HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
-                HTML += '<th colspan="8"></th>';
+                HTML += '<th colspan="7"></th>';
                 HTML += '<th>Jumlah Tagihan</th>';
                 HTML += '<th>' + ribuan(data.purchase.total_price) + '</th>';
                 HTML += '</tr>';
@@ -577,19 +587,17 @@
                 $("#btn-reject-data").hide();
                 $("#btn-propose-data").hide();
 
-                if(data.purchase.status == 1) {
-                    if(data.purchase.request_user_id == data.user.id) {
+                if (data.purchase.status == 1) {
+                    if (data.purchase.request_user_id == data.user.id) {
                         $("#btn-propose-data").show();
                     }
-                }
-                else if(data.purchase.status == 2) {
-                    if(data.user.approve_1 === 1) { 
+                } else if (data.purchase.status == 2) {
+                    if (data.user.approve_1 === 1) {
                         $("#btn-approve-data").show();
                         $("#btn-reject-data").show();
                     }
-                }
-                else if(data.purchase.status == 3) {
-                    if(data.user.approve_2 === 1 && data.purchase.is_approve_2 === null) { 
+                } else if (data.purchase.status == 3) {
+                    if (data.user.approve_2 === 1 && data.purchase.is_approve_2 === null) {
                         $("#btn-approve-data").show();
                         $("#btn-reject-data").show();
                     }
@@ -637,9 +645,10 @@
             dataType: "JSON",
             success: function(data) {
                 console.log(data);
-                
-                var note = data.purchase.rejection_note_1 === null ? data.purchase.rejection_note_2 : $data.purchase.rejection_note_1;
-                
+
+                var note = data.purchase.rejection_note_1 === null ? data.purchase.rejection_note_2 : $data
+                    .purchase.rejection_note_1;
+
                 var HTML = '';
 
 
@@ -798,7 +807,7 @@
                     </div>
                 </div>
 
-                <div class="col-1 px-1">
+                <div style="display:none;" class="col-1 px-1">
                     <div class="form-group mb-2">
                         <label class="mb-1">Qty</label>
                         <input value="${mode==1?data.items[i].quantity:data.items[i].quantity_outstanding}" onkeyup="qty_change(${i}, this, ${mode})" type="number"
@@ -932,6 +941,7 @@
 
             if (tax > 0) {
                 let tpajak = (tax * price_before_tax) / 100;
+                tpajak = Math.round(tpajak); // pembulatan ke integer terdekat
                 pajak += tpajak;
             }
 

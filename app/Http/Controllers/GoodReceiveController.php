@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\GoodReceive;
 use App\Models\GoodReceiveItem;
 use App\Models\Location;
+use App\Models\Mills;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\Warehouse;
 use App\Traits\CommonTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -80,17 +83,12 @@ class GoodReceiveController extends Controller
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
 
-                
+                $html .= '<a target="_blank" href="' . url('good_receive_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
 
                 if ($row->status == 4) {
-                    $html .= '<a target="_blank" href="' . url('good_receive_print/' . $row->id) . '" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-
-
                     $html .= '<a class="disabled" title="Edit Data" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 } else {
-
-                    $html .= '<a class="disabled" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
-
+                    // $html .= '<a class="disabled" title="Print PO" href="javascript:void(0);" style="margin-right:6px;"><i class="fa fa-print fa-tombol-copy"></i></a>';
 
                     $html .= '<a title="Edit Data" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
                 }
@@ -111,9 +109,13 @@ class GoodReceiveController extends Controller
      */
     public function index()
     {
-        $locations = Location::where('userid', $this->set_owner_id(Auth::user()->id))->get();
-        $vendors = Vendor::where('userid', $this->set_owner_id(Auth::user()->id))->get();
-        return view('frontend.good_receive.index', compact('locations','vendors'));
+        $userid = $this->set_owner_id(Auth::user()->id);
+        $locations = Location::where('userid', $userid)->get();
+        $vendors = Vendor::where('userid', $userid)->get();
+        $mills = Mills::where('userid', $userid)->get();
+        $customers = Customer::where('userid', $userid)->get();
+        $warehouse = Warehouse::where('userid', $userid)->get();
+        return view('frontend.good_receive.index', compact('locations', 'vendors', 'mills', 'customers','warehouse'));
     }
 
     /**
@@ -146,7 +148,6 @@ class GoodReceiveController extends Controller
             'delivery_date.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
-            'quantity_received.*' => 'required',
             'weight_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
@@ -168,6 +169,8 @@ class GoodReceiveController extends Controller
                 'message' => $html,
             ]);
         }
+
+        // $total_weight_po = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->count();
 
         try {
             DB::beginTransaction();
@@ -205,6 +208,20 @@ class GoodReceiveController extends Controller
                 foreach ($items as $index => $item) {
                     $int_berat = str_replace('.', '', $input['weight'][$index]);
                     $received = $received + $input['weight_received'][$index];
+
+
+                    $lastCode = GoodReceiveItem::where('product_number', 'like', 'SJJBS%')
+                        ->orderBy('id', 'desc')
+                        ->value('product_number');
+
+                    $lastNumber = 0;
+                    if ($lastCode && preg_match('/^SJJBS(\d+)$/', $lastCode, $m)) {
+                        $lastNumber = (int) $m[1];
+                    }
+                    $nextNumber = $lastNumber + 1;
+                    $sjjbsCode  = 'SJJBS' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+
                     $gr = GoodReceiveItem::create([
                         'gr_id' => $id,
                         'po_item_id' => $input['good_id_item'][$index],
@@ -216,9 +233,10 @@ class GoodReceiveController extends Controller
                         'tebal' => $input['tebal'][$index],
                         'lebar' => $input['lebar'][$index],
                         'panjang' => $input['panjang'][$index],
-                        'quantity' => $input['quantity'][$index],
-                        'quantity_received' => $input['quantity_received'][$index],
-                        'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
+                        'product_number' => $sjjbsCode,
+                        // 'quantity' => $input['quantity'][$index],
+                        // 'quantity_received' => $input['quantity_received'][$index],
+                        // 'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
                         'weight' => $int_berat,
                         'weight_received' => $input['weight_received'][$index],
                         'weight_outstanding' => $int_berat - $input['weight_received'][$index],
@@ -230,22 +248,22 @@ class GoodReceiveController extends Controller
                     if ($gr) {
                         $curr_po = PurchaseOrderItem::find($input['good_id_item'][$index]);
                         PurchaseOrderItem::where('id', $input['good_id_item'][$index])->update([
-                            'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
-                            'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
+                            // 'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
+                            // 'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
                             'weight_received' => $curr_po->weight_received + $input['weight_received'][$index],
                             'weight_outstanding' => $curr_po->weight_outstanding - $input['weight_received'][$index],
                         ]);
 
                         $pro_list = Product::find($item);
                         Product::where('id', $item)->update([
-                            'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
+                            // 'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
                             'weight' => $pro_list->weight + $input['weight_received'][$index],
                         ]);
                     }
                 }
             }
 
-            if ($item_count == $received) {
+            if ((int) $item_count == (int) $received) {
                 GoodReceive::where('po_id', $input['po_id'])->update([
                     'status' => 4,
                     'updated_at' => Carbon::now(),
@@ -279,7 +297,7 @@ class GoodReceiveController extends Controller
      */
     public function show($id)
     {
-        $data['gr'] = GoodReceive::with('item.product','vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity','payment_methods', 'delivery_methods')->find($id);
+        $data['gr'] = GoodReceive::with('item.product', 'vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity', 'payment_methods', 'delivery_methods')->find($id);
 
         return $data;
     }
@@ -317,7 +335,7 @@ class GoodReceiveController extends Controller
             'delivery_date.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
-            'quantity_received.*' => 'required',
+            // 'quantity_received.*' => 'required',
             'weight_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
@@ -347,7 +365,9 @@ class GoodReceiveController extends Controller
 
             $userid = $this->set_owner_id(Auth::user()->id);
             $order = PurchaseOrder::with('payment_methods')->find($input['po_id']);
-            $item_count = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->sum('weight_outstanding');
+            $item_count = DB::table('purchase_order_items')->where('purchase_order_id', $input['po_id'])->sum(DB::raw('weight_outstanding + weight_received'));
+
+            // dd($item_count);
 
             $input['total_quantity'] = 0;
             $input['total_weight'] = str_replace('.', '', $input['total_weight']);
@@ -360,19 +380,19 @@ class GoodReceiveController extends Controller
             $query->update($input);
 
             $old_items = GoodReceiveItem::where('gr_id', $id)->get();
-            
+
             foreach ($old_items as $old) {
                 $curr_po = PurchaseOrderItem::find($old->po_item_id);
                 PurchaseOrderItem::where('id', $old->po_item_id)->update([
-                    'quantity_received' => $curr_po->quantity_received - $old->quantity_received,
-                    'quantity_outstanding' => $curr_po->quantity_outstanding + $old->quantity_received,
+                    // 'quantity_received' => $curr_po->quantity_received - $old->quantity_received,
+                    // 'quantity_outstanding' => $curr_po->quantity_outstanding + $old->quantity_received,
                     'weight_received' => $curr_po->weight_received - $old->weight_received,
                     'weight_outstanding' => $curr_po->weight_outstanding + $old->weight_received,
                 ]);
 
                 $pro_list = Product::find($old->product_id);
                 Product::where('id', $old->product_id)->update([
-                    'quantity' => $pro_list->quantity - $old->quantity_received,
+                    // 'quantity' => $pro_list->quantity - $old->quantity_received,
                     'weight' => $pro_list->weight - $old->weight_received,
                 ]);
 
@@ -384,6 +404,20 @@ class GoodReceiveController extends Controller
             if (count($items) > 0) {
                 $received = 0;
                 foreach ($items as $index => $item) {
+
+                    $lastCode = GoodReceiveItem::where('product_number', 'like', 'SJJBS%')
+                        ->orderBy('id', 'desc')
+                        ->value('product_number');
+
+                    $lastNumber = 0;
+                    if ($lastCode && preg_match('/^SJJBS(\d+)$/', $lastCode, $m)) {
+                        $lastNumber = (int) $m[1];
+                    }
+                    $nextNumber = $lastNumber + 1;
+                    $sjjbsCode  = 'SJJBS' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+
+
                     $int_berat = str_replace('.', '', $input['weight'][$index]);
                     $received = $received + $input['weight_received'][$index];
                     $gr = GoodReceiveItem::create([
@@ -394,12 +428,13 @@ class GoodReceiveController extends Controller
                         'arrive_date' => $input['arrive_date'][$index],
                         'coil_number' => $input['coil_number'][$index],
                         'product_id' => $input['product_id'][$index],
+                        'product_number' => $sjjbsCode,
                         'tebal' => $input['tebal'][$index],
                         'lebar' => $input['lebar'][$index],
                         'panjang' => $input['panjang'][$index],
-                        'quantity' => $input['quantity'][$index],
-                        'quantity_received' => $input['quantity_received'][$index],
-                        'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
+                        // 'quantity' => $input['quantity'][$index],
+                        // 'quantity_received' => $input['quantity_received'][$index],
+                        // 'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
                         'weight' => $int_berat,
                         'weight_received' => $input['weight_received'][$index],
                         'weight_outstanding' => $int_berat - $input['weight_received'][$index],
@@ -411,22 +446,22 @@ class GoodReceiveController extends Controller
                     if ($gr) {
                         $curr_po = PurchaseOrderItem::find($input['good_id_item'][$index]);
                         PurchaseOrderItem::where('id', $input['good_id_item'][$index])->update([
-                            'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
-                            'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
+                            // 'quantity_received' => $curr_po->quantity_received + $input['quantity_received'][$index],
+                            // 'quantity_outstanding' => $curr_po->quantity_outstanding - $input['quantity_received'][$index],
                             'weight_received' => $curr_po->weight_received + $input['weight_received'][$index],
                             'weight_outstanding' => $curr_po->weight_outstanding - $input['weight_received'][$index],
                         ]);
 
                         $pro_list = Product::find($item);
                         Product::where('id', $item)->update([
-                            'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
+                            // 'quantity' => $pro_list->quantity + $input['quantity_received'][$index],
                             'weight' => $pro_list->weight + $input['weight_received'][$index],
                         ]);
                     }
                 }
             }
 
-            if ($item_count == $received) {
+            if ((int) $item_count == (int) $received) {
                 GoodReceive::where('po_id', $input['po_id'])->update([
                     'status' => 4,
                     'updated_at' => Carbon::now(),
@@ -466,26 +501,28 @@ class GoodReceiveController extends Controller
     public function getPoData(Request $request)
     {
         $userid = $this->set_owner_id(Auth::user()->id);
-        $data = PurchaseOrder::where('userid', $userid)
-            ->where('status', 3)
-            ->where('is_approve_1', 1)
-            ->where('is_approve_2', 1)
-            ->whereHas('item', function ($q) {
-                // hitung total weight di tabel purchase_request_item
-                $q->select(DB::raw('purchase_order_id, SUM(weight_outstanding) as total_weight'))->groupBy('purchase_order_id')->havingRaw('SUM(weight_outstanding) > 0');
-            })
-            ->get();
+        $data = PurchaseOrder::where('userid', $userid)->where('status', 3)->where('is_approve_1', 1)->where('is_approve_2', 1)
+        ->whereHas('item', function ($q) {
+            $q->select(DB::raw('purchase_order_id, SUM(weight_outstanding) as total_weight'))->groupBy('purchase_order_id')->havingRaw('SUM(weight_outstanding) > 0');
+        })
+        ->get();
 
         return $data;
     }
 
     public function generateGrNumber(Request $request)
     {
+        $type = $request->type;
+
         $lastPR = GoodReceive::latest('id')->first();
 
         $nextNumber = $lastPR ? $lastPR->id + 1 : 1;
 
-        $prNumber = 'GR-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        if ($type == 1) {
+            $prNumber = 'GR-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        } else {
+            $prNumber = 'PT-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        }
 
         return response()->json(['gr_number' => $prNumber]);
     }
@@ -539,11 +576,9 @@ class GoodReceiveController extends Controller
         }
     }
 
-
     public function print($id)
     {
-        
-        $data['purchase'] = GoodReceive::with('vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity', 'payment_methods', 'delivery_methods')->where('status', 4)->where('id', $id)->firstOrFail();
+        $data['purchase'] = GoodReceive::with('vendor.province', 'vendor.city', 'warehouse.rprovince', 'warehouse.rcity', 'payment_methods', 'delivery_methods')->where('id', $id)->firstOrFail();
 
         $data['items'] = GoodReceiveItem::with('product')->where('gr_id', $id)->get();
         $data['request_user_name'] = $data['purchase']->user->name ?? '-';
@@ -554,8 +589,20 @@ class GoodReceiveController extends Controller
         $pdf = Pdf::loadView('frontend.good_receive.print', $data)->setPaper('a4', 'portrait');
 
         return $pdf->stream('good_receive.pdf');
-        
+    }
 
-        
+    public function customerDetail(Request $request)
+    {
+        $input = $request->all();
+        $data = Customer::with('province', 'city')->find($input['cust_id']);
+        return $data;
+    }
+
+
+    public function warehouseDetail(Request $request)
+    {
+        $input = $request->all();
+        $data = Warehouse::with('rprovince', 'rcity')->find($input['whs_id']);
+        return $data;
     }
 }

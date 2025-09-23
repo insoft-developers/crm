@@ -166,10 +166,10 @@
                                                             id="panjang_1" name="panjang[]">
                                                     </div>
                                                 </div>
-                                                <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                                                <div style="display: none;" class="col-1" style="padding-left:2px; padding-right:2px;">
                                                     <div class="form-group" style="margin-bottom:5px;">
                                                         <label style="margin-bottom:2px;">Qty</label>
-                                                        <input onkeyup="qty_change(1, this)" type="text" class="form-control selected-qty" id="quantity_1"
+                                                        <input value="1" onkeyup="qty_change(1, this)" type="text" class="form-control selected-qty" id="quantity_1"
                                                             name="quantity[]">
                                                     </div>
                                                 </div>

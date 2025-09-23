@@ -68,6 +68,36 @@
             margin-left: 15px;
 
         }
+
+        .card-header {
+            border-bottom: 2px solid #ccc;
+            /* warna & ketebalan garis */
+            padding-bottom: 4px;
+            /* jarak teks ke garis */
+            margin-bottom: 8px;
+            /* jarak ke .card-body */
+        }
+
+        .card-text {
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: px;
+
+        }
+
+       
+
+        .side-step {
+            font-weight: 700;
+            font-size: 14px;
+            position: relative;
+            left: 120px;
+            top:-150px;
+            width:250px;
+            margin-bottom: -100px !important;        
+        }
+        
+
     </style>
 
 </head>
@@ -85,7 +115,7 @@
         @foreach ($items as $item)
             @php
                 // Hasil generate() sudah berupa biner PNG
-                $qrBinary = QrCode::format('png')->size(200)->generate($item->sp_number);
+                $qrBinary = QrCode::format('svg')->size(200)->generate($item->coil_number);
 
                 // Baru sekali di-base64
                 $qrBase64 = base64_encode($qrBinary);
@@ -95,11 +125,16 @@
                     <img class="img-logo" src="{{ public_path('images/logo.png') }}" alt="Logo">
                     <span class="head-title">{{ $user->company_name }}</span>
                 </h5>
+
                 <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <img src="data:image/png;base64,{{ $qrBase64 }}" alt="QR Code" width="150" height="150">
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <img style="margin-top:10px;" src="data:image/png;base64,{{ $qrBase64 }}" alt="QR Code"
+                        width="100" height="100">
+                    <p class="card-text">{{ $item->sp_number }}</p>
+                    <div class="side-step">
+                        <p>No Coil : {{ $item->coil_number }}</p>
+                        <p>Spekifikasi : {{ $item->product->product_name }}
+                            {{ $item->tebal }}X{{ $item->lebar }}X{{ $item->panjang }}</p>
+                    </div>
                 </div>
             </div>
         @endforeach

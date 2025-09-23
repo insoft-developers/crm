@@ -167,7 +167,7 @@ class PurchaseOrderController extends Controller
             'delivery_method' => 'required',
             'pr_item_id.*' => 'required',
             'product_id.*' => 'required',
-            'quantity.*' => 'required',
+            // 'quantity.*' => 'required',
             'weight.*' => 'required',
             'price.*' => 'required',
             'price_before_tax.*' => 'required',
@@ -321,7 +321,7 @@ class PurchaseOrderController extends Controller
             'delivery_method' => 'required',
             'pr_item_id.*' => 'required',
             'product_id.*' => 'required',
-            'quantity.*' => 'required',
+            // 'quantity.*' => 'required',
             'weight.*' => 'required',
             'price.*' => 'required',
             'price_before_tax.*' => 'required',
@@ -387,7 +387,7 @@ class PurchaseOrderController extends Controller
                 'total_tax' => $input['total_tax'],
                 'total_price' => $input['total_price'],
                 'userid' => $userid,
-                'status' => 1,
+                
             ]);
 
             /**
@@ -635,7 +635,7 @@ class PurchaseOrderController extends Controller
         $pr_item = PurchaseRequestItem::find($input['pr_item_id']);
         if ($mode == 1) {
             $po_item = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->where('pr_item_id', $input['pr_item_id'])->first();
-            $po_weight = $pr_item->weight_outstanding;
+            $po_weight = $po_item->weight_outstanding;
             $pr_quantity = $po_item->quantity;
         } else {
             $po_weight = $pr_item->weight_outstanding;
@@ -694,16 +694,21 @@ class PurchaseOrderController extends Controller
 
     public function getPrData(Request $request)
     {
+        
         $userid = $this->set_owner_id(Auth::user()->id);
-        $data = PurchaseRequest::where('userid', $userid)
+        $query = PurchaseRequest::where('userid', $userid)
             ->where('status', 3)
             ->where('is_approve_1', 1)
-            ->where('is_approve_2', 1)
-            ->whereHas('item', function ($q) {
+            ->where('is_approve_2', 1);
+        if(empty($request->selected_id)) {
+            $query->whereHas('item', function ($q) {
                 // hitung total weight di tabel purchase_request_item
                 $q->select(DB::raw('purchase_id, SUM(weight_outstanding) as total_weight'))->groupBy('purchase_id')->havingRaw('SUM(weight_outstanding) > 0');
-            })
-            ->get();
+            });
+        }
+            
+            
+        $data = $query->get();
 
         return $data;
     }

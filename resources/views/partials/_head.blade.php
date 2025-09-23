@@ -20,6 +20,10 @@
 
 
 <style>
+    .dropdown-menu .dropdown-item {
+        font-size: 12px;
+    }
+
     #btn-filter-data,
     #btn-refresh-data,
     #btn-proses-data {
@@ -30,8 +34,15 @@
     .btn-hapus-row2 {
         position: absolute;
         right: -7px;
-        margin-top: 22px;
+        margin-top: 35px;
         color: red;
+    }
+
+    .btn-tambah-row2 {
+        position: absolute;
+        right: -7px;
+        margin-top: 10px;
+        color: green;
     }
 
     .col-custom {
@@ -527,11 +538,11 @@
     /* Tombol hapus elegan */
     .btn-hapus-row {
         position: absolute;
-        left: -21px;
+        left: 0px;
         background: red;
         color: white;
         padding: 4px 4px 2px 9px !important;
-        top: -52px;
+        top: -43px;
         border-radius: 23px;
     }
 

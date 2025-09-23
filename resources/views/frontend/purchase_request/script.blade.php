@@ -334,10 +334,10 @@
                         id="panjang_1" name="panjang[]">
                 </div>
             </div>
-            <div class="col-1" style="padding-left:2px; padding-right:2px;">
+            <div style="display:none;" class="col-1" style="padding-left:2px; padding-right:2px;">
                 <div class="form-group" style="margin-bottom:5px;">
                     <label style="margin-bottom:2px;">Qty</label>
-                    <input onkeyup="qty_change(1, this)" type="text" class="form-control selected-qty" id="quantity_1"
+                    <input value="1" onkeyup="qty_change(1, this)" type="text" class="form-control selected-qty" id="quantity_1"
                         name="quantity[]">
                 </div>
             </div>
@@ -407,10 +407,10 @@
                         <input readonly type="text" class="form-control" id="panjang_${rowCount}" name="panjang[]">
                     </div>
                 </div>
-                <div class="col-1" style="padding-left:2px; padding-right:2px;">
+                <div style="display:none;" class="col-1" style="padding-left:2px; padding-right:2px;">
                     <div class="form-group" style="margin-bottom:5px;">
                         <label style="margin-bottom:2px;">Qty</label>
-                        <input onkeyup="qty_change(${rowCount}, this)" type="text" class="form-control selected-qty" id="quantity_${rowCount}" name="quantity[]">
+                        <input value="1" onkeyup="qty_change(${rowCount}, this)" type="text" class="form-control selected-qty" id="quantity_${rowCount}" name="quantity[]">
                     </div>
                 </div>
                 <div class="col-2" style="padding-left:2px; padding-right:2px;">
@@ -666,7 +666,7 @@
                 HTML += '<th>Tebal</th>';
                 HTML += '<th>Lebar</th>';
                 HTML += '<th>Panjang</th>';
-                HTML += '<th>Kuantitas Jumlah</th>';
+                // HTML += '<th>Kuantitas Jumlah</th>';
                 HTML += '<th>Kuantitas Berat</th>';
                 HTML += '<th>Satuan</th>';
                 HTML += '</tr>';
@@ -677,7 +677,7 @@
                     HTML += '<td>' + data.item[i].tebal + '</td>';
                     HTML += '<td>' + data.item[i].lebar + '</td>';
                     HTML += '<td>' + data.item[i].panjang + '</td>';
-                    HTML += '<td>' + ribuan(data.item[i].quantity) + '</td>';
+                    // HTML += '<td>' + ribuan(data.item[i].quantity) + '</td>';
                     HTML += '<td>' + ribuan(data.item[i].weight) + '</td>';
                     HTML += '<td>' + data.item[i].satuan + '</td>';
                     HTML += '</tr>';

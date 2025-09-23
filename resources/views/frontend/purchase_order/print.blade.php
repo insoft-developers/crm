@@ -103,7 +103,7 @@
                 <td width="2%">No<br>Hal</td>
                 <td width="1%">:<br>:</td>
                 <td width="20%">{{ $purchase->purchase_order_number }}<br>Purchase Order</td>
-                <td width="*" style="text-align: right;">{{ $user->city }},
+                <td width="67%" style="text-align: right;">{{ $user->city }},
                     {{ date('d F Y', strtotime($purchase->purchase_order_date)) }}</td>
             </tr>
             <tr>
@@ -124,7 +124,7 @@
                 <th>NO</th>
                 <th>SPEC</th>
                 <th colspan="3">UKURAN</th>
-                <th>QTY</th>
+                {{-- <th>QTY</th> --}}
                 <th>BERAT</th>
                 <th>HARGA/KG</th>
                 <th>SUBTOTAL</th>
@@ -148,7 +148,7 @@
                     <td>{{ $item->tebal }}</td>
                     <td>{{ $item->lebar }}</td>
                     <td>{{ $item->panjang }}</td>
-                    <td>{{ number_format($item->quantity, 0, ',', '.') }}</td>
+                    {{-- <td>{{ number_format($item->quantity, 0, ',', '.') }}</td> --}}
                     <td>{{ number_format($item->weight, 0, ',', '.') }}</td>
                     {{-- <td>{{ $item->satuan }}</td> --}}
                     <td>{{ number_format($item->price, 0, ',', '.') }}</td>
@@ -164,9 +164,9 @@
             @endforeach
 
             <tr style="background: rgb(217, 213, 213);">
-                <th colspan="5" style="text-align: left;">TOTAL</th>
-                <th style="text-align: left;">{{ $total_qty }}</th>
-                <th style="text-align: left;">{{ $total_weight }}</th>
+                <th colspan="4" style="text-align: left;">TOTAL</th>
+                <th style="text-align: left;"></th>
+                <th style="text-align: left;">{{ number_format($total_weight, 0, ',', '.') }}</th>
                 <th></th>
                 <th style="text-align: left;">SUBTOTAL</th>
                 <th>:</th>
@@ -174,7 +174,7 @@
             </tr>
 
             <tr style="background: rgb(217, 213, 213);">
-                <th colspan="5" style="text-align: left;"></th>
+                <th colspan="4" style="text-align: left;"></th>
                 <th style="text-align: left;"></th>
                 <th style="text-align: left;"></th>
                 <th></th>
@@ -184,7 +184,7 @@
             </tr>
 
             <tr style="background: rgb(217, 213, 213);">
-                <th colspan="5" style="text-align: left;"></th>
+                <th colspan="4" style="text-align: left;"></th>
                 <th style="text-align: left;"></th>
                 <th style="text-align: left;"></th>
                 <th></th>
