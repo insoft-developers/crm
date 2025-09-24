@@ -183,59 +183,70 @@
 
     function show_item(items, tambah = null) {
         if (tambah == 1) {
-
+            // Tambah baris tunggal
+            $("#return-item").append(buildRow(rowIndex));
+            rowIndex++;
         } else {
-            rowIndex = 1;
+            if (items.length > 0) {
+                rowIndex = 1;
+                var LIST = '';
+                $.each(items, function(i, item) {
+                    LIST += buildRow(rowIndex, item);
+                    rowIndex++;
+                });
+                $("#return-item").html(LIST);
+            } else {
+                rowIndex = 1;
+                $("#return-item").html(buildRow(rowIndex));
+                rowIndex++;
+            }
         }
-        var HTML = `<div id="row_${rowIndex}" class="row">
+    }
+
+    // fungsi pembuat row agar id/atribut selalu sesuai
+    function buildRow(idx, data = null) {
+
+        const defaultImg = "{{ asset('images/product/1.png') }}";
+        const imgSrc = (data && data.return_image) ?
+            `/storage/${data.return_image}` :
+            defaultImg;
+        let input_id = null;
+        if (data == null) {
+            input_id = `<input type="hidden" id="list_id_${idx}" name="list_id[]">`;
+        } else {
+            input_id = `<input value="${data.id}" type="hidden" id="list_id_${idx}" name="list_id[]">`;
+        }
+
+
+        return `
+        <div id="row_${idx}" class="row">
             <div class="col-1">
                 <div class="tombol-return-container">
-                    <a title="Tambah Catatan" href="javascript:void(0);" onclick="tambah_return_note(${rowIndex})"><i
-                            class="fa fa-plus return-tambah"></i></a>
-                    <a title="Hapus Catatan" href="javascript:void(0);" onclick="hapus_return_note(${rowIndex})"><i
-                            class="fa fa-trash return-hapus"></i></a>
+                    <a title="Tambah Catatan" href="javascript:void(0);" onclick="tambah_return_note(${idx})"><i class="fa fa-plus return-tambah"></i></a>
+                    <a title="Hapus Catatan" href="javascript:void(0);" onclick="hapus_return_note(${idx})"><i class="fa fa-trash return-hapus"></i></a>
                 </div>
             </div>
             <div class="col-3">
                 <div class="form-group">
                     <label>Note:</label>
-                    <textarea class="form-control" id="return_note_${rowIndex}"
-                        name="return_note[]"></textarea>
+                    ${input_id}
+                    <textarea class="form-control" id="return_note_${idx}" name="return_note[]">${data == null ? '': data.note}</textarea>
                 </div>
             </div>
             <div class="col-3">
                 <div class="form-group">
                     <label>Foto Barang Retur:</label>
                     <input style="display: none;" accept=".jpg, .jpeg, .png" type="file"
-                        class="sm-input return-file" id="return_image_${rowIndex}" name="return_image[]">
+                           class="sm-input return-file" id="return_image_${idx}" name="return_image[]">
                     <br>
-                    <img data-row="${rowIndex}" src="{{ asset('images/product/1.png') }}" id="return_image_preview_${rowIndex}"
-                        class="return-image-preview">
+                    <img data-row="${idx}" src="${imgSrc}"
+                         id="return_image_preview_${idx}" class="return-image-preview">
                 </div>
             </div>
             <div class="col-5"></div>
         </div>`;
-        if (tambah == 1) {
-            $("#return-item").append(HTML);
-            rowIndex++;
-        } else {
-
-            if (item.length > 0) {
-                var LIST = '';
-                $.each(items, function(i, item) {
-                    LIST += HTML;
-                    rowIndex++;
-                });
-                $("#return-item").html(LIST);
-            } else {
-                $("#return-item").html(HTML);
-            }
-
-
-
-        }
-
     }
+
 
 
     $(document).on('click', '.return-image-preview', function() {

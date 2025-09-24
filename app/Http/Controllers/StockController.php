@@ -114,7 +114,7 @@ class StockController extends Controller
      */
     public function edit($id)
     {
-        $data = GoodReceiveItem::with('product', 'goodReceive','retur')->find($id);
+        $data = GoodReceiveItem::with('product', 'goodReceive', 'retur')->find($id);
         return $data;
     }
 
@@ -128,6 +128,7 @@ class StockController extends Controller
     public function update(Request $request, $id)
     {
         $input = $request->all();
+        
         $aksi = $input['aksi'];
 
         if ($aksi == 'retur') {
@@ -154,29 +155,56 @@ class StockController extends Controller
                 ]);
             }
 
-            $notes = $input['return_note'];
-            $images = $request->file('return_image', []); // bisa saja kosong
+            
+            $notes = $input['return_note'] ?? [];
+            $listId = $input['list_id'] ?? []; // hidden input berisi id lama (bisa null)
+            $images = $request->file('return_image', []); // array file (bisa kosong)
 
+            // --- 1. Hapus record yang tidak lagi ada di form ---
+            $existingIds = StockReturnDetail::where('stock_id', $id)->pluck('id')->toArray();
+            $idsToDelete = array_diff($existingIds, $listId); // id yg ada di DB tapi tidak dikirim
+            foreach ($idsToDelete as $delId) {
+                $detail = StockReturnDetail::find($delId);
+                if ($detail) {
+                    
+                    $detail->delete();
+                }
+            }
+
+            // --- 2. Insert / Update ---
             foreach ($notes as $index => $note) {
+                $currentId = $listId[$index] ?? null;
                 $path = null;
 
-                // jika ada file gambar di index yg sama
+                // cek apakah user mengunggah gambar baru di index ini
                 if (!empty($images[$index])) {
-                    // simpan ke storage/app/public/returns
                     $path = $images[$index]->store('return', 'public');
                 }
 
-                StockReturnDetail::create([
-                    'note' => $note,
-                    'return_image' => $path, // bisa null jika tak ada gambar
-                    'stock_id' => $id, // contoh relasi
-                    'userid' => $this->set_owner_id(Auth::user()->id),
-                ]);
+                if ($currentId) {
+                    // update record lama
+                    $detail = StockReturnDetail::find($currentId);
+                    if ($detail) {
+                        $updateData = ['note' => $note];
+                        if ($path) {
+                            $updateData['return_image'] = $path;
+                        }
+                        $detail->update($updateData);
+                    }
+                } else {
+                    // insert record baru
+                    StockReturnDetail::create([
+                        'note' => $note,
+                        'return_image' => $path,
+                        'stock_id' => $id,
+                        'userid' => $this->set_owner_id(Auth::user()->id),
+                    ]);
+                }
             }
 
             GoodReceiveItem::where('id', $id)->update([
-                "stock_status" => 2,
-                "return_date" => Carbon::now()
+                'stock_status' => 2,
+                'return_date' => Carbon::now(),
             ]);
 
             return response()->json([
