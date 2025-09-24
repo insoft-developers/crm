@@ -11,6 +11,7 @@ use App\Http\Controllers\MillsController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\UserController;
@@ -147,6 +148,9 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('warehouse_detail', [GoodReceiveController::class, 'warehouseDetail'])->name('warehouse.detail');
   Route::post('good_titipan_add', [GoodReceiveController::class, 'titipanAdd'])->name('titipan.add');
   Route::post('good_titipan_edit', [GoodReceiveController::class, 'titipanEdit'])->name('titipan.edit');
+
+  Route::resource('stock', StockController::class);
+  Route::get('stock_table', [StockController::class, 'stockTable'])->name('stock.table');
 
 
 });

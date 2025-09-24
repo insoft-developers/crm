@@ -17,4 +17,9 @@ class GoodReceiveItem extends Model
     {
         return $this->belongsTo(Product::class, 'product_id','id');
     }
+
+    public function goodReceive(): BelongsTo
+    {
+        return $this->belongsTo(GoodReceive::class, 'gr_id', 'id');
+    }
 }

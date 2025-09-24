@@ -193,8 +193,18 @@
                             </a>
                         </li>
                         <li class="list-subtitle">
-                            <a href="#">
-                                <i class="las la-minus"></i><span class="subtitle">Penyimpanan Stok<br>Barang</span>
+                            <a href="{{ url('stock') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Kelola Stok Barang</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
+                            <a href="{{ url('titipan') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Kelola Stok Titipan</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
+                            <a href="{{ url('opname') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Stock Opname</span>
                             </a>
                         </li>
                         <li class="list-subtitle">

@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\GoodReceiveItem;
+use App\Traits\CommonTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+
+class StockController extends Controller
+{
+    use CommonTrait;
+    public function stockTable()
+    {
+        $userid = $this->set_owner_id(Auth::user()->id);
+        $data = GoodReceiveItem::where('userid', $userid)->whereHas('goodReceive', function ($q) {
+            $q->where('good_status', 1);
+        });
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->addColumn('mills', function ($row) {
+                return $row->goodReceive->mills ?? '';
+            })
+            ->addColumn('product_id', function ($row) {
+                return $row->product->product_name ?? '';
+            })
+            ->addColumn('tebal_actual', function ($row) {
+                return $row->tebal_actual === null ? '<span style="color:red;">Not Inspected</span>' : number_format($row->tebal_actual);
+            })
+            ->addColumn('weight_actual', function ($row) {
+                return $row->weight_actual === null ? '<span style="color:red;">Not Inspected</span>' : number_format($row->weight_actual);
+            })
+            ->addColumn('weight_received', function ($row) {
+                return number_format($row->weight_received);
+            })
+            ->addColumn('stock_status', function ($row) {
+                if ($row->stock_status == 1) {
+                    return '<div style="color:blue;">Booked</div>';
+                } elseif ($row->stock_status == 2) {
+                    return '<div style="color:red;">Returned</div>';
+                } else {
+                    return '<div style="color:orange;">Available</div>';
+                }
+            })
+
+            ->addColumn('note', function ($row) {
+                return $row->note == null ? ' - ' : $row->note;
+            })
+
+            ->addColumn('action', function ($row) {
+                $html = '';
+                $html .= '<div style="margin-top:-10px;"><center>';
+
+                $html .= '<a title="Edit Stock" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                $html .= '<a title="Return Stock" href="javascript:void(0);" onclick="deleteData(' . $row->id . ')"><i class="fa fa-trash fa-tombol-delete"></i></a>';
+                $html .= '</center></div>';
+                return $html;
+            })
+            ->rawColumns(['action', 'tebal_actual', 'weight_actual', 'stock_status'])
+            ->make(true);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return view('frontend.stock.index');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $data = GoodReceiveItem::find($id);
+        return $data;
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}
