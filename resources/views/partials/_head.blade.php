@@ -18,8 +18,36 @@
 
 
 
-
 <style>
+    .tombol-return-container{
+       position: relative;
+    top: 27px;
+    left: 47px;
+    }
+    .return-tambah {
+        background: green;
+        color: white;
+        font-size: 12px;
+        padding: 4px 5px;
+        border-radius: 16px
+    }
+
+    .return-hapus {
+        background: red;
+        color: white;
+        font-size: 12px;
+        padding: 4px 5px;
+        border-radius: 16px
+    }
+
+    .return-image-preview {
+        border-radius: 8px;
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
     .dropdown-menu .dropdown-item {
         font-size: 12px;
     }

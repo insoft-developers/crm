@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GoodReceiveItem extends Model
 {
@@ -21,5 +22,11 @@ class GoodReceiveItem extends Model
     public function goodReceive(): BelongsTo
     {
         return $this->belongsTo(GoodReceive::class, 'gr_id', 'id');
+    }
+
+
+    public function retur():HasMany
+    {
+        return $this->hasMany(StockReturnDetail::class, 'stock_id', 'id');
     }
 }

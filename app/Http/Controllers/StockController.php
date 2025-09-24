@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodReceiveItem;
+use App\Models\StockReturnDetail;
 use App\Traits\CommonTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class StockController extends Controller
@@ -26,7 +29,7 @@ class StockController extends Controller
                 return $row->product->product_name ?? '';
             })
             ->addColumn('tebal_actual', function ($row) {
-                return $row->tebal_actual === null ? '<span style="color:red;">Not Inspected</span>' : number_format($row->tebal_actual);
+                return $row->tebal_actual === null ? '<span style="color:red;">Not Inspected</span>' : $row->tebal_actual;
             })
             ->addColumn('weight_actual', function ($row) {
                 return $row->weight_actual === null ? '<span style="color:red;">Not Inspected</span>' : number_format($row->weight_actual);
@@ -52,8 +55,8 @@ class StockController extends Controller
                 $html = '';
                 $html .= '<div style="margin-top:-10px;"><center>';
 
-                $html .= '<a title="Edit Stock" href="javascript:void(0);" onclick="editData(' . $row->id . ')" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
-                $html .= '<a title="Return Stock" href="javascript:void(0);" onclick="deleteData(' . $row->id . ')"><i class="fa fa-trash fa-tombol-delete"></i></a>';
+                $html .= '<a title="Edit Stock" href="javascript:void(0);" onclick="editData(' . $row->id . ', 1)" style="margin-right:6px;"><i class="fa fa-edit fa-tombol-edit"></i></a>';
+                $html .= '<a title="Return Stock" href="javascript:void(0);" onclick="editData(' . $row->id . ', 2)"><i class="fa fa-trash fa-tombol-delete"></i></a>';
                 $html .= '</center></div>';
                 return $html;
             })
@@ -111,7 +114,7 @@ class StockController extends Controller
      */
     public function edit($id)
     {
-        $data = GoodReceiveItem::find($id);
+        $data = GoodReceiveItem::with('product', 'goodReceive','retur')->find($id);
         return $data;
     }
 
@@ -124,7 +127,75 @@ class StockController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->all();
+        $aksi = $input['aksi'];
+
+        if ($aksi == 'retur') {
+            $rules = [
+                'return_note' => 'array|required',
+                'return_note.*' => 'nullable|string',
+                'return_image' => 'array',
+                'return_image.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ];
+
+            $validator = Validator::make($input, $rules);
+            if ($validator->fails()) {
+                $pesan = $validator->errors();
+                $pesanarr = explode(',', $pesan);
+                $find = ['[', ']', '{', '}'];
+                $html = '';
+                foreach ($pesanarr as $p) {
+                    $html .= str_replace($find, '', $p) . '<br>';
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $html,
+                ]);
+            }
+
+            $notes = $input['return_note'];
+            $images = $request->file('return_image', []); // bisa saja kosong
+
+            foreach ($notes as $index => $note) {
+                $path = null;
+
+                // jika ada file gambar di index yg sama
+                if (!empty($images[$index])) {
+                    // simpan ke storage/app/public/returns
+                    $path = $images[$index]->store('return', 'public');
+                }
+
+                StockReturnDetail::create([
+                    'note' => $note,
+                    'return_image' => $path, // bisa null jika tak ada gambar
+                    'stock_id' => $id, // contoh relasi
+                    'userid' => $this->set_owner_id(Auth::user()->id),
+                ]);
+            }
+
+            GoodReceiveItem::where('id', $id)->update([
+                "stock_status" => 2,
+                "return_date" => Carbon::now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } else {
+            $data = GoodReceiveItem::find($id);
+            $data->tebal_actual = $input['tebal_actual'];
+            $data->weight_actual = $input['weight_actual'];
+            $data->note = $input['note'];
+            $data->remark = $input['remark'];
+            $data->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        }
     }
 
     /**
