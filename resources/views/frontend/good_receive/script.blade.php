@@ -84,7 +84,7 @@
                     "_token": csrf_token
                 },
                 success: function(data) {
-                    console.log(data);
+
                     var vendors = '';
                     vendors += data.po.vendor.vendor_name + '<br>';
                     vendors += data.po.vendor.alamat_tagihan + '<br>';
@@ -331,26 +331,33 @@
     function editData(id) {
         save_method = "edit";
         save_index = 'edit';
-        $('input[name=_method]').val('PATCH');
+       
         $.ajax({
             url: "{{ url('/good_receive') }}" + "/" + id + "/edit",
             type: "GET",
             dataType: "JSON",
             success: function(data) {
-                console.log(data);
-               
-                if(data.good_status == 2) {
+
+
+                if (data.good_status == 2) {
+                    $('input[name="_method"]').val('POST');
+
                     $('.modal-title').text("Edit Penerimaan Barang Titipan");
                     $('#modal-titipan').modal("show");
                     $("#titipan_id").val(data.id);
                     $('#titipan_number').val(data.gr_number);
-                    $("#customer_id").val(data.vendor_id);
+                    $("#customer_id").val(data.vendor_id).trigger('change');
                     $("#titipan_product_category").val(data.product_category);
-                    $("#titipan_warehouse_id").val(data.warehouse_id);
+                    $("#titipan_warehouse_id").val(data.warehouse_id).trigger('change');
                     $("#titipan_gr_date").val(data.gr_date);
                     $("#titipan_mills").val(data.mills);
                     $("#titipan_status").html('<span class="text-success">Selesai</span>');
+                    edit_item_titipan(data);
+                    $("#titipan_total_weight").val(ribuan(data.total_weight));
+                    $("#titipan_total_weight_received").val(ribuan(data.total_weight_received));
+                    $("#titipan_total_weight_outstanding").val(ribuan(data.total_weight_outstanding));
                 } else {
+                    $('input[name=_method]').val('PATCH');
                     $('.modal-title').text("Edit Penerimaan Barang Masuk");
                     $('#modal-add').modal("show");
                     $("#id").val(data.id);
@@ -364,10 +371,176 @@
         })
     }
 
+    function edit_item_titipan(kirim) {
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $("#product_titipan").html('');
+
+        $.ajax({
+            url: "{{ route('product.category') }}",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                "category": kirim.product_category,
+                "_token": csrf_token
+            },
+            success: function(data) {
+                $.each(kirim.item, function(i, obj) {
+                    show_item_edit_titipan(obj, data);
+                });
+            }
+        });
+    }
+
+
+    function show_item_edit_titipan(data, prodList) {
+        console.log(prodList);
+
+        var HTML = '';
+
+        // let locationOptions = `
+        // <option value="" disabled selected>
+        //     Pilih Lokasi
+        // </option>`;
+
+        
+        const selectedLocation = data.location; 
+        let locationOptions = '';
+
+        for (let t = 0; t < locationList.length; t++) {
+            const loc = locationList[t];
+            const isSelected = loc.location_name === selectedLocation ? 'selected' : '';
+            locationOptions += `<option value="${loc.location_name}" ${isSelected}>${loc.location_name}</option>`;
+        }
+
+
+        const selectedProduct = data.product_id; 
+        let productOptions = '';
+
+        for (let p = 0; p < prodList.length; p++) {
+            const prod = prodList[p];
+            const isSelected = prod.id === selectedProduct ? 'selected' : '';
+            productOptions += `<option value="${prod.id}" ${isSelected}>${prod.product_name}</option>`;
+        }
+
+        HTML += `<div id="row_titipan_${rowTitipan}" class="row">
+            <div class="col-1">
+                <div class="form-group">
+                    <label>Nomor SP</label>
+                    
+                    <input value="${data.gr_id}" type="hidden" id="gr_id_item_titipan_${rowTitipan}" name="gr_id_item[]">
+                    <input value="${data.gr_id}" type="hidden" id="good_id_item_titipan_${rowTitipan}" name="good_id_item[]">
+                    <input value="${data.sp_number}" type="text" class="form-control sm-input"
+                        id="sp_number_titipan_${rowTitipan}" name="sp_number[]">
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Tgl Kirim</label>
+                    <input value="${data.delivery_date}" type="date" class="form-control sm-input"
+                        id="delivery_date_titipan_${rowTitipan}" name="delivery_date[]">
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Tgl Datang</label>
+                    <input value="${data.arrive_date}" type="date" class="form-control sm-input"
+                        id="arrive_date_titipan_${rowTitipan}" name="arrive_date[]">
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Nomor Coil</label>
+                    <input value="${data.coil_number}" type="text" class="form-control sm-input"
+                        id="coil_number_titipan_${rowTitipan}" name="coil_number[]">
+                </div>
+            </div>
+
+            <div class="col-3 col-custom">
+                <div class="form-group">
+                    <label>Spec</label>
+                    <select onchange="selected_product(${rowTitipan})" class="form-control sm-input product-id"
+                        id="product_id_titipan_${rowTitipan}" name="product_id[]">
+                        ${productOptions}
+                    </select>
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Tebal</label>
+                    <input value="${data.tebal}" readonly type="text" class="form-control sm-input"
+                        id="tebal_titipan_${rowTitipan}" name="tebal[]">
+
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Lebar</label>
+                    <input value="${data.lebar}" readonly type="text" class="form-control sm-input"
+                        id="lebar_titipan_${rowTitipan}" name="lebar[]">
+
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Panjang</label>
+                    <input value="${data.panjang}" readonly type="text" class="form-control sm-input"
+                        id="panjang_titipan_${rowTitipan}" name="panjang[]">
+
+                </div>
+            </div>
+            
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Satuan</label>
+                    <input value="${data.satuan}" readonly type="text" class="form-control sm-input"
+                        id="satuan_titipan_${rowTitipan}" name="satuan[]">
+
+                </div>
+            </div>
+            <div class="col-2 col-custom">
+                <div class="form-group">
+                    <label>Received</label>
+                    <input value="${data.weight_received}" onkeyup="weight_titipan_onchange(${rowTitipan}, this)" type="number" class="form-control sm-input berat-titipan-diterima"
+                        id="weight_received_titipan_${rowTitipan}" name="weight_received[]"
+                        placeholder="Berat">
+
+                </div>
+            </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Lokasi</label>
+                    <select class="form-control sm-input" id="location_titipan_${rowTitipan}"
+                        name="location[]">
+                        <option value="" selected disabled>Pilih</option>
+                        ${locationOptions}
+                    </select>
+
+                </div>
+            </div>
+            <button type="button" class="btn btn-hapus-row2"
+                onclick="hapusBarisTitipan(${rowTitipan})" title="Hapus baris">
+                <i class="fa fa-remove"></i>
+            </button>
+            <button type="button" class="btn btn-tambah-row2"
+                onclick="tambahBarisTitipan(${rowTitipan})" title="tambah/copy data produk">
+                <i class="fa fa-plus"></i>
+            </button>
+
+        </div>`;
+
+
+        $("#product_titipan").append(HTML);
+        rowTitipan++;
+    }
+
+
+
+
+
 
 
     function viewData(id) {
-       
+
         $("#purchase_id_show").val(id);
         $.ajax({
             url: "{{ url('good_receive') }}" + "/" + id,
@@ -567,10 +740,10 @@
                 HTML += '</div>';
 
                 $("#modal-view-content").html(HTML);
-                if(data.gr.good_status == 2) {
-                     $(".modal-title").text('Detail Penerimaan Barang Titipan');
+                if (data.gr.good_status == 2) {
+                    $(".modal-title").text('Detail Penerimaan Barang Titipan');
                 } else {
-                     $(".modal-title").text('Detail Penerimaan Barang Masuk');
+                    $(".modal-title").text('Detail Penerimaan Barang Masuk');
                 }
                 $("#modal-view").modal("show");
             }
@@ -746,7 +919,7 @@
             </div>`;
 
             rowIndex++;
-            console.log(rowIndex);
+
         }
 
 
@@ -890,38 +1063,49 @@
 
 
     function hapusBarisTitipan(index) {
-        Swal.fire({
-            icon: 'question',
-            title: 'Hapus data ini?',
+        if (index == 1) {
+            Swal.fire({
+                icon: "warning",
+                title: "",
+                text: 'Baris pertama tidak boleh dihapus',
+                footer: ''
+            });
+        } else {
+            Swal.fire({
+                icon: 'question',
+                title: 'Hapus data ini?',
 
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal',
-        }).then((result) => {
-            if (result.isConfirmed) {
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-                let $row = $("#row_titipan_" + index);
+                    let $row = $("#row_titipan_" + index);
 
-                if ($row.length) { // pastikan row ada
-                    $row.fadeOut(200, function() {
-                        $(this).remove();
+                    if ($row.length) { // pastikan row ada
+                        $row.fadeOut(200, function() {
 
-                        // Cek dulu apakah fungsi hitung_subtotal ada
-                        if (typeof hitung_total_berat_titipan === "function") {
-                            try {
-                                hitung_total_berat_titipan();
-                            } catch (err) {
-                                console.error("Error saat hitung_total_berat_titipan:", err);
+                            $(this).remove();
+
+                            // Cek dulu apakah fungsi hitung_subtotal ada
+                            if (typeof hitung_total_berat_titipan === "function") {
+                                try {
+                                    hitung_total_berat_titipan();
+                                } catch (err) {
+                                    console.error("Error saat hitung_total_berat_titipan:", err);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+
+
                 }
+            });
+        }
 
-
-            }
-        });
 
     }
 
@@ -1328,7 +1512,7 @@
                 "_token": csrf_token
             },
             success: function(data) {
-                console.log(data);
+
 
                 var cust = '';
                 cust += '<strong>' + data.nama_lengkap + '</strong><br>';
@@ -1358,7 +1542,7 @@
                 "_token": csrf_token
             },
             success: function(data) {
-                console.log(data);
+
 
                 var cust = '';
                 cust += '<strong>' + data.name + '</strong><br>';

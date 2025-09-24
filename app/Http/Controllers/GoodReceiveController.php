@@ -721,4 +721,127 @@ class GoodReceiveController extends Controller
             ]);
         }
     }
+
+    public function titipanEdit(Request $request)
+    {
+        $input = $request->all();
+        $rules = [
+            'titipan_number' => 'required',
+            'titipan_gr_date' => 'required',
+            'sp_number.*' => 'required',
+            'delivery_date.*' => 'required',
+            'product_id.*' => 'required',
+            'arrive_date.*' => 'required',
+            'coil_number.*' => 'required',
+            'weight_received.*' => 'required',
+            'total_weight' => 'required',
+            'total_weight_received' => 'required',
+            'total_weight_outstanding' => 'required',
+        ];
+
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $pesan = $validator->errors();
+            $pesanarr = explode(',', $pesan);
+            $find = ['[', ']', '{', '}'];
+            $html = '';
+            foreach ($pesanarr as $p) {
+                $html .= str_replace($find, '', $p) . '<br>';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $html,
+            ]);
+        }
+
+        // $total_weight_po = PurchaseOrderItem::where('purchase_order_id', $input['po_id'])->count();
+
+        try {
+            DB::beginTransaction();
+            $id = $input['titipan_id'];
+            $userid = $this->set_owner_id(Auth::user()->id);
+
+            // $jatuh_tempo = $this->hitung_jatuh_tempo($order->purchase_order_date, $order->payment_methods->term_days);
+
+            $wo = str_replace('.', '', $input['total_weight_outstanding']);
+
+            $input['po_id'] = 0;
+            $input['po_number'] = $input['titipan_number'];
+            $input['gr_number'] = $input['titipan_number'];
+            $input['gr_date'] = $input['titipan_gr_date'];
+            $input['contract_number'] = $input['titipan_number'];
+            $input['vendor_id'] = $input['customer_id'];
+            $input['warehouse_id'] = $input['titipan_warehouse_id'];
+            $input['mills'] = $input['titipan_mills'];
+            $input['product_category'] = $input['titipan_product_category'];
+            $input['total_quantity'] = 0;
+            $input['total_weight'] = str_replace('.', '', $input['total_weight_received']);
+            $input['total_weight_received'] = str_replace('.', '', $input['total_weight_received']);
+            $input['total_weight_outstanding'] = $wo;
+            $input['request_user_id'] = Auth::user()->id;
+            $input['userid'] = $userid;
+            $input['status'] = 4;
+
+            $good = GoodReceive::find($id);
+            $good->update($input);
+            $items = $input['product_id'];
+
+            if (count($items) > 0) {
+                $good_item = GoodReceiveItem::where('gr_id', $id)->delete();
+
+                if ($good_item) {
+                    foreach ($items as $index => $item) {
+                        $lastCode = GoodReceiveItem::where('product_number', 'like', 'SJJBS%')->orderBy('id', 'desc')->value('product_number');
+
+                        $lastNumber = 0;
+                        if ($lastCode && preg_match('/^SJJBS(\d+)$/', $lastCode, $m)) {
+                            $lastNumber = (int) $m[1];
+                        }
+                        $nextNumber = $lastNumber + 1;
+                        $sjjbsCode = 'SJJBS' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+                        GoodReceiveItem::create([
+                            'gr_id' => $id,
+                            'po_item_id' => $id,
+                            'good_id_item' => $id,
+                            'sp_number' => $input['sp_number'][$index],
+                            'delivery_date' => $input['delivery_date'][$index],
+                            'arrive_date' => $input['arrive_date'][$index],
+                            'coil_number' => $input['coil_number'][$index],
+                            'product_id' => $input['product_id'][$index],
+                            'tebal' => $input['tebal'][$index],
+                            'lebar' => $input['lebar'][$index],
+                            'panjang' => $input['panjang'][$index],
+                            'product_number' => $sjjbsCode,
+                            'weight' => $input['weight_received'][$index],
+                            'weight_received' => $input['weight_received'][$index],
+                            'weight_outstanding' => 0,
+                            'satuan' => $input['satuan'][$index],
+                            'location' => $input['location'][$index],
+                            'userid' => $userid,
+                        ]);
+                    }
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "tidak ada item untuk diupdate",
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }
