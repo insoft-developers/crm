@@ -1565,7 +1565,7 @@
         e.preventDefault();
         var id = $('#titipan_id').val();
         if (save_method == "add") url = "{{ route('titipan.add') }}";
-        else url = "{{ route('titipan.edit') }}";
+        else url = "{{ route('good.titipan.edit') }}";
         $.ajax({
             url: url,
             type: "POST",

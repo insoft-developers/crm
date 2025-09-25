@@ -7,13 +7,17 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoodReceiveController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MillsController;
+use App\Http\Controllers\OpnameController;
+use App\Http\Controllers\PrefixController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TaxController;
+use App\Http\Controllers\TitipanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\WarehouseController;
@@ -147,10 +151,22 @@ Route::group(['middleware' => ['auth', 'verified', 'is_active']], function () {
   Route::post('customer_detail', [GoodReceiveController::class, 'customerDetail'])->name('customer.detail');
   Route::post('warehouse_detail', [GoodReceiveController::class, 'warehouseDetail'])->name('warehouse.detail');
   Route::post('good_titipan_add', [GoodReceiveController::class, 'titipanAdd'])->name('titipan.add');
-  Route::post('good_titipan_edit', [GoodReceiveController::class, 'titipanEdit'])->name('titipan.edit');
+  Route::post('good_titipan_edit', [GoodReceiveController::class, 'titipanEdit'])->name('good.titipan.edit');
 
   Route::resource('stock', StockController::class);
   Route::get('stock_table', [StockController::class, 'stockTable'])->name('stock.table');
+
+  Route::resource('titipan', TitipanController::class);
+  Route::get('titipan_table', [TitipanController::class, 'titipanTable'])->name('titipan.table');
+
+  Route::resource('opname', OpnameController::class);
+  Route::get('opname_table', [OpnameController::class, 'opnameTable'])->name('opname.table');
+
+  Route::resource('location', LocationController::class);
+  Route::get('location_table', [LocationController::class, 'locationTable'])->name('location.table');
+
+  Route::resource('prefix_setting', PrefixController::class);
+  Route::get('prefix_setting_table', [PrefixController::class, 'prefixSettingTable'])->name('prefix.setting.table');
 
 
 });

@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title">Kelola Stok Barang</h4>
+                            <h4 class="card-title">Kelola Stok Opname</h4>
 
                         </div>
                     </div>
@@ -66,10 +66,12 @@
                                         <th scope="col">Mill</th>
                                         <th scope="col">Lokasi</th>
                                         <th scope="col">Tebal Aktual</th>
+                                        <th scope="col">Tebal Fisik</th>
                                         <th scope="col">Nomor Barang</th>
                                         <th scope="col">Nomor Coil</th>
                                         <th scope="col">Berat</th>
                                         <th scope="col">Berat Aktual</th>
+                                        <th scope="col">Berat Fisik</th>
                                         <th scope="col">Keterangan</th>
                                         <th scope="col">Status</th>
                                         <th style="width: 200px;" scope="col">Actions</th>
@@ -86,10 +88,10 @@
         </div>
     </div>
 
-    @include('frontend.stock.modal_edit')
+    @include('frontend.opname.modal_edit')
     
 </x-app-layout>
 
 
 
-@include('frontend.stock.script')
+@include('frontend.opname.script')

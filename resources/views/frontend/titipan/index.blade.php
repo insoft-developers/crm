@@ -6,7 +6,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title">Kelola Stok Barang</h4>
+                            <h4 class="card-title">Kelola Stok Sewa Gudang</h4>
 
                         </div>
                     </div>
@@ -86,10 +86,10 @@
         </div>
     </div>
 
-    @include('frontend.stock.modal_edit')
+    @include('frontend.titipan.modal_edit')
     
 </x-app-layout>
 
 
 
-@include('frontend.stock.script')
+@include('frontend.titipan.script')

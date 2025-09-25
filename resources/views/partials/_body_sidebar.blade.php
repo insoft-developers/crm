@@ -199,7 +199,7 @@
                         </li>
                         <li class="list-subtitle">
                             <a href="{{ url('titipan') }}">
-                                <i class="las la-minus"></i><span class="subtitle">Kelola Stok Titipan</span>
+                                <i class="las la-minus"></i><span class="subtitle">Kelola Stok Sewa Gudang</span>
                             </a>
                         </li>
                         <li class="list-subtitle">
@@ -310,6 +310,11 @@
                     </a>
                     <ul id="settingan" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                         <li class="list-subtitle">
+                            <a href="{{ url('prefix_setting') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Prefix Setting</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
                             <a href="{{ url('karyawan') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Manajemen Data<br>Karyawan</span>
                             </a>
@@ -349,6 +354,11 @@
                         <li class="list-subtitle">
                             <a href="{{ url('warehouse') }}">
                                 <i class="las la-minus"></i><span class="subtitle">Warehouse Data</span>
+                            </a>
+                        </li>
+                        <li class="list-subtitle">
+                            <a href="{{ url('location') }}">
+                                <i class="las la-minus"></i><span class="subtitle">Location Data</span>
                             </a>
                         </li>
                         <li class="list-subtitle">

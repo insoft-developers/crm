@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NumberPrefix;
 use App\Models\Product;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
@@ -370,12 +371,21 @@ class PurchaseRequestController extends Controller
     // di controller
     public function generatePrNumber(Request $request)
     {
+        
+        $prefix = NumberPrefix::where('userid', $this->set_owner_id(Auth::user()->id))->first();
+        $prefix_used = '';
+        if($prefix) {
+            $prefix_used = $prefix->purchase_request;
+        }  else {
+            $prefix_used = "PR";
+        }
+        
         $lastPR = PurchaseRequest::latest('id')
             ->first();
 
         $nextNumber = $lastPR ? $lastPR->id + 1 : 1;
 
-        $prNumber = 'PR-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        $prNumber = $prefix_used . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
         return response()->json(['pr_number' => $prNumber]);
     }

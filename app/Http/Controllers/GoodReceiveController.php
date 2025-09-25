@@ -7,6 +7,7 @@ use App\Models\GoodReceive;
 use App\Models\GoodReceiveItem;
 use App\Models\Location;
 use App\Models\Mills;
+use App\Models\NumberPrefix;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -514,14 +515,26 @@ class GoodReceiveController extends Controller
     {
         $type = $request->type;
 
+        $prefix = NumberPrefix::where('userid', $this->set_owner_id(Auth::user()->id))->first();
+        $prefix_used = '';
+        $prefix_used2 = '';
+        if($prefix) {
+            $prefix_used = $prefix->good_receive;
+            $prefix_used2 = $prefix->titipan;
+        }  else {
+            $prefix_used = "GR";
+            $prefix_used2 = "TI";
+        }
+
+
         $lastPR = GoodReceive::latest('id')->first();
 
         $nextNumber = $lastPR ? $lastPR->id + 1 : 1;
 
         if ($type == 1) {
-            $prNumber = 'GR-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $prNumber = $prefix_used. '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         } else {
-            $prNumber = 'PT-' . date('Ymd') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $prNumber = $prefix_used2. '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
 
         return response()->json(['gr_number' => $prNumber]);

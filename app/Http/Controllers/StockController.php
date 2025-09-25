@@ -14,12 +14,33 @@ use Yajra\DataTables\Facades\DataTables;
 class StockController extends Controller
 {
     use CommonTrait;
-    public function stockTable()
+    public function stockTable(Request $request)
     {
         $userid = $this->set_owner_id(Auth::user()->id);
-        $data = GoodReceiveItem::where('userid', $userid)->whereHas('goodReceive', function ($q) {
+        $query = GoodReceiveItem::where('userid', $userid)->whereHas('goodReceive', function ($q) {
             $q->where('good_status', 1);
         });
+
+        if ($request->product_name_filter) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('product_name', 'like', '%'.$request->product_name_filter.'%');
+            });
+        }
+
+        // filter status
+        if ($request->coil_number_filter) {
+            $query->where('coil_number', 'like', '%'.$request->coil_number_filter.'%');
+        }
+
+        if ($request->product_number_filter) {
+            $query->where('product_number', 'like', '%'.$request->product_number_filter.'%');
+        }
+
+        if ($request->tebal_filter) {
+            $query->where('tebal', 'like', '%'.$request->tebal_filter.'%');
+        }
+
+        $data = $query->get();
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('mills', function ($row) {
