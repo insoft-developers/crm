@@ -73,6 +73,10 @@
                 name: 'coil_number'
             },
             {
+                data: 'quantity_received',
+                name: 'quantity_received'
+            },
+            {
                 data: 'weight_received',
                 name: 'weight_received'
             },

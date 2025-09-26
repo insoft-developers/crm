@@ -14,11 +14,11 @@
 
     function get_po_data(id = null) {
         var csrf_token = $('meta[name="csrf-token"]').attr('content');
-
         $.ajax({
             url: "{{ route('get.po.data') }}",
             type: "POST",
             data: {
+                "po_id":id,
                 "_token": csrf_token
             },
             success: function(data) {
@@ -132,7 +132,7 @@
                     $("#product_category").text(data.po.product_category);
 
                     $("#delivery_method").text(data.po.delivery_methods.name);
-                    $("#description").text(data.po.description);
+                    $("#description").html(data.po.description);
                     var status_text = null;
                     if (data.po.status == 1) {
                         status_text = 'Dikirim';
@@ -356,15 +356,17 @@
                     $("#titipan_total_weight").val(ribuan(data.total_weight));
                     $("#titipan_total_weight_received").val(ribuan(data.total_weight_received));
                     $("#titipan_total_weight_outstanding").val(ribuan(data.total_weight_outstanding));
+                    $("#titipan_sp_number").val(data.sp_number);
                 } else {
                     $('input[name=_method]').val('PATCH');
                     $('.modal-title').text("Edit Penerimaan Barang Masuk");
                     $('#modal-add').modal("show");
                     $("#id").val(data.id);
                     $("#gr_number").val(data.gr_number);
-                    get_po_data(data.po_id);
+                    get_po_data(data.po_id, 1);
                     $("#gr_date").val(data.gr_date);
                     $("#contract_number").val(data.contract_number);
+                    $("#sp_number").val(data.sp_number);
                 }
 
             }
@@ -397,14 +399,14 @@
 
         var HTML = '';
 
-        // let locationOptions = `
-        // <option value="" disabled selected>
-        //     Pilih Lokasi
-        // </option>`;
+         
 
         
         const selectedLocation = data.location; 
-        let locationOptions = '';
+        let locationOptions = `
+            <option value="" ${!data.location ? 'selected' : ''}>
+                Pilih Lokasi
+            </option>`;
 
         for (let t = 0; t < locationList.length; t++) {
             const loc = locationList[t];
@@ -423,19 +425,12 @@
         }
 
         HTML += `<div id="row_titipan_${rowTitipan}" class="row">
+            
             <div class="col-1">
                 <div class="form-group">
-                    <label>Nomor SP</label>
-                    
+                    <label>Tgl Kirim</label>
                     <input value="${data.gr_id}" type="hidden" id="gr_id_item_titipan_${rowTitipan}" name="gr_id_item[]">
                     <input value="${data.gr_id}" type="hidden" id="good_id_item_titipan_${rowTitipan}" name="good_id_item[]">
-                    <input value="${data.sp_number}" type="text" class="form-control sm-input"
-                        id="sp_number_titipan_${rowTitipan}" name="sp_number[]">
-                </div>
-            </div>
-            <div class="col-1 col-custom">
-                <div class="form-group">
-                    <label>Tgl Kirim</label>
                     <input value="${data.delivery_date}" type="date" class="form-control sm-input"
                         id="delivery_date_titipan_${rowTitipan}" name="delivery_date[]">
                 </div>
@@ -488,6 +483,14 @@
 
                 </div>
             </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input value="${data.quantity_received}" type="number" class="form-control sm-input"
+                        id="quantity_received_titipan_${rowTitipan}" name="quantity_received[]">
+
+                </div>
+            </div>
             
             <div class="col-1 col-custom">
                 <div class="form-group">
@@ -511,7 +514,7 @@
                     <label>Lokasi</label>
                     <select class="form-control sm-input" id="location_titipan_${rowTitipan}"
                         name="location[]">
-                        <option value="" selected disabled>Pilih</option>
+                      
                         ${locationOptions}
                     </select>
 
@@ -574,9 +577,9 @@
                 HTML += '<td width="2%">:</td>';
                 HTML += '<td width="*">' + data.gr.contract_number + '</td>';
 
-                HTML += '<td width="15%"></td>';
+                HTML += '<td width="15%">SP Number</td>';
                 HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*"></td>';
+                HTML += '<td width="*">'+data.gr.sp_number+'</td>';
                 HTML += '</tr>';
 
                 HTML += '<tr>';
@@ -637,9 +640,9 @@
                 HTML += '<tr>';
 
 
-                HTML += '<td width="15%">Deskripsi</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.gr.description + '</td>';
+                HTML += '<td style="vertical-align:top;" width="15%">Deskripsi</td>';
+                HTML += '<td style="vertical-align:top;" width="2%">:</td>';
+                HTML += '<td style="vertical-align:top;" width="*">' + data.gr.description + '</td>';
                 HTML += '</tr>';
 
 
@@ -688,7 +691,7 @@
                 HTML += '<tr>';
 
                 HTML += '<tr>';
-                HTML += '<th>Nomor SP</th>';
+                
                 HTML += '<th>Tgl Kirim</th>';
                 HTML += '<th>Tgl Datang</th>';
                 HTML += '<th>Nomor Coil</th>';
@@ -696,6 +699,7 @@
                 HTML += '<th>Tebal</th>';
                 HTML += '<th>Lebar</th>';
                 HTML += '<th>Panjang</th>';
+                HTML += '<th>Quantity</th>';
                 HTML += '<th>Satuan</th>';
                 HTML += '<th>Berat</th>';
                 HTML += '<th>Berat Received</th>';
@@ -704,7 +708,7 @@
 
                 for (var i = 0; i < data.gr.item.length; i++) {
                     HTML += '<tr>';
-                    HTML += '<td>' + data.gr.item[i].sp_number + '</td>';
+                    
                     HTML += '<td>' + data.gr.item[i].delivery_date + '</td>';
                     HTML += '<td>' + data.gr.item[i].arrive_date + '</td>';
                     HTML += '<td>' + data.gr.item[i].coil_number + '</td>';
@@ -712,6 +716,7 @@
                     HTML += '<td>' + data.gr.item[i].tebal + '</td>';
                     HTML += '<td>' + data.gr.item[i].lebar + '</td>';
                     HTML += '<td>' + data.gr.item[i].panjang + '</td>';
+                    HTML += '<td>' + data.gr.item[i].quantity_received + '</td>';
                     HTML += '<td>' + data.gr.item[i].satuan + '</td>';
                     HTML += '<td>' + ribuan(data.gr.item[i].weight) + '</td>';
                     HTML += '<td>' + ribuan(data.gr.item[i].weight_received) + '</td>';
@@ -775,6 +780,7 @@
         $("#total_weight").val("");
         $("#total_weight_received").val("");
         $("#total_weight_outstanding").val("");
+        $("#sp_number").val("");
 
         $("#product_items").html('<center>Belum ada daftar produk</center>');
     }
@@ -791,7 +797,7 @@
 
 
             let locationOptions = `
-            <option value="" disabled ${!data.item[i].location ? 'selected' : ''}>
+            <option value="" ${!data.item[i].location ? 'selected' : ''}>
                 Pilih Lokasi
             </option>`;
 
@@ -806,19 +812,12 @@
             // <input value="${ save_index == 'edit' ? data.item[i].id: ''}" type="hidden" id="gr_item_id_${rowIndex}" name="gr_item_id[]">
 
             HTML += `<div id="row_${rowIndex}" class="row">
+                
                 <div class="col-1">
                     <div class="form-group">
-                        <label>Nomor SP</label>
-                        
+                        <label>Tgl Kirim</label>
                         <input value="${ save_index == 'edit' ? data.item[i].id :''}" type="hidden" id="gr_id_item_${rowIndex}" name="gr_id_item[]">
                         <input value="${ save_index == 'edit' ? data.item[i].po_item_id : data.item[i].id}" type="hidden" id="good_id_item_${rowIndex}" name="good_id_item[]">
-                        <input value="${ save_index == 'edit' ? data.item[i].sp_number : ''}" type="text" class="form-control sm-input"
-                            id="sp_number_${rowIndex}" name="sp_number[]">
-                    </div>
-                </div>
-                <div class="col-1 col-custom">
-                    <div class="form-group">
-                        <label>Tgl Kirim</label>
                         <input value="${save_index == 'edit' ? data.item[i].delivery_date :'' }" type="date" class="form-control sm-input"
                             id="delivery_date_${rowIndex}" name="delivery_date[]">
                     </div>
@@ -870,6 +869,15 @@
 
                     </div>
                 </div>
+
+                <div class="col-1 col-custom">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input value="${data.item[i].quantity_received}" type="number" class="form-control sm-input"
+                            id="quantity_received_${rowIndex}" name="quantity_received[]">
+
+                    </div>
+                </div>
                 
                 <div class="col-1 col-custom">
                     <div class="form-group">
@@ -901,7 +909,7 @@
                         <label>Lokasi</label>
                         <select class="form-control sm-input" id="location_${rowIndex}"
                             name="location[]">
-                            <option value="" selected disabled>Pilih</option>
+                           
                             ${locationOptions}
                         </select>
 
@@ -1137,6 +1145,7 @@
         var tebal = $("#tebal_" + index).val();
         var lebar = $("#lebar_" + index).val();
         var panjang = $("#panjang_" + index).val();
+        var quantity_received = $("#quantity_received_" + index).val();
         var quantity = 0;
         var satuan = $("#satuan_" + index).val();
         var weight = 0;
@@ -1146,7 +1155,7 @@
         var HTML = '';
 
         let locationOptions = `
-        <option value="" disabled selected>
+        <option value="">
             Pilih Lokasi
         </option>`;
 
@@ -1160,18 +1169,11 @@
         // <input value="${ save_index == 'edit' ? data.item[i].id: ''}" type="hidden" id="gr_item_id_${rowIndex}" name="gr_item_id[]">
 
         HTML += `<div id="row_${rowIndex}" class="row">
+            
             <div class="col-1">
                 <div class="form-group">
-                    <label>Nomor SP</label>
-                    
                     <input type="hidden" id="gr_id_item_${rowIndex}" name="gr_id_item[]">
                     <input value="${good_id_item}" type="hidden" id="good_id_item_${rowIndex}" name="good_id_item[]">
-                    <input type="text" class="form-control sm-input"
-                        id="sp_number_${rowIndex}" name="sp_number[]">
-                </div>
-            </div>
-            <div class="col-1 col-custom">
-                <div class="form-group">
                     <label>Tgl Kirim</label>
                     <input type="date" class="form-control sm-input"
                         id="delivery_date_${rowIndex}" name="delivery_date[]">
@@ -1224,6 +1226,14 @@
 
                 </div>
             </div>
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input value="${quantity_received}" type="number" class="form-control sm-input"
+                        id="quantity_received_${rowIndex}" name="quantity_received[]">
+
+                </div>
+            </div>
             
             <div class="col-1 col-custom">
                 <div class="form-group">
@@ -1255,7 +1265,7 @@
                     <label>Lokasi</label>
                     <select class="form-control sm-input" id="location_${rowIndex}"
                         name="location[]">
-                        <option value="" selected disabled>Pilih</option>
+                       
                         ${locationOptions}
                     </select>
 
@@ -1290,7 +1300,7 @@
         var HTML = '';
 
         let locationOptions = `
-        <option value="" disabled selected>
+        <option value="">
             Pilih Lokasi
         </option>`;
 
@@ -1304,19 +1314,12 @@
         // <input value="${ save_index == 'edit' ? data.item[i].id: ''}" type="hidden" id="gr_item_id_${rowIndex}" name="gr_item_id[]">
 
         HTML += `<div id="row_titipan_${rowTitipan}" class="row">
+            
             <div class="col-1">
                 <div class="form-group">
-                    <label>Nomor SP</label>
-                    
+                    <label>Tgl Kirim</label>
                     <input type="hidden" id="gr_id_item_titipan_${rowTitipan}" name="gr_id_item[]">
                     <input type="hidden" id="good_id_item_titipan_${rowTitipan}" name="good_id_item[]">
-                    <input type="text" class="form-control sm-input"
-                        id="sp_number_titipan_${rowTitipan}" name="sp_number[]">
-                </div>
-            </div>
-            <div class="col-1 col-custom">
-                <div class="form-group">
-                    <label>Tgl Kirim</label>
                     <input type="date" class="form-control sm-input"
                         id="delivery_date_titipan_${rowTitipan}" name="delivery_date[]">
                 </div>
@@ -1369,6 +1372,15 @@
 
                 </div>
             </div>
+
+            <div class="col-1 col-custom">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" class="form-control sm-input"
+                        id="quantity_received_titipan_${rowTitipan}" name="quantity_received[]">
+
+                </div>
+            </div>
             
             <div class="col-1 col-custom">
                 <div class="form-group">
@@ -1392,7 +1404,7 @@
                     <label>Lokasi</label>
                     <select class="form-control sm-input" id="location_titipan_${rowTitipan}"
                         name="location[]">
-                        <option value="" selected disabled>Pilih</option>
+                       
                         ${locationOptions}
                     </select>
 

@@ -8,10 +8,12 @@
         body {
             font-family: sans-serif;
             font-size: 12px;
+            height: auto;
+            
         }
 
         @page {
-            size: A4;
+            size: 160mm auto;
             margin: 5mm;
         }
 
@@ -23,13 +25,14 @@
         }
 
         .card {
-            width: 45%;
+            width: 90%;
             background: #ffffff;
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 16px;
             box-sizing: border-box;
             margin-bottom: 16px;
+            margin-right: 20px !important;
             /* jarak vertikal antar baris */
         }
 
@@ -45,9 +48,9 @@
         }
 
         .card {
-            float: left;
-            width: 45%;
-            margin: 0 2% 16px 0;
+            /* float: left; */
+            /* width: 100%;
+            margin: 0 16px 16px 0; */
         }
 
         .card:nth-child(2n) {

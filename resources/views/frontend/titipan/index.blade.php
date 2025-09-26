@@ -68,6 +68,7 @@
                                         <th scope="col">Tebal Aktual</th>
                                         <th scope="col">Nomor Barang</th>
                                         <th scope="col">Nomor Coil</th>
+                                        <th scope="col">Quantity</th>
                                         <th scope="col">Berat</th>
                                         <th scope="col">Berat Aktual</th>
                                         <th scope="col">Keterangan</th>

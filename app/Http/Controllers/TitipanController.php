@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodReceiveItem;
+use App\Models\Location;
 use App\Traits\CommonTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -88,7 +89,8 @@ class TitipanController extends Controller
      */
     public function index()
     {
-        return view('frontend.titipan.index');
+        $locations = Location::where('userid', $this->set_owner_id(Auth::user()->id))->get();
+        return view('frontend.titipan.index', compact('locations'));
     }
 
     /**
@@ -151,6 +153,7 @@ class TitipanController extends Controller
         $data->weight_actual = $input['weight_actual'];
         $data->note = $input['note'];
         $data->remark = $input['remark'];
+        $data->location = $input['location'];
         $data->save();
 
         return response()->json([

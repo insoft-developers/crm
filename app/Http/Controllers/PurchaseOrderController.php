@@ -383,7 +383,7 @@ class PurchaseOrderController extends Controller
                 'product_category' => $input['product_category'],
                 'payment_method' => $input['payment_method'],
                 'delivery_method' => $input['delivery_method'],
-                
+                'description' => $input['description'],
                 'subtotal' => $input['subtotal'],
                 'total_tax' => $input['total_tax'],
                 'total_price' => $input['total_price'],

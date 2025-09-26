@@ -1,5 +1,7 @@
 <!-- JAVASCRIPT -->
 <script>
+
+    CKEDITOR.replace('description_text');
     const taxList = @json($taxes);
 
 
@@ -260,10 +262,14 @@
         var id = $('#id').val();
         if (save_method == "add") url = "{{ url('/purchase_order') }}";
         else url = "{{ url('/purchase_order') . '/' }}" + id;
+        
+        var description_text = CKEDITOR.instances.description_text.getData();
+        var form = new FormData($('#modal-add form')[0]);
+        form.append('description', description_text);
         $.ajax({
             url: url,
             type: "POST",
-            data: new FormData($('#modal-add form')[0]),
+            data: form,
             contentType: false,
             processData: false,
             success: function(data) {
@@ -310,7 +316,8 @@
                 $("#product_category").val(data.purchase.product_category);
                 $("#payment_method").val(data.purchase.payment_method);
                 $("#delivery_method").val(data.purchase.delivery_method);
-                $("#description").val(data.purchase.description);
+                // $("#description").val(data.purchase.description);
+                CKEDITOR.instances.description_text.setData(data.purchase.description);
                 // set vendor_id dulu
                 $("#vendor_id")
                     .val(data.purchase.vendor_id)
@@ -444,12 +451,12 @@
                     .purchase.vendor.vendor_name + '<br>' + data.purchase.vendor.alamat_tagihan + '<br>' +
                     data.purchase.vendor.city.city_name + '<br>' + data.purchase.vendor.province
                     .province_name + ' ' + data.purchase.vendor.postal_code + '<br>' + data.purchase.vendor
-                    .kontak_tagihan + '</td>';
+                    .kontak_tagihan + '<br><strong>Nomor Pajak : </strong>' + data.purchase.vendor.npwp + '</td>';
 
                 HTML += '<td style="vertical-align: top;" rowspan="5" colspan="3" width="8%">' + data
                     .purchase.gudang.name + '<br>' + data.purchase.gudang.address + '<br>' + data.purchase
                     .gudang.rcity.city_name + '<br>' + data.purchase.gudang.rprovince.province_name + ' ' +
-                    data.purchase.gudang.postal_code + '<br>' + data.purchase.gudang.contact + '</td>';
+                    data.purchase.gudang.postal_code + '<br>' + data.purchase.gudang.contact + '<br><strong>Nomor Pajak : </strong>'+ data.purchase.vendor.npwp +'</td>';
 
                 HTML += '<td width="15%">Kategori</td>';
                 HTML += '<td width="2%">:</td>';
@@ -482,21 +489,19 @@
                 HTML += '</tr>';
 
                 HTML += '<tr>';
-
-
-                HTML += '<td width="15%">Deskripsi</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.description + '</td>';
+                HTML += '<td style="vertical-align:top;" width="15%">Deskripsi</td>';
+                HTML += '<td style="vertical-align:top;" width="2%">:</td>';
+                HTML += '<td style="vertical-align:top;" width="*">' + data.purchase.description + '</td>';
                 HTML += '</tr>';
 
 
                 HTML += '<tr>';
-                HTML += '<td width="8%">Nomor Pajak</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.vendor.npwp + '</td>';
-                HTML += '<td width="8%">Nomor Pajak</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.vendor.npwp + '</td>';
+                HTML += '<td width="8%"></td>';
+                HTML += '<td width="2%"></td>';
+                HTML += '<td width="*"></td>';
+                HTML += '<td width="8%"></td>';
+                HTML += '<td width="2%"></td>';
+                HTML += '<td width="*"></td>';
 
                 HTML += '<td width="15%">Status</td>';
                 HTML += '<td width="2%">:</td>';

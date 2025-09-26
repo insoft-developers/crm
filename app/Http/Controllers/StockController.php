@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodReceiveItem;
+use App\Models\Location;
 use App\Models\StockReturnDetail;
 use App\Traits\CommonTrait;
 use Carbon\Carbon;
@@ -92,7 +93,8 @@ class StockController extends Controller
      */
     public function index()
     {
-        return view('frontend.stock.index');
+        $locations = Location::where('userid', $this->set_owner_id(Auth::user()->id))->get();
+        return view('frontend.stock.index',compact('locations'));
     }
 
     /**
@@ -238,6 +240,7 @@ class StockController extends Controller
             $data->weight_actual = $input['weight_actual'];
             $data->note = $input['note'];
             $data->remark = $input['remark'];
+            $data->location = $input['location'];
             $data->save();
 
             return response()->json([

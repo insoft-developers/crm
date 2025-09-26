@@ -1,5 +1,9 @@
 <!-- JAVASCRIPT -->
 <script>
+
+
+    CKEDITOR.replace('description_text');
+
     let rowCount = 1;
 
     function add_product_item() {
@@ -229,10 +233,13 @@
         var id = $('#id').val();
         if (save_method == "add") url = "{{ url('/purchase_request') }}";
         else url = "{{ url('/purchase_request') . '/' }}" + id;
+        var description_text = CKEDITOR.instances.description_text.getData();
+        var form = new FormData($('#modal-add form')[0]);
+        form.append('description', description_text);
         $.ajax({
             url: url,
             type: "POST",
-            data: new FormData($('#modal-add form')[0]),
+            data: form,
             contentType: false,
             processData: false,
             success: function(data) {
@@ -267,7 +274,8 @@
                 $('#id').val(data.purchase.id);
                 $("#pr_number").val(data.purchase.pr_number);
                 $("#request_date").val(data.purchase.request_date);
-                $("#description").val(data.purchase.description);
+                // $("#description").val(data.purchase.description);
+                CKEDITOR.instances.description_text.setData(data.purchase.description);
                 $("#product_category").val(data.purchase.product_category);
                 init_edit_item(data);
 
@@ -290,7 +298,7 @@
                 $('#id').val(data.purchase.id);
                 $("#pr_number").val(data.purchase.pr_number);
                 $("#request_date").val(data.purchase.request_date);
-                $("#description").val(data.purchase.description);
+                CKEDITOR.instances.description_text.setData(data.purchase.description);
                 $("#product_category").val(data.purchase.product_category);
                 init_edit_item(data);
                 generate_pr_number();
@@ -627,23 +635,23 @@
                 HTML += '</tr>';
 
                 HTML += '<tr>';
-                HTML += '<td width="20%">Status</td>';
-                HTML += '<td width="2%">:</td>';
+                HTML += '<td style="vertical-align:top;" width="20%">Status</td>';
+                HTML += '<td style="vertical-align:top;" width="2%">:</td>';
 
                 if (data.purchase.status == 1) {
-                    HTML += '<td width="*"><div class="text-info">Draft</div></td>';
+                    HTML += '<td style="vertical-align:top;" width="*"><div class="text-info">Draft</div></td>';
                 } else if (data.purchase.status == 2) {
-                    HTML += '<td width="*"><div class="text-kuning">Pengajuan</div></td>';
+                    HTML += '<td style="vertical-align:top;" width="*"><div class="text-kuning">Pengajuan</div></td>';
                 } else if (data.purchase.status == 3) {
-                    HTML += '<td width="*"><div class="text-success">Disetujui</div></td>';
+                    HTML += '<td style="vertical-align:top;" width="*"><div class="text-success">Disetujui</div></td>';
                 } else if (data.purchase.status == 4) {
-                    HTML += '<td width="*"><div class="text-danger">Ditolak</div></td>';
+                    HTML += '<td style="vertical-align:top;" width="*"><div class="text-danger">Ditolak</div></td>';
                 }
 
 
-                HTML += '<td width="20%">Deskripsi</td>';
-                HTML += '<td width="2%">:</td>';
-                HTML += '<td width="*">' + data.purchase.description + '</td>';
+                HTML += '<td style="vertical-align:top;" width="20%">Deskripsi</td>';
+                HTML += '<td style="vertical-align:top;" width="2%">:</td>';
+                HTML += '<td style="vertical-align:top;" width="*">' + data.purchase.description + '</td>';
                 HTML += '</tr>';
 
 

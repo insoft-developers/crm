@@ -56,8 +56,13 @@
                           <div class="col-1 col-custom">
                               <div class="form-group">
                                   <label>Lokasi</label>
-                                  <input readonly type="text" class="form-control sm-input" id="location"
+                                  <select class="form-control sm-input berat-order" id="location"
                                       name="location">
+                                    <option value="">Pilih Lokasi</option>    
+                                    @foreach($locations as $location)
+                                    <option value="{{ $location->location_name }}">{{ $location->location_name }}</option>
+                                    @endforeach
+                                </select>
 
                               </div>
                           </div>

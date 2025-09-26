@@ -70,9 +70,9 @@
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Status</th>
                                         <td>:</td>
                                         <td><span id="titipan_status"></span></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td>Sp Number</td>
+                                        <td>:</td>
+                                        <td><input type="text" class="form-control sm-input" id="titipan_sp_number" name="titipan_sp_number"></td>
                                     </tr>
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>

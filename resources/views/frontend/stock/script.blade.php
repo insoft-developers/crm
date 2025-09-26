@@ -73,6 +73,10 @@
                 name: 'coil_number'
             },
             {
+                data: 'quantity_received',
+                name: 'quantity_received'
+            },
+            {
                 data: 'weight_received',
                 name: 'weight_received'
             },
@@ -170,6 +174,7 @@
                 $("#weight_actual").val(data.weight_actual);
                 $("#note").val(data.note);
                 $("#remark").val(data.remark);
+                $("#location").val(data.location);
 
                 if (actions == 2) {
                     show_item(data.retur, 0);
@@ -179,6 +184,7 @@
                     $("#weight_actual").attr("readonly", true);
                     $("#note").attr("readonly", true);
                     $("#remark").attr("readonly", true);
+                    $("#location").addClass('disabled');
                 } else {
                     $('.modal-title').text(data.product.product_name);
                     $("#return-item").html("");
@@ -187,6 +193,8 @@
                     $("#weight_actual").removeAttr("readonly");
                     $("#note").removeAttr("readonly");
                     $("#remark").removeAttr("readonly");
+                    $("#location").removeClass('disabled');
+
                 }
             }
         })

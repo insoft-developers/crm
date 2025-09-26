@@ -26,7 +26,7 @@
                                                 id="gr_date" name="gr_date"></td>
                                         <th width="13%">&nbsp;&nbsp;&nbsp;&nbsp;Tanggal Jatuh Tempo</th>
                                         <td width="1%">:</td>
-                                        <td width="*"><span id="due_date"></span></td>
+                                        <td width="18%"><span id="due_date"></span></td>
                                     </tr>
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Ref PO</th>
@@ -39,26 +39,41 @@
                                         <td>:</td>
                                         <td><input type="text" class="form-control sm-input" id="contract_number"
                                                 name="contract_number"></td>
-                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;Kategori</th>
+                                                <th>&nbsp;&nbsp;&nbsp;&nbsp;SP Number</th>
                                         <td>:</td>
-                                        <td><span id="product_category"></span></td>
+                                        <td><input type="text" class="form-control sm-input" id="sp_number"
+                                                name="sp_number"></td>
+                                        {{-- <th>&nbsp;&nbsp;&nbsp;&nbsp;Kategori</th>
+                                        <td>:</td>
+                                        <td><span id="product_category"></span></td> --}}
                                     </tr>
                                     <tr>
-                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;Vendor</th>
-                                        <td></td>
-                                        <td rowspan="5">
-                                            <div style="font-size:11px;line-height:16px;position:relative;top:-17px;"
+                                        <th style="vertical-align: top;">&nbsp;&nbsp;&nbsp;&nbsp;Vendor</th>
+                                        <td style="vertical-align: top;"></td>
+                                        <td style="vertical-align: top;" rowspan="5">
+                                            <div style="font-size:11px;line-height:16px;margin-top:8px;"
                                                 id="vendor_id"></div>
                                         </td>
-                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;Tujuan</th>
-                                        <td></td>
-                                        <td rowspan="5">
-                                            <div style="font-size:11px;line-height:16px;position:relative;top:-24px;"
+                                        <th style="vertical-align: top;">&nbsp;&nbsp;&nbsp;&nbsp;Tujuan</th>
+                                        <td style="vertical-align: top;"></td>
+                                        <td style="vertical-align: top;" rowspan="5">
+                                            <div style="font-size:11px;line-height:16px;margin-top:8px;"
                                                 id="warehouse_id"></div>
                                         </td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Metode Pembayaran</th>
                                         <td>:</td>
                                         <td><span id="payment_method"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                        <td></td>
+
+                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                        <td></td>
+
+                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;Kategori</th>
+                                        <td>:</td>
+                                        <td><span id="product_category"></span></td>
                                     </tr>
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
@@ -89,17 +104,20 @@
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
 
-                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;Deskripsi</th>
-                                        <td>:</td>
-                                        <td><span id="description"></span></td>
+                                        <th style="vertical-align: top;">&nbsp;&nbsp;&nbsp;&nbsp;Deskripsi</th>
+                                        <td style="vertical-align: top;">:</td>
+                                        <td style="vertical-align: top;"><span id="description"></span></td>
                                     </tr>
                                     <tr>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                         <td></td>
-
-                                        <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                        <td rowspan="5">
+                                            <div></div>
+                                        </td>
+                                        <th></th>
                                         <td></td>
-
+                                        <td>
+                                        </td>
                                         <th>&nbsp;&nbsp;&nbsp;&nbsp;Status</th>
                                         <td>:</td>
                                         <td><span id="status"></span></td>

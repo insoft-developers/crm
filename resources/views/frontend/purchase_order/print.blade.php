@@ -202,7 +202,7 @@
                     {{ $purchase->payment_methods->description }}</td>
             </tr>
             <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{ $purchase->description }}</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <?= $purchase->description ;?></td>
             </tr>
             <tr>
                     <td>Demikian kami sampaikan, atas perhatian dan kerjasamanya<br>kami ucapkan terima kasih.</td>

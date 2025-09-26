@@ -222,7 +222,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label class="bintang">Deskripsi</label>
-                                    <textarea class="form-control" id="description" name="description"></textarea>
+                                    <textarea class="form-control" id="description_text" name="description_text"></textarea>
                                 </div>
                             </div>
                         </div>

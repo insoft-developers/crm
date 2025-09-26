@@ -149,12 +149,12 @@ class GoodReceiveController extends Controller
             'gr_number' => 'required',
             'gr_date' => 'required',
             'po_id' => 'required',
-            'contract_number' => 'required',
+            'sp_number' => 'required',
             'good_id_item.*' => 'required',
-            'sp_number.*' => 'required',
             'delivery_date.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
+            'quantity_received.*' => 'required',
             'weight_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
@@ -228,7 +228,7 @@ class GoodReceiveController extends Controller
                     $gr = GoodReceiveItem::create([
                         'gr_id' => $id,
                         'po_item_id' => $input['good_id_item'][$index],
-                        'sp_number' => $input['sp_number'][$index],
+                        'sp_number' => $input['sp_number'],
                         'delivery_date' => $input['delivery_date'][$index],
                         'arrive_date' => $input['arrive_date'][$index],
                         'coil_number' => $input['coil_number'][$index],
@@ -238,7 +238,7 @@ class GoodReceiveController extends Controller
                         'panjang' => $input['panjang'][$index],
                         'product_number' => $sjjbsCode,
                         // 'quantity' => $input['quantity'][$index],
-                        // 'quantity_received' => $input['quantity_received'][$index],
+                        'quantity_received' => $input['quantity_received'][$index],
                         // 'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
                         'weight' => $int_berat,
                         'weight_received' => $input['weight_received'][$index],
@@ -332,13 +332,12 @@ class GoodReceiveController extends Controller
             'gr_number' => 'required',
             'gr_date' => 'required',
             'po_id' => 'required',
-            'contract_number' => 'required',
             'good_id_item.*' => 'required',
-            'sp_number.*' => 'required',
+            'sp_number' => 'required',
             'delivery_date.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
-            // 'quantity_received.*' => 'required',
+            'quantity_received.*' => 'required',
             'weight_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
@@ -421,7 +420,7 @@ class GoodReceiveController extends Controller
                     $gr = GoodReceiveItem::create([
                         'gr_id' => $id,
                         'po_item_id' => $input['good_id_item'][$index],
-                        'sp_number' => $input['sp_number'][$index],
+                        'sp_number' => $input['sp_number'],
                         'delivery_date' => $input['delivery_date'][$index],
                         'arrive_date' => $input['arrive_date'][$index],
                         'coil_number' => $input['coil_number'][$index],
@@ -431,7 +430,7 @@ class GoodReceiveController extends Controller
                         'lebar' => $input['lebar'][$index],
                         'panjang' => $input['panjang'][$index],
                         // 'quantity' => $input['quantity'][$index],
-                        // 'quantity_received' => $input['quantity_received'][$index],
+                        'quantity_received' => $input['quantity_received'][$index],
                         // 'quantity_outstanding' => $input['quantity'][$index] - $input['quantity_received'][$index],
                         'weight' => $int_berat,
                         'weight_received' => $input['weight_received'][$index],
@@ -499,15 +498,17 @@ class GoodReceiveController extends Controller
     public function getPoData(Request $request)
     {
         $userid = $this->set_owner_id(Auth::user()->id);
-        $data = PurchaseOrder::where('userid', $userid)
+        $query = PurchaseOrder::where('userid', $userid)
             ->where('status', 3)
             ->where('is_approve_1', 1)
-            ->where('is_approve_2', 1)
-            ->whereHas('item', function ($q) {
+            ->where('is_approve_2', 1);
+        if($request->po_id == null) {
+            $query->whereHas('item', function ($q) {
                 $q->select(DB::raw('purchase_order_id, SUM(weight_outstanding) as total_weight'))->groupBy('purchase_order_id')->havingRaw('SUM(weight_outstanding) > 0');
-            })
-            ->get();
-
+            });
+        }
+            
+        $data = $query->get();
         return $data;
     }
 
@@ -624,12 +625,13 @@ class GoodReceiveController extends Controller
         $rules = [
             'titipan_number' => 'required',
             'titipan_gr_date' => 'required',
-            'sp_number.*' => 'required',
+            'titipan_sp_number' => 'required',
             'delivery_date.*' => 'required',
             'product_id.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
             'weight_received.*' => 'required',
+            'quantity_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
             'total_weight_outstanding' => 'required',
@@ -666,9 +668,10 @@ class GoodReceiveController extends Controller
             $input['po_number'] = $input['titipan_number'];
             $input['gr_number'] = $input['titipan_number'];
             $input['gr_date'] = $input['titipan_gr_date'];
-            $input['contract_number'] = $input['titipan_number'];
+            // $input['contract_number'] = $input['titipan_number'];
             $input['vendor_id'] = $input['customer_id'];
             $input['warehouse_id'] = $input['titipan_warehouse_id'];
+            $input['sp_number'] = $input['titipan_sp_number'];
             $input['mills'] = $input['titipan_mills'];
             $input['product_category'] = $input['titipan_product_category'];
             $input['total_quantity'] = 0;
@@ -702,7 +705,7 @@ class GoodReceiveController extends Controller
                         'gr_id' => $id,
                         'po_item_id' => $id,
                         'good_id_item' => $id,
-                        'sp_number' => $input['sp_number'][$index],
+                        'sp_number' => $input['sp_number'],
                         'delivery_date' => $input['delivery_date'][$index],
                         'arrive_date' => $input['arrive_date'][$index],
                         'coil_number' => $input['coil_number'][$index],
@@ -713,6 +716,7 @@ class GoodReceiveController extends Controller
                         'product_number' => $sjjbsCode,
                         'weight' => $input['weight_received'][$index],
                         'weight_received' => $input['weight_received'][$index],
+                        'quantity_received' => $input['quantity_received'][$index],
                         'weight_outstanding' => 0,
                         'satuan' => $input['satuan'][$index],
                         'location' => $input['location'][$index],
@@ -741,11 +745,12 @@ class GoodReceiveController extends Controller
         $rules = [
             'titipan_number' => 'required',
             'titipan_gr_date' => 'required',
-            'sp_number.*' => 'required',
+            'titipan_sp_number' => 'required',
             'delivery_date.*' => 'required',
             'product_id.*' => 'required',
             'arrive_date.*' => 'required',
             'coil_number.*' => 'required',
+            'quantity_received.*' => 'required',
             'weight_received.*' => 'required',
             'total_weight' => 'required',
             'total_weight_received' => 'required',
@@ -783,7 +788,8 @@ class GoodReceiveController extends Controller
             $input['po_number'] = $input['titipan_number'];
             $input['gr_number'] = $input['titipan_number'];
             $input['gr_date'] = $input['titipan_gr_date'];
-            $input['contract_number'] = $input['titipan_number'];
+            $input['sp_number'] = $input['titipan_sp_number'];
+            // $input['contract_number'] = $input['titipan_number'];
             $input['vendor_id'] = $input['customer_id'];
             $input['warehouse_id'] = $input['titipan_warehouse_id'];
             $input['mills'] = $input['titipan_mills'];
@@ -818,7 +824,7 @@ class GoodReceiveController extends Controller
                             'gr_id' => $id,
                             'po_item_id' => $id,
                             'good_id_item' => $id,
-                            'sp_number' => $input['sp_number'][$index],
+                            'sp_number' => $input['sp_number'],
                             'delivery_date' => $input['delivery_date'][$index],
                             'arrive_date' => $input['arrive_date'][$index],
                             'coil_number' => $input['coil_number'][$index],
@@ -830,6 +836,7 @@ class GoodReceiveController extends Controller
                             'weight' => $input['weight_received'][$index],
                             'weight_received' => $input['weight_received'][$index],
                             'weight_outstanding' => 0,
+                            'quantity_received' => $input['quantity_received'][$index],
                             'satuan' => $input['satuan'][$index],
                             'location' => $input['location'][$index],
                             'userid' => $userid,

@@ -19,11 +19,16 @@
 
 
 <style>
-    .tombol-return-container{
-       position: relative;
-    top: 27px;
-    left: 47px;
+    .cke_notifications_area {
+        display: none !important;
     }
+
+    .tombol-return-container {
+        position: relative;
+        top: 27px;
+        left: 47px;
+    }
+
     .return-tambah {
         background: green;
         color: white;
@@ -441,6 +446,17 @@
         opacity: 0.3;
         /* tampil lebih pucat */
         cursor: not-allowed;
+        /* icon cursor silang */
+    }
+
+
+    select.disabled {
+        pointer-events: none;
+        /* biar tidak bisa diklik */
+        opacity: 0.3;
+        /* tampil lebih pucat */
+        cursor: not-allowed;
+        background:#d3d3d3;
         /* icon cursor silang */
     }
 
